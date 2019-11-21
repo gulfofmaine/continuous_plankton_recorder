@@ -19,7 +19,7 @@ class: inverse, center, middle
 
 
 ### Revisiting Pershing et al. 2005
-.large[Adam A. Kemberling | Quanittative Technician | 20 Nov 2019]
+.large[Adam A. Kemberling | Quantitative Technician | 20 Nov 2019]
 
 ---
 
