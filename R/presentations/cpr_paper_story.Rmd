@@ -1,0 +1,286 @@
+---
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      seal: FALSE
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
+---
+background-image: url(gmri_ppt_template_WIDE_2018.png)
+background-size: 100%
+class: inverse, center, middle
+
+# Continuous Plankton Recorder Project
+
+
+
+### Revisiting Pershing et al. 2005
+.large[Adam A. Kemberling | Quanittative Technician | 20 Nov 2019]
+
+---
+
+layout: true
+background-image: url(gmri_logo.png)
+background-position: 1% 99%
+background-size: 10%
+
+---
+name: title
+class:  middle, top
+
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = FALSE, comment = NA, warning = FALSE, message = FALSE, fig.retina = 3)
+options(knitr.kable.NA = '')
+
+####  Packages  ####
+library(ggbiplot)
+library(tidyverse)
+library(here)
+#devtools::install_github("vqv/ggbiplot")
+
+
+####  Functions  ####
+source("/Users/akemberling/Box/Adam Kemberling/Box_Projects/R_exercise_library/gmri_colors/gmripalette/R/gmri_colors.R")
+floor_decade <- function(value){ return(value - value %% 10) }
+
+
+#Set ggplot theme
+theme_set(theme_classic())
+
+####  Load Data  ####
+
+# SST long-format with the lag periods
+sst_long_lagged <- read_csv(here::here("data", "processed_data", "SST_with_lags.csv")) %>% 
+  mutate(period = case_when(
+    period == "annual" ~ "Annual",
+    period == "jf" ~ "January - February",
+    period == "ma" ~ "March - April",
+    period == "mj" ~ "May - June",
+    period == "ja" ~ "July - August",
+    period == "so" ~ "September - October",
+    period == "nd" ~ "November - December"),
+period = factor(period, 
+                levels = c("Annual", "January - February", "March - April", "May - June", "July - August", "September - October", "November - December")))
+
+# CPR species Data with the corrresponding SST
+species_periods_long <- read_csv(here::here("data", "processed_data", "cpr_with_SSTlags.csv"))  %>% 
+  mutate(period = case_when(
+    period == "annual" ~ "Annual",
+    period == "jf" ~ "January - February",
+    period == "ma" ~ "March - April",
+    period == "mj" ~ "May - June",
+    period == "ja" ~ "July - August",
+    period == "so" ~ "September - October",
+    period == "nd" ~ "November - December"),
+period = factor(period, 
+                levels = c("Annual", "January - February", "March - April", "May - June", "July - August", "September - October", "November - December")))
+
+```
+
+# Pershing et al. 2005
+
+.pull-left[
+
+  **Data**
+
+ * 42 Years of Zooplankton Data (1961 - 2003)
+
+ * 6 Zooplankton species (2 Calanaus age-groups)
+]
+
+.pull-right[
+
+  **Findings**
+  
+  * Two Dominant PCA Modes
+  
+  * Decadal variation in Plankton Communities
+  
+  * Two Zooplankton-communities associated with PCA modes
+  
+  * Temperature thought to drive shift between modes
+
+]
+
+
+
+---
+class: top, center
+
+
+```{r  out.height = 600}
+# local
+knitr::include_graphics("pershing_05_PCA.png") 
+
+# For pasting images outside of code blocks use:
+#![2005 results](pershing_05_PCA.png)
+
+
+```
+
+---
+class: top, middle
+
+# Recreating the 2005 PCA
+
+ ###1. Re-run PCA on 1961-2003 Plankton Population Anomaly Data
+ ###2. Project Weights from 2 Major Principal Components onto More Recent Data (2003 - 2017)
+ ###3. Compare Most Recent Decade (Warmest Decade on Record) to the 90's
+ ###4. Temperature's Relationship on Individual Abundances and PCA modes
+
+---
+class: top
+### 1a. Re-run PCA on 1961-2003 Plankton Population Anomaly Data
+
+
+```{r figure 2a, out.height = 500}
+# local
+knitr::include_graphics("Figure2a_recreation.png") 
+
+```
+
+---
+class: top
+### 1b. Re-run PCA on 1961-2003 Plankton Population Anomaly Data
+
+```{r figure 2b,  out.height = 500}
+# local
+knitr::include_graphics("Figure2b_recreation.png") 
+
+```
+
+
+
+---
+class: top
+### 2. Project PCA Weights Forward to 2018
+
+```{r  out.height = 500}
+# local
+knitr::include_graphics("Figure2b_full.png") 
+
+```
+
+---
+class: top
+### 2. PCA Bi-plot
+
+```{r  out.height = 500}
+# local
+knitr::include_graphics("2005pca_biplot.png") 
+
+```
+
+
+
+---
+class: top
+
+### Trends in SST - Gulf of Maine
+
+.pull-left[
+```{r}
+sst_long_lagged %>% filter(period == "Annual") %>% 
+  ggplot(aes(year, temp_anomaly)) +
+    geom_hline(yintercept = 0, color = "darkred", alpha = 0.3, linetype = 2) +
+    geom_line(group = 1) +
+    geom_smooth(method = "loess", color = gmri_cols("gmri blue")) +
+    facet_wrap(~period, ncol = 1) +
+    labs(x = NULL, y = NULL)
+```
+
+]
+
+
+.pull-right[
+```{r}
+sst_long_lagged %>% filter(period != "Annual") %>% 
+  ggplot(aes(year, temp_anomaly)) +
+    geom_hline(yintercept = 0, color = "darkred", alpha = 0.3, linetype = 2) +
+    geom_line(group = 1) +
+    geom_smooth(method = "loess", color = gmri_cols("gmri blue")) +
+    facet_wrap(~period, ncol = 2) +
+    scale_x_continuous(breaks = c(1980, 1990, 2000, 2010)) +
+    labs(x = NULL, y = NULL)
+```
+]
+
+---
+class: top
+
+### SST Increases - Last ~15 Years
+
+.pull-left[
+```{r}
+sst_annual <- sst_long_lagged %>% filter(period == "Annual")
+
+sst_annual %>% 
+  ggplot(aes(year, temp_anomaly)) +
+    geom_hline(yintercept = 0, color = "darkred", alpha = 0.3, linetype = 2) +
+    geom_line(group = 1) +
+    geom_smooth(data = filter(sst_annual, year <= 2010),
+                aes(year, temp_anomaly, color = "1982 - 2010"),
+                method = "lm") +
+  geom_smooth(data = filter(sst_annual, year >= 2000),
+                aes(year, temp_anomaly, color = "2000 - 2018"),
+                method = "lm") +
+  guides(color = guide_legend(title = NULL)) +
+    facet_wrap(~period, ncol = 1) +
+    labs(x = NULL, y = NULL) +
+    theme(legend.position = c(0.85, 0.2))
+```
+
+]
+
+
+.pull-right[
+```{r}
+sst_periods <- sst_long_lagged %>% filter(period != "Annual")
+
+sst_periods %>% 
+  ggplot(aes(year, temp_anomaly)) +
+    geom_hline(yintercept = 0, color = "darkred", alpha = 0.3, linetype = 2) +
+    geom_line(group = 1) +
+    geom_smooth(data = filter(sst_periods, year <= 2010),
+                aes(year, temp_anomaly, color = "1982 - 2010"),
+                method = "lm", show.legend = FALSE) +
+  geom_smooth(data = filter(sst_periods, year >= 2000),
+                aes(year, temp_anomaly, color = "2000 - 2018"),
+                method = "lm", show.legend = FALSE) +
+  scale_x_continuous(breaks = c(1980, 1990, 2000, 2010)) +
+  guides(color = guide_legend(title = NULL)) +
+    facet_wrap(~period, ncol = 2) +
+    labs(x = NULL, y = NULL)
+```
+]
+
+---
+class: top, center
+
+### SST + Zooplankton PCA Modes
+
+
+```{r original ts plot, out.height = 500}
+
+knitr::include_graphics("2005_ts_temps.png") 
+
+```
+
+---
+class: top, center
+
+### SST + Zooplankton PCA Modes - Extended to 2018
+
+
+```{r full ts plot,, out.height = 500}
+knitr::include_graphics("full_ts_temps.png") 
+
+
+```
+
+
