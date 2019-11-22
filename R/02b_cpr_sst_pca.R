@@ -93,8 +93,7 @@ write_csv(sst_long_lagged, str_c(cpr_boxpath, "data", "processed_data", "SST_wit
 
 #Add to zooplankton
 species_periods_long <- cpr_long %>% 
-  filter(species %in% species_05,
-         between(year, 1961, 2003)) %>% 
+  filter(species %in% species_05) %>% 
   left_join(sst_long_lagged, by = c("year", "period"))
 
 #Export to processed folder

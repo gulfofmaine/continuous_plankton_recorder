@@ -283,13 +283,78 @@ knitr::include_graphics("2005_ts_temps.png")
 ---
 class: top, center
 
-### SST + Zooplankton PCA Modes - Extended to 2018
+### 05' PCA Modes - Extended to 2018
 
 
-```{r full ts plot,, out.height = 500}
+```{r full ts plot, out.height = 500}
 knitr::include_graphics("full_ts_temps.png") 
 
 
 ```
 
+---
+class: top, center
+
+### Annual Zooplankton & Temperature Correlations All Years
+
+```{r full ts corrplot, out.height = 500}
+knitr::include_graphics("corrplots/corrplot_full.png") 
+
+
+```
+
+
+---
+class: top, center
+
+### Annual Zooplankton & Temperature Correlations 1982-2003
+
+```{r pre shift annual corrplot, out.height = 500}
+knitr::include_graphics("corrplots/corrplot_pre.png") 
+
+
+```
+
+---
+class: top, center
+
+### Annual Zooplankton & Temperature Correlations 2003-2018
+
+```{r post shift annual corrplots, out.height = 500}
+knitr::include_graphics("corrplots/corrplot_post.png") 
+
+
+```
+
+---
+class: top, center
+
+### Annual Zooplankton & Period Temperature Correlations 1982-2018
+
+```{r seasonal corrplots, out.height = 500}
+knitr::include_graphics("corrplots/all_seasons.png") 
+
+
+```
+
+
+---
+class: top, center
+
+#### PCA Weights - Using Full Timeseries
+
+```{r full ts pca weights, out.height = 500}
+knitr::include_graphics("full_ts_pca.png") 
+
+```
+
+---
+class: top, center
+
+#### PCA Weights - Post 2003 Data Only
+
+```{r 2003 pca weights, out.height = 500}
+knitr::include_graphics("post_shift_pca.png") 
+
+```
 
