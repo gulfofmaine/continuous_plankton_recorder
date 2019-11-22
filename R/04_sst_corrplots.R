@@ -145,3 +145,12 @@ summary(pca_full)
     theme(legend.position = c(0.85, 0.2)))
 
 
+
+
+
+
+####  Buoy Data  ####
+load(file = str_c(cpr_boxpath, "/data/processed_data/Buoy.RData"))
+
+#Buoys are lists with dataframes by depth
+Buoys$Buoy_B$depth_1m
