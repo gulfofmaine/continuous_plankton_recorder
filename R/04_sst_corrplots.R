@@ -123,3 +123,25 @@ pca_full_vals <- pca_full_data %>% select(-year) %>% drop_na()
 #PCA - full timeseries
 pca_full <- prcomp(pca_full_vals, center = F, scale. = F)
 summary(pca_full)
+
+
+#leading_modes <- rownames_to_column(as.data.frame(pca_full$rotation)) %>% dplyr::select(species = rowname, PC1, PC2)
+
+
+# PCA Weights Figure
+(weights_fig <- rownames_to_column(as.data.frame(pca_full$rotation)) %>% 
+    dplyr::select(species = rowname, PC1, PC2)%>% 
+    dplyr::rename("First Mode (65.4%)" = PC1,
+                  "Second Mode (17.5%)" = PC2) %>% 
+    gather(key = "PC", value =  "Principal Component Weight", 
+           `First Mode (65.4%)`, `Second Mode (17.5%)`) %>% 
+    mutate(species = factor(species, 
+                            levels = c("calanus", "centropages", "oithona","para_pseudocalanus", 
+                                       "metridia", "calanus1to4", "euphausiacea"))) %>% 
+    ggplot(aes(species, `Principal Component Weight` * -1, fill = PC)) +
+    geom_col(position  = "dodge") +
+    scale_fill_gmri(palette = "mixed") +
+    labs(x = "", title = "PCA leading Mode Weights", subtitle = "1982-2018") +
+    theme(legend.position = c(0.85, 0.2)))
+
+
