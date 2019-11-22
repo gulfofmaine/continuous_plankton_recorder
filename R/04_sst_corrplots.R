@@ -215,8 +215,8 @@ dev.off()
 ####__####
 ####  PCA weights for entire time series  ####
 pca_full_data <- species_periods_long %>% 
-  filter(period == "Annual") %>% 
   pivot_wider(names_from = species, values_from = anomaly) %>% 
+  filter(period == "Annual") %>% 
   select(year, one_of(species_05))
 
 pca_full_vals <- pca_full_data %>% select(-year) %>% drop_na()
