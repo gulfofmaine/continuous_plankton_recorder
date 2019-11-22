@@ -6,21 +6,34 @@
 library(tidyverse)
 library(here)
 
+####  Functions  ####
+find_box_data <- function(box_project_name) {
+  box_project <- as.character(box_project_name)
+  box_path <- str_c("/Users/akemberling/Box/Adam Kemberling/Box_Projects/", paste(box_project))
+  return(box_path)
+}
+
+cpr_boxpath <- find_box_data("continuous_plankton_recorder")
+gmricols_boxpath <- find_box_data("R_exercise_library/gmri_colors/gmripalette/R")
+
+source(str_c(gmricols_boxpath, "/gmri_colors.R"))
+floor_decade <- function(value){ return(value - value %% 10) }
+
 #Set ggplot theme
 theme_set(theme_bw())
 
 
 ####  Load Data  ####
-calanus            <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Calanus_finmarchicus.txt"), header = F, skip = 3)
-calanus_1to4       <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Calanus_I-IV.txt"), header = F, skip = 3)
-centropages        <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Centropages_typicus.txt"), header = F, skip = 3)
-chaetognatha       <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Chaetognatha_eyecount.txt"), header = F, skip = 3)
-euphausiacea       <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Euphausiacea_Total.txt"), header = F, skip = 3)
-metridia           <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Metridia_lucens.txt"), header = F, skip = 3)
-oithona            <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Oithona_spp..txt"), header = F, skip = 3)
-para_pseudocalanus <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Para-Pseudocalanus_spp..txt"), header = F, skip = 3)
-paraeucheata       <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Paraeuchaeta_norvegica.txt"), header = F, skip = 3)
-temora             <- read.table(here("data","CPRtimeseries_textX6", "GOMx.Temora_longicornis.txt"), header = F, skip = 3)
+calanus            <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Calanus_finmarchicus.txt", sep = "/"), header = F, skip = 3)
+calanus_1to4       <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Calanus_I-IV.txt", sep = "/"), header = F, skip = 3)
+centropages        <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Centropages_typicus.txt", sep = "/"), header = F, skip = 3)
+chaetognatha       <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Chaetognatha_eyecount.txt", sep = "/"), header = F, skip = 3)
+euphausiacea       <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Euphausiacea_Total.txt", sep = "/"), header = F, skip = 3)
+metridia           <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Metridia_lucens.txt", sep = "/"), header = F, skip = 3)
+oithona            <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Oithona_spp..txt", sep = "/"), header = F, skip = 3)
+para_pseudocalanus <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Para-Pseudocalanus_spp..txt", sep = "/"), header = F, skip = 3)
+paraeucheata       <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Paraeuchaeta_norvegica.txt", sep = "/"), header = F, skip = 3)
+temora             <- read.table(str_c(cpr_boxpath, "data","CPRtimeseries_textX6", "GOMx.Temora_longicornis.txt", sep = "/"), header = F, skip = 3)
 
 
 ####  Data Reshaping  ####
@@ -59,7 +72,7 @@ cpr_species <- map(cpr_species, cpr_reshape)
 
 # Bind to one df
 cpr_all <- bind_rows(cpr_species, .id = "species")
-write_csv(cpr_all, here("data", "processed_data", "cpr_allspecies_long.csv"), col_names = TRUE)
+write_csv(cpr_all, str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/"), col_names = TRUE)
 
 # Remove originals
 rm(calanus, calanus_1to4, centropages, chaetognatha, euphausiacea, metridia, oithona, para_pseudocalanus, paraeucheata, temora)

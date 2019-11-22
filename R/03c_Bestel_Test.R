@@ -18,9 +18,15 @@ library(here)
 ##_############################################################
 ## Load Data  ####
 ##_############################################################
+find_box_data <- function(box_project_name) {
+  box_project <- as.character(box_project_name)
+  box_path <- str_c("/Users/akemberling/Box/Adam Kemberling/Box_Projects/", paste(box_project))
+  return(box_path)
+}
 
+cpr_boxpath <- find_box_data("continuous_plankton_recorder")
 #All species, subset to only annual data
-mydata <- read_csv(here::here("data", "processed_data", "cpr_allspecies_long.csv")) %>% 
+mydata <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/")) %>% 
   filter(period == "annual")
 
 #breakout into list of df's for each species

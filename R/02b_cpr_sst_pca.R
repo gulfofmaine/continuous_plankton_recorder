@@ -10,7 +10,16 @@ library(here)
 
 
 ####  Functions  ####
-source("/Users/akemberling/Box/Adam Kemberling/Box_Projects/R_exercise_library/gmri_colors/gmripalette/R/gmri_colors.R")
+find_box_data <- function(box_project_name) {
+  box_project <- as.character(box_project_name)
+  box_path <- str_c("/Users/akemberling/Box/Adam Kemberling/Box_Projects/", paste(box_project))
+  return(box_path)
+}
+
+cpr_boxpath <- find_box_data("continuous_plankton_recorder")
+gmricols_boxpath <- find_box_data("R_exercise_library/gmri_colors/gmripalette/R")
+
+source(str_c(gmricols_boxpath, "/gmri_colors.R"))
 floor_decade <- function(value){ return(value - value %% 10) }
 
 
@@ -18,7 +27,7 @@ floor_decade <- function(value){ return(value - value %% 10) }
 theme_set(theme_classic())
 
 ####  Load Data  ####
-cpr_long <- read_csv(here::here("data", "processed_data", "cpr_allspecies_long.csv"),
+cpr_long <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/"),
                      col_types = cols()) %>% 
   mutate(period = case_when(
     period == "p1"     ~ "jf", 
@@ -32,7 +41,7 @@ cpr_long <- read_csv(here::here("data", "processed_data", "cpr_allspecies_long.c
   period = factor(period, levels = c("annual", "jf", "ma", "mj", "ja", "so", "nd")))
 
 
-sst <- read_csv(here("data", "ENV", "GulfofMaineSSTanomalies_2019.11.14.csv"), skip = 1) %>% 
+sst <- read_csv(str_c(cpr_boxpath, "data", "ENV", "GulfofMaineSSTanomalies_2019.11.14.csv", sep = "/"), skip = 1) %>% 
   rename_all(tolower)
 
 
@@ -89,7 +98,7 @@ temp_lags <- lag_key %>% left_join(sst_long, by = c("period", "year")) %>%
 sst_long_lagged <- left_join(sst_long, temp_lags, by = c("period", "year"))
 
 #Export to processed folder
-write_csv(sst_long_lagged, here::here("data", "processed_data", "SST_with_lags.csv"), col_names = TRUE)
+write_csv(sst_long_lagged, str_c(cpr_boxpath, "data", "processed_data", "SST_with_lags.csv", sep = "/"), col_names = TRUE)
 
 
 #Add to zooplankton
@@ -99,7 +108,7 @@ species_periods_long <- cpr_long %>%
   left_join(sst_long_lagged, by = c("year", "period"))
 
 #Export to processed folder
-write_csv(species_periods_long, here::here("data", "processed_data", "cpr_with_SSTlags.csv"), col_names = TRUE)
+write_csv(species_periods_long, str_c(cpr_boxpath, "data", "processed_data", "cpr_with_SSTlags.csv", sep = "/"), col_names = TRUE)
 
 
 #Store combos in a list
@@ -161,12 +170,6 @@ ggplot(data = NULL, aes(year, anomaly)) +
   xlim(1980,2005) + 
   labs(title = "Winter 1-4's & January 5+",
        x = NULL, y = NULL)
-
-#On one plot
-bind_rows(species_periods$calanus1to4$mj, species_periods$calanus$ja) %>% 
-  ggplot(aes(year, anomaly, color = species, shape = period)) +
-    geom_point() +
-    geom_line()
 
 
 

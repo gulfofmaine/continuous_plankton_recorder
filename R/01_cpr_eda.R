@@ -6,12 +6,21 @@
 library(tidyverse)
 library(here)
 
+####  Functions  ####
+find_box_data <- function(box_project_name) {
+  box_project <- as.character(box_project_name)
+  box_path <- str_c("/Users/akemberling/Box/Adam Kemberling/Box_Projects/", paste(box_project))
+  return(box_path)
+}
+
+cpr_boxpath <- find_box_data("continuous_plankton_recorder")
+
 #Set ggplot theme
 theme_set(theme_bw())
 
 ####  Load Data  ####
 # Long form
-cpr_all <- read_csv(here::here("data", "processed_data", "cpr_allspecies_long.csv"))
+cpr_all <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/"))
 # List form if we want to dig into any or perform operations to all
 cpr_species <- cpr_all %>% group_by(species) %>% split(.$species)
 
