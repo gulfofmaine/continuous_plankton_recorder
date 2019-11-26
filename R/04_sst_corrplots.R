@@ -214,6 +214,19 @@ dev.off()
 
 ####__####
 ####  PCA weights for entire time series  ####
+species_periods_long <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_with_SSTlags.csv", sep = "/"))  %>% 
+  mutate(period = case_when(
+    period == "annual" ~ "Annual",
+    period == "jf" ~ "January - February",
+    period == "ma" ~ "March - April",
+    period == "mj" ~ "May - June",
+    period == "ja" ~ "July - August",
+    period == "so" ~ "September - October",
+    period == "nd" ~ "November - December"),
+    period = factor(period, 
+                    levels = c("Annual", "January - February", "March - April", "May - June", "July - August", "September - October", "November - December")))
+
+
 pca_full_data <- species_periods_long %>% 
   pivot_wider(names_from = species, values_from = anomaly) %>% 
   filter(period == "Annual") %>% 
