@@ -1,10 +1,20 @@
-Hello github page
+#Github Pages Directory
 
-This is a landing pad for the Rmarkdown presentation.
+This is a landing pad for the Rmarkdown presentation and the cluster analysis rmarkdown doc.
 
-The index.md is used to customize the github page's home page, The following link directs to the slide.
+This index.md file is used as a shortcut to the following html presentations and pages.
+
+
+The following links direct you to the xaringan slideshow:
 
 [Presentation Code link](/R/presentations/cpr_paper_story.html)
 
 [Presentation Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/presentations/cpr_paper_story.html#1)
 
+
+
+The next links direct you to the clustering analysis markdown document and its code:
+
+[Rmarkdown Code Link](/R/05_cpr_clustering.Rmd)
+
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/05_cpr_clustering.html)
