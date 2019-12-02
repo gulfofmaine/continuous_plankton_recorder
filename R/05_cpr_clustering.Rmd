@@ -1,0 +1,593 @@
+---
+title: "CPR Clustering Analysis"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float:
+        collapsed: FALSE
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+options(knitr.kable.NA = '')
+
+```
+
+# Markdown Document Overview
+
+This markdown doc is set up for reviewing each analysis step I've done in parallel for each of the following three sections of the continuous plankton recorder dataset:
+
+ 1. All available years (1961 - 2017)   
+ 2. The early period (1961 - 2003)   
+ 3. The Most recent and warmest period (2003 - 2017)   
+ 
+ 
+ The first sections will mirror the steps taken in Pershing et al., 2005 in setting up the PCA and determining the weights and timelines for each time-period as shown in the following figure.
+
+![](presentations/pershing_05_PCA.png)
+
+**Data and Packages**
+
+```{r data import}
+####  Packages  ####
+library(cluster)
+library(factoextra)
+library(ggbiplot)
+library(tidyverse)
+library(here)
+
+
+
+####  Functions  ####
+source(here::here("R", "cpr_helper_funs.R"))
+
+#Set ggplot theme
+theme_set(theme_classic())
+
+####  Load Data  ####
+
+# CPR species Data with the corrresponding SST and lagged SST
+species_periods_long <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_with_SSTlags.csv", sep = "/"))  %>% 
+  mutate(period = case_when(
+    period == "annual" ~ "Annual",
+    period == "jf" ~ "January - February",
+    period == "ma" ~ "March - April",
+    period == "mj" ~ "May - June",
+    period == "ja" ~ "July - August",
+    period == "so" ~ "September - October",
+    period == "nd" ~ "November - December"),
+period = factor(period, 
+                levels = c("Annual", "January - February", "March - April", "May - June", "July - August", "September - October", "November - December")))
+```
+
+**Analysis Code**
+
+```{r analysis loop}
+#Split into analysis units
+full_ts <- species_periods_long
+pre_split <- species_periods_long %>% filter(year <= 2003)
+post_split <- species_periods_long %>% filter(year > 2003)
+
+#Put the full data sets into a nested list
+analysis_sets <- list("Full Timeseries" = list(data = full_ts),
+                      "1961 - 2003" = list(data = pre_split),
+                      "2004 - 2017" = list(data = post_split))
+
+#Function for extracting %variance explained from PCA object
+pull_deviance <- function(pca_sdev) {
+  
+  eigs <- pca_sdev ^ 2
+  
+  deviance_df <- rbind(
+    SD = sqrt(eigs),
+    Proportion = eigs/sum(eigs),
+    Cumulative = cumsum(eigs)/sum(eigs))
+  
+  pca_dev_out <- data.frame(
+    "PC1" = str_c(as.character(round(deviance_df[2,1] * 100, 2)), "% of Variance"),
+    "PC2" = str_c(as.character(round(deviance_df[2,2] * 100, 2)), "% of Variance"))
+  
+  return(pca_dev_out)
+  
+}
+
+# Perform all analyses on this list for consistency and for organization
+
+####  Analysis Loop  ####
+for (i in 1:length(analysis_sets)) {
+  
+  #Keep years with the data going into distance matrices for PCA and clustering
+  analysis_sets[[i]]$pca_data <- analysis_sets[[i]]$data %>% 
+    filter(period == "Annual") %>% 
+    pivot_wider(names_from = species, values_from = anomaly) %>% 
+    mutate(decade = factor(floor_decade(year))) %>% 
+    select(year, decade, calanus:para_pseudocalanus) %>% 
+    drop_na()
+  
+  #Pull out just the values used for PCA and clustering
+  analysis_sets[[i]]$anom_mat <- analysis_sets[[i]]$pca_data %>% select(-year, -decade)
+  
+  
+  #PCA Object
+  analysis_sets[[i]]$pca_obj <- prcomp(analysis_sets[[i]]$anom_mat, center = F, scale. = F)
+  
+  #PCA Leading Modes
+  analysis_sets[[i]]$leading_modes <- rownames_to_column(as.data.frame(analysis_sets[[i]]$pca_obj$rotation)) %>%
+    dplyr::select(species = rowname, PC1, PC2)
+  
+  #Percent Deviance Explained (To slide into plots)
+  analysis_sets[[i]]$deviance_explained <- pull_deviance(analysis_sets[[i]]$pca_obj$sdev)
+  
+  #Figure 2a
+  analysis_sets[[i]]$fig2a <- analysis_sets[[i]]$leading_modes %>%
+    gather(key = "PC", value =  "Principal Component Weight", PC1, PC2) %>%
+    mutate(species = factor(species,
+                            levels = c("calanus", "centropages", "oithona","para_pseudocalanus",
+                                       "metridia", "calanus1to4", "euphausiacea")),
+           PC = if_else(PC == "PC1", 
+                       as.character(analysis_sets[[i]]$deviance_explained$PC1),
+                       as.character(analysis_sets[[i]]$deviance_explained$PC2))
+           ) %>%
+    ggplot(aes(species, `Principal Component Weight` * -1, fill = PC)) +
+      geom_col(position  = "dodge") +
+      scale_fill_gmri(palette = "mixed") +
+      labs(x = "") +
+      theme(#legend.position = c(0.85, 0.85),
+            axis.text.x = element_text(angle = 45, hjust = 1))
+  
+}
+
+
+```
+
+---
+
+# PCA Analysis 
+
+## PCA Weights {.tabset}
+
+### Full TS
+
+```{r}
+analysis_sets$`Full Timeseries`$fig2a
+```
+
+
+### Early Period
+
+```{r}
+analysis_sets$`1961 - 2003`$fig2a
+```
+
+### Last 14 Years
+
+
+```{r}
+analysis_sets$`2004 - 2017`$fig2a
+```
+
+## PCA Timelines {.tabset}
+
+Taking the PCA weights from the 1961-2003 PCA (mimicking the 2005 paper) we can recreate the original timeline and extend those weights out through 2017 to create the following figures:
+
+### Original Time-period
+
+![](presentations/Figure2b_recreation.png)
+
+### Extended Through 2017
+
+![](presentations/Figure2b_full.png)
+
+### Applying 1961-2005 Weights to Bi-Monthly Periods
+
+When applying 1961-2005 PCA weights to the bi-monthly period anomalies and extend them out through 2017 you get this figure.
+
+![](presentations/bi_monthly_modes.png)
+
+
+
+## Abundance Anomaly Timelines for Specific Taxa {.tabset}
+
+The following plots show the timelines of abundance anomalies for each of the seven taxa. There are timelines for each bi-monthly period for each taxa.
+
+### Calanus V+
+
+![](presentations/abundance_timelines/calanus.png)
+
+###  Calanus I - IV
+
+![](presentations/abundance_timelines/calanus1to4.png)
+
+### Centropages
+
+![](presentations/abundance_timelines/centropages.png)
+
+### Euphausiacea
+
+![](presentations/abundance_timelines/euphausiacea.png)
+
+### Metridia
+
+![](presentations/abundance_timelines/metridia.png)
+
+### Oithona 
+
+![](presentations/abundance_timelines/oithona.png)
+
+### Para Pseudocalanus
+
+![](presentations/abundance_timelines/para_pseudocalanus.png)
+
+
+---
+
+# Cluster Analysis
+
+```{r optimal clusters}
+for (i in 1:length(analysis_sets)) {
+  analysis_sets[[i]]$distance <- get_dist(analysis_sets[[i]]$pca_data)
+}
+```
+
+## Optimal Clusters {.tabset .tabset-pills}
+
+### Full TS {.tabset}
+
+#### Elbow Method
+```{r}
+fviz_nbclust(analysis_sets$`Full Timeseries`$anom_mat, kmeans, method = "wss")
+```
+
+
+#### Average Silhouette
+
+```{r}
+fviz_nbclust(analysis_sets$`Full Timeseries`$anom_mat, kmeans, method = "silhouette")
+```
+
+#### Gap Statistic
+
+```{r}
+gap_stat <- clusGap(analysis_sets$`Full Timeseries`$anom_mat, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+
+fviz_gap_stat(gap_stat)
+```
+
+
+
+### Early Period {.tabset}
+
+#### Elbow Method
+```{r}
+fviz_nbclust(analysis_sets$`1961 - 2003`$anom_mat, kmeans, method = "wss")
+```
+
+
+#### Average Silhouette
+
+```{r}
+fviz_nbclust(analysis_sets$`1961 - 2003`$anom_mat, kmeans, method = "silhouette")
+```
+
+#### Gap Statistic
+
+```{r}
+gap_stat <- clusGap(analysis_sets$`1961 - 2003`$anom_mat, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+
+fviz_gap_stat(gap_stat)
+```
+
+
+### Last 14 Years {.tabset}
+
+#### Elbow Method
+```{r}
+fviz_nbclust(analysis_sets$`2004 - 2017`$anom_mat, kmeans, method = "wss")
+```
+
+
+#### Average Silhouette
+
+```{r}
+fviz_nbclust(analysis_sets$`2004 - 2017`$anom_mat, kmeans, method = "silhouette")
+```
+
+#### Gap Statistic
+
+```{r}
+gap_stat <- clusGap(analysis_sets$`2004 - 2017`$anom_mat, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+
+fviz_gap_stat(gap_stat)
+```
+
+
+
+
+# Inter-Taxa Relationships Over Time {.tabset .tabset-pills}
+
+Using the Optimal number of clusters identified for each period, we can plot which years cluster together on a population anomaly plot with an axis for each taxa. The units of each axis is the deviance from annual mean abundance. To aid in visuallization a grid has been overlayed which splits the plot into four quadrants. Years falling in the Mutual + quadrant had positive abundance anomalies for both species, with years in the Mutual - quadrant exhibiting lower than average abundance for both species.
+
+**K-means Code**
+
+```{r}
+#Using 2 Clusters for All Periods
+for (i in 1:length(analysis_sets)) {
+  
+  #Get the cluster identification for each period
+  analysis_sets[[i]]$kmeans <- kmeans(analysis_sets[[i]]$anom_mat, centers = 2, nstart = 25)
+  
+  #Add the cluster ID to the dataset that has year information
+  analysis_sets[[i]]$pca_data <- analysis_sets[[i]]$pca_data %>% 
+  mutate(cluster = factor(analysis_sets[[i]]$kmeans$cluster))
+  
+  
+  
+  ####__####
+  ####  Inter-taxa relationships  #####
+  ####__####
+  
+  #Centropages and Calanus
+  analysis_sets[[i]]$centro_x_cal <- analysis_sets[[i]]$pca_data %>% 
+  ggplot(aes(calanus, centropages, color = cluster)) +
+    geom_hline(yintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_vline(xintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_text(aes(label = year)) +
+    ggforce::geom_mark_ellipse() +
+    labs(x = "Calanus V+", y = "Centropages") +
+    xlim(-2, 2) +
+    ylim(-2, 2)
+  
+  #Table of Quadrat Tally
+  analysis_sets[[i]]$centro_x_cal_t <- analysis_sets[[i]]$pca_data %>% 
+    mutate(
+      `Plot Quadrant` = if_else(calanus > 0 & centropages > 0, "Mutual +", "Mutual -"),
+      `Plot Quadrant` = if_else(calanus > 0 & centropages < 0, "Calanus Favored", `Plot Quadrant`),
+      `Plot Quadrant` = if_else(calanus < 0 & centropages > 0, "Competitor Favored", `Plot Quadrant`),
+      `Plot Quadrant` = factor(`Plot Quadrant`,
+                               levels = c("Mutual +", "Calanus Favored", "Competitor Favored", "Mutual -"))) %>%
+    group_by(decade) %>%
+    count(`Plot Quadrant`) %>%
+    tidyr::complete(decade, `Plot Quadrant`, fill = list(n = 0)) %>%
+    ggplot(aes(decade, n, fill = `Plot Quadrant`)) +
+      geom_col(position = "fill") +
+      labs(x = NULL, y = "Proportion") + 
+      scale_fill_gmri(palette = "mixed") +
+      theme(legend.title = element_blank())
+  
+  #Oithona and Calanus
+  analysis_sets[[i]]$oithona_x_cal <- analysis_sets[[i]]$pca_data %>% 
+  ggplot(aes(calanus, oithona, color = cluster)) +
+    geom_hline(yintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_vline(xintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_text(aes(label = year)) +
+    ggforce::geom_mark_ellipse() +
+    labs(x = "Calanus V+", y = "Oithona") +
+    xlim(-2, 2) +
+    ylim(-2, 2)
+  
+  #Table of Quadrat Tally
+  analysis_sets[[i]]$oithona_x_cal_t <- analysis_sets[[i]]$pca_data %>% 
+    mutate(
+      `Plot Quadrant` = if_else(calanus > 0 & oithona > 0, "Mutual +", "Mutual -"),
+      `Plot Quadrant` = if_else(calanus > 0 & oithona < 0, "Calanus Favored", `Plot Quadrant`),
+      `Plot Quadrant` = if_else(calanus < 0 & oithona > 0, "Competitor Favored", `Plot Quadrant`),
+      `Plot Quadrant` = factor(`Plot Quadrant`,
+                               levels = c("Mutual +", "Calanus Favored", "Competitor Favored", "Mutual -"))) %>%
+    group_by(decade) %>%
+    count(`Plot Quadrant`) %>%
+    tidyr::complete(decade, `Plot Quadrant`, fill = list(n = 0)) %>%
+    ggplot(aes(decade, n, fill = `Plot Quadrant`)) +
+      geom_col(position = "fill") +
+      labs(x = NULL, y = "Proportion") + 
+      scale_fill_gmri(palette = "mixed") +
+      theme(legend.title = element_blank())
+  
+  #Pseudocalanus and Calanus
+  analysis_sets[[i]]$pseudo_x_cal <- analysis_sets[[i]]$pca_data %>% 
+  ggplot(aes(calanus, para_pseudocalanus, color = cluster)) +
+    geom_hline(yintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_vline(xintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_text(aes(label = year)) +
+    ggforce::geom_mark_ellipse() +
+    labs(x = "Calanus V+", y = "Pseudocalanus") +
+    xlim(-2, 2) +
+    ylim(-2, 2)
+  
+  #Does it match the corellations?
+  analysis_sets[[1]]$pca_data %>% 
+  ggplot(aes(calanus, para_pseudocalanus)) +
+    geom_hline(yintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_vline(xintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_text(aes(color = cluster, label = year)) +
+    geom_smooth(method = "lm")+
+    labs(x = "Calanus V+", y = "Pseudocalanus") +
+    xlim(-2, 2) +
+    ylim(-2, 2)
+  
+  #Table of Quadrat Tally
+  analysis_sets[[i]]$pseudo_x_cal_t <- analysis_sets[[i]]$pca_data %>% 
+    mutate(
+      `Plot Quadrant` = if_else(calanus > 0 & para_pseudocalanus > 0, "Mutual +", "Mutual -"),
+      `Plot Quadrant` = if_else(calanus > 0 & para_pseudocalanus < 0, "Calanus Favored", `Plot Quadrant`),
+      `Plot Quadrant` = if_else(calanus < 0 & para_pseudocalanus > 0, "Competitor Favored", `Plot Quadrant`),
+      `Plot Quadrant` = factor(`Plot Quadrant`,
+                               levels = c("Mutual +", "Calanus Favored", "Competitor Favored", "Mutual -"))) %>%
+    group_by(decade) %>%
+    count(`Plot Quadrant`) %>%
+    tidyr::complete(decade, `Plot Quadrant`, fill = list(n = 0)) %>%
+    ggplot(aes(decade, n, fill = `Plot Quadrant`)) +
+      geom_col(position = "fill") +
+      labs(x = NULL, y = "Proportion") + 
+      scale_fill_gmri(palette = "mixed") +
+      theme(legend.title = element_blank())
+  
+  #Calanus I -IV and Calanus
+  analysis_sets[[i]]$cal2_x_cal <- analysis_sets[[i]]$pca_data %>% 
+  ggplot(aes(calanus, calanus1to4, color = cluster)) +
+    geom_hline(yintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_vline(xintercept = 0, color = "gray", linetype = 2, alpha = 0.5) +
+    geom_text(aes(label = year)) +
+    ggforce::geom_mark_ellipse() + 
+    labs(x = "Calanus V+", y = "Calanus I - IV") +
+    xlim(-2, 2) +
+    ylim(-2, 2)
+  
+  analysis_sets[[i]]$cal2_x_cal_t <- analysis_sets[[i]]$pca_data %>% 
+    mutate(
+      `Plot Quadrant` = if_else(calanus > 0 & calanus1to4 > 0, "Mutual +", "Mutual -"),
+      `Plot Quadrant` = if_else(calanus > 0 & calanus1to4 < 0, "Calanus Favored", `Plot Quadrant`),
+      `Plot Quadrant` = if_else(calanus < 0 & calanus1to4 > 0, "Competitor Favored", `Plot Quadrant`),
+      `Plot Quadrant` = factor(`Plot Quadrant`,
+                               levels = c("Mutual +", "Calanus Favored", "Competitor Favored", "Mutual -"))) %>%
+    group_by(decade) %>%
+    count(`Plot Quadrant`) %>%
+    tidyr::complete(decade, `Plot Quadrant`, fill = list(n = 0)) %>%
+    ggplot(aes(decade, n, fill = `Plot Quadrant`)) +
+      geom_col(position = "fill") +
+      labs(x = NULL, y = "Proportion") + 
+      scale_fill_gmri(palette = "mixed") +
+      theme(legend.title = element_blank())
+  
+  
+}
+```
+
+
+
+## Full TS {.tabset}
+
+### Calanus x Centropages
+
+```{r}
+analysis_sets$`Full Timeseries`$centro_x_cal
+analysis_sets$`Full Timeseries`$centro_x_cal_t
+```
+
+
+### Calanus x Oithona
+
+```{r}
+analysis_sets$`Full Timeseries`$oithona_x_cal
+analysis_sets$`Full Timeseries`$oithona_x_cal_t
+```
+
+### Calanus x Pseudocalanus
+
+```{r}
+analysis_sets$`Full Timeseries`$pseudo_x_cal
+analysis_sets$`Full Timeseries`$pseudo_x_cal_t
+```
+
+### Calanus x Calanus I-IV
+
+```{r}
+analysis_sets$`Full Timeseries`$cal2_x_cal
+analysis_sets$`Full Timeseries`$cal2_x_cal_t
+```
+
+## Early Period {.tabset}
+
+### Calanus x Centropages
+
+```{r}
+analysis_sets$`1961 - 2003`$centro_x_cal
+analysis_sets$`1961 - 2003`$centro_x_cal_t
+```
+
+
+### Calanus x Oithona
+
+```{r}
+analysis_sets$`1961 - 2003`$oithona_x_cal
+analysis_sets$`1961 - 2003`$oithona_x_cal_t
+```
+
+### Calanus x Pseudocalanus
+
+```{r}
+analysis_sets$`1961 - 2003`$pseudo_x_cal
+analysis_sets$`1961 - 2003`$pseudo_x_cal_t
+```
+
+### Calanus x Calanus I-IV
+
+```{r}
+analysis_sets$`1961 - 2003`$cal2_x_cal
+analysis_sets$`1961 - 2003`$cal2_x_cal_t
+```
+
+## Last 14 Years {.tabset}
+
+### Calanus x Centropages
+
+```{r}
+analysis_sets$`2004 - 2017`$centro_x_cal
+analysis_sets$`2004 - 2017`$centro_x_cal_t
+```
+
+
+### Calanus x Oithona
+
+```{r}
+analysis_sets$`2004 - 2017`$oithona_x_cal
+analysis_sets$`2004 - 2017`$oithona_x_cal_t
+```
+
+### Calanus x Pseudocalanus
+
+```{r}
+analysis_sets$`2004 - 2017`$pseudo_x_cal
+analysis_sets$`2004 - 2017`$pseudo_x_cal_t
+```
+
+### Calanus x Calanus I-IV
+
+```{r}
+analysis_sets$`2004 - 2017`$cal2_x_cal
+analysis_sets$`2004 - 2017`$cal2_x_cal_t
+```
+
+# Do the kmeans Clusters Match the PCA Mode Timelines?
+
+**Original Period, PCA Mode Timeline**
+
+![](presentations/Figure2b_recreation.png)
+
+**Kmeans Cluster Year Assignments**
+
+```{r, out.width=800}
+cluster_1 <- analysis_sets$`1961 - 2003`$pca_data %>% 
+  filter(cluster == 1) %>% 
+  select(year) %>%   
+  mutate(`Cluster 1` = "+")
+
+cluster_2 <- analysis_sets$`1961 - 2003`$pca_data %>% 
+  filter(cluster == 2) %>% 
+  select(year) %>% 
+  mutate(`Cluster 2` = "+")
+
+#Plot them as a timeline
+analysis_sets$`1961 - 2003`$pca_data %>% 
+  select(year) %>% 
+  left_join(cluster_1, by = "year") %>% 
+  left_join(cluster_2, by = "year") %>% 
+  mutate(`Cluster 1` = if_else(is.na(`Cluster 1`) == T, "-", `Cluster 1`),
+         `Cluster 2` = if_else(is.na(`Cluster 2`) == T, "-", `Cluster 2`)) %>% 
+  gather(key = "Cluster ID", value = "Selected +/-", `Cluster 1`, `Cluster 2`) %>% 
+  ggplot(aes(x = year, 
+             y = fct_rev(`Cluster ID`), 
+             label = `Selected +/-`,
+             color = `Selected +/-`)
+         ) +
+    geom_text(size = 5, show.legend = FALSE) +
+    scale_color_gmri(palette = "mixed", reverse = T) +
+    labs(x = NULL, y = NULL) + theme_minimal()
+  
+```
+
