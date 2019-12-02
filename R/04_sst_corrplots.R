@@ -298,18 +298,4 @@ ggsave(weights_fig_post, filename =  here::here("R", "presentations", "post_shif
 
 
 
-####  Buoy Data  ####
-load(file = str_c(cpr_boxpath, "/data/processed_data/Buoy.RData"))
-#Check Refernce Tree
-lobstr::ref(Buoys)
 
-#Buoys is a nested list with environmental data for each buoy at each depth
-buoy_b <- Buoys$Buoy_B
-bind_rows(buoy_b$depth_1m, .id = "var_name")
-
-Buoys %>% 
-  map(function(x) { #Buoy Level
-    map(function(x){ #Depth Level
-      bind_rows(x, .id = "var_name")
-    }) %>% bind_rows(.id = "depth")
-  })
