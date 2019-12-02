@@ -57,3 +57,45 @@ buoy_b <- buoy_collapse(buoy_b)
 #Buoys Collapsed
 buoys_collapsed <- Buoys %>% map(buoy_collapse) %>% 
   bind_rows(.id = "buoy_id")
+
+#Check Structure
+head(buoys_collapsed)
+
+
+
+#Pivot the measurements into their own columns
+buoys <- buoys_collapsed %>% 
+  pivot_wider(names_from = var_name, values_from = daily_mean)
+
+#clean environment
+rm(Buoys, buoy_b, buoys_collapsed)
+
+yearly_means <- buoys %>% 
+  mutate(year = lubridate::year(Date),
+         year = factor(year)) %>% 
+  group_by(buoy_id, year) %>% 
+  summarise(mean_temp = mean(temp, na.rm = T),
+            mean_sal = mean(sal, na.rm = T),
+            mean_dens = mean(density, na.rm = T)) %>% 
+  ungroup() %>% 
+  mutate(period = "Annual")
+
+quarterly_means <- buoys %>% 
+  mutate(year = lubridate::year(Date),
+         year = factor(year),
+         month_col = lubridate::month(Date),
+         month_col = factor(month_col),
+         period = case_when(
+           month_col %in% c(1:3)   ~ "Q1",
+           month_col %in% c(4:6)   ~ "Q2",
+           month_col %in% c(7:9)   ~ "Q3",
+           month_col %in% c(10:12) ~ "Q4"
+         )) %>% 
+  group_by(buoy_id, year, period) %>% 
+  summarise(mean_temp = mean(temp, na.rm = T),
+            mean_sal = mean(sal, na.rm = T),
+            mean_dens = mean(density, na.rm = T)) %>% 
+  ungroup()
+
+#Put them back together
+buoy_dataset <- full_join(yearly_means, quarterly_means)
