@@ -97,5 +97,26 @@ quarterly_means <- buoys %>%
             mean_dens = mean(density, na.rm = T)) %>% 
   ungroup()
 
+bi_monthly_means <- buoys %>% 
+  mutate(year = lubridate::year(Date),
+         year = factor(year),
+         month_col = lubridate::month(Date),
+         month_col = factor(month_col),
+         period = case_when(
+           month_col %in% c(1:2)   ~ "P1",
+           month_col %in% c(3:4)   ~ "P2",
+           month_col %in% c(5:6)   ~ "P3",
+           month_col %in% c(7:8)   ~ "P4",
+           month_col %in% c(9:10)   ~ "P5",
+           month_col %in% c(11:12)   ~ "P6",
+         )) %>% 
+  group_by(buoy_id, year, period) %>% 
+  summarise(mean_temp = mean(temp, na.rm = T),
+            mean_sal = mean(sal, na.rm = T),
+            mean_dens = mean(density, na.rm = T)) %>% 
+  ungroup()
+
 #Put them back together
-buoy_dataset <- full_join(yearly_means, quarterly_means)
+buoy_dataset <- full_join(yearly_means, quarterly_means) %>% 
+  full_join(bi_monthly_means)
+write_csv(buoy_dataset, path = str_c(cpr_boxpath, "data/processed_data/buoys_aggregated.csv", sep = "/"))
