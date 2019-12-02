@@ -145,6 +145,7 @@ for (i in 1:length(analysis_sets)) {
 
 ---
 
+
 # PCA Analysis 
 
 ## PCA Weights {.tabset}
@@ -169,6 +170,7 @@ analysis_sets$`1961 - 2003`$fig2a
 analysis_sets$`2004 - 2017`$fig2a
 ```
 
+
 ## PCA Timelines {.tabset}
 
 Taking the PCA weights from the 1961-2003 PCA (mimicking the 2005 paper) we can recreate the original timeline and extend those weights out through 2017 to create the following figures:
@@ -189,9 +191,13 @@ When applying 1961-2005 PCA weights to the bi-monthly period anomalies and exten
 
 
 
-## Abundance Anomaly Timelines for Specific Taxa {.tabset}
 
-The following plots show the timelines of abundance anomalies for each of the seven taxa. There are timelines for each bi-monthly period for each taxa.
+
+# Abundance Anomaly Timelines {.tabset .tabset-pills}
+
+The following plots show the timelines of abundance anomalies for each of the seven taxa. There are timelines for each bi-monthly period and each quarterly period for each taxa.
+
+## Bi-monthly Periods {.tabset}
 
 ### Calanus V+
 
@@ -222,7 +228,42 @@ The following plots show the timelines of abundance anomalies for each of the se
 ![](presentations/abundance_timelines/para_pseudocalanus.png)
 
 
+## Quarterly Periods {.tabset}
+
+
+### Calanus V+
+
+![](presentations/quarterly_timelines/calanus.png)
+
+###  Calanus I - IV
+
+![](presentations/quarterly_timelines/calanus1to4.png)
+
+### Centropages
+
+![](presentations/quarterly_timelines/centropages.png)
+
+### Euphausiacea
+
+![](presentations/quarterly_timelines/euphausiacea.png)
+
+### Metridia
+
+![](presentations/quarterly_timelines/metridia.png)
+
+### Oithona 
+
+![](presentations/quarterly_timelines/oithona.png)
+
+### Para Pseudocalanus
+
+![](presentations/quarterly_timelines/para_pseudocalanus.png)
+
+
+
+
 ---
+
 
 # Cluster Analysis
 
@@ -305,6 +346,7 @@ gap_stat <- clusGap(analysis_sets$`2004 - 2017`$anom_mat, FUN = kmeans, nstart =
 
 fviz_gap_stat(gap_stat)
 ```
+
 
 
 
@@ -553,7 +595,8 @@ analysis_sets$`2004 - 2017`$cal2_x_cal
 analysis_sets$`2004 - 2017`$cal2_x_cal_t
 ```
 
-# Do the kmeans Clusters Match the PCA Mode Timelines?
+
+# Comparing PCA modes and k-means cluster
 
 **Original Period, PCA Mode Timeline**
 
@@ -591,3 +634,339 @@ analysis_sets$`1961 - 2003`$pca_data %>%
   
 ```
 
+
+
+#Quarterly PCA's
+
+```{r quarterly data setup}
+
+#Target species
+species_05 <- c("calanus", "centropages", "oithona", "para_pseudocalanus",
+                "metridia", "calanus1to4", "euphausiacea")
+
+#Set up a list for the quarterly groups
+quarterly_long <- read_csv(str_c(cpr_boxpath,"data", "processed_data", "cpr_allspecies_long_quarters.csv", sep = "/")) %>% 
+  mutate(
+    period = case_when(
+      period == "annual" ~"Annual",
+      period == "q1" ~"Q1",
+      period == "q2" ~"Q2",
+      period == "q3" ~"Q3",
+      period == "q4" ~"Q4",
+      TRUE ~ "Missed One"
+    )
+  ) %>% 
+  filter(species %in% species_05)
+
+#Split into analysis units
+full_ts_q    <- quarterly_long
+pre_split_q  <- quarterly_long %>% filter(year <= 2003)
+post_split_q <- quarterly_long %>% filter(year > 2003)
+
+#Put the full data sets into a nested list
+quarterly_sets <- list("Full Timeseries" = list(Annual = list(data = filter(full_ts_q, period == "Annual")),
+                                                Q1     = list(data = filter(full_ts_q, period == "Q1")),
+                                                Q2     = list(data = filter(full_ts_q, period == "Q2")),
+                                                Q3     = list(data = filter(full_ts_q, period == "Q3")),
+                                                Q4     = list(data = filter(full_ts_q, period == "Q4"))),
+                       "1961 - 2003"     = list(Annual = list(data = filter(pre_split_q, period == "Annual")),
+                                                Q1     = list(data = filter(pre_split_q, period == "Q1")),
+                                                Q2     = list(data = filter(pre_split_q, period == "Q2")),
+                                                Q3     = list(data = filter(pre_split_q, period == "Q3")),
+                                                Q4     = list(data = filter(pre_split_q, period == "Q4"))),
+                       "2004 - 2017"     = list(Annual = list(data = filter(post_split_q, period == "Annual")),
+                                                Q1     = list(data = filter(post_split_q, period == "Q1")),
+                                                Q2     = list(data = filter(post_split_q, period == "Q2")),
+                                                Q3     = list(data = filter(post_split_q, period == "Q3")),
+                                                Q4     = list(data = filter(post_split_q, period == "Q4")))
+)
+```
+
+
+
+```{r quarterly analysis loop}
+####  Analysis Loop  ####
+# i for period
+# q for quarter
+for (i in 1:length(quarterly_sets)) {
+  for (q in 1:5) {
+  
+  #Keep years with the data going into distance matrices for PCA and clustering
+  quarterly_sets[[i]][[q]]$pca_data <- quarterly_sets[[i]][[q]]$data %>% 
+    pivot_wider(names_from = species, values_from = anomaly) %>% 
+    mutate(decade = factor(floor_decade(year))) %>% 
+    dplyr::select(year, decade, calanus:para_pseudocalanus) %>% 
+    drop_na()
+  
+  #Pull out just the values used for PCA and clustering
+  quarterly_sets[[i]][[q]]$anom_mat <- quarterly_sets[[i]][[q]]$pca_data %>% select(-year, -decade)
+  
+  
+  #PCA Object
+  quarterly_sets[[i]][[q]]$pca_obj <- prcomp(quarterly_sets[[i]][[q]]$anom_mat, center = F, scale. = F)
+
+  #PCA Leading Modes
+  quarterly_sets[[i]][[q]]$leading_modes <- rownames_to_column(as.data.frame(quarterly_sets[[i]][[q]]$pca_obj$rotation)) %>%
+    dplyr::select(species = rowname, PC1, PC2)
+
+  #Percent Deviance Explained (To slide into plots)
+  quarterly_sets[[i]][[q]]$deviance_explained <- pull_deviance(quarterly_sets[[i]][[q]]$pca_obj$sdev)
+
+  #Figure 2a
+  quarterly_sets[[i]][[q]]$fig2a <- quarterly_sets[[i]][[q]]$leading_modes %>%
+    gather(key = "PC", value =  "Principal Component Weight", PC1, PC2) %>%
+    mutate(species = factor(species,
+                            levels = c("calanus", "centropages", "oithona","para_pseudocalanus",
+                                       "metridia", "calanus1to4", "euphausiacea")),
+           PC = if_else(PC == "PC1",
+                       as.character(quarterly_sets[[i]][[q]]$deviance_explained$PC1),
+                       as.character(quarterly_sets[[i]][[q]]$deviance_explained$PC2))
+           ) %>%
+    ggplot(aes(species, `Principal Component Weight` * -1, fill = PC)) +
+      geom_col(position  = "dodge") +
+      scale_fill_gmri(palette = "mixed") +
+      labs(x = "") +
+      theme(#legend.position = c(0.85, 0.85),
+            axis.text.x = element_text(angle = 45, hjust = 1))
+  }
+  
+}
+
+
+col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+```
+
+## PCA Weights {.tabset .tabset-pills}
+
+### Full TS {.tabset}
+
+#### Annual
+
+```{r}
+quarterly_sets$`Full Timeseries`$Annual$fig2a + labs(caption = "Annual")
+
+quarterly_sets$`Full Timeseries`$Annual$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q1
+
+```{r}
+quarterly_sets$`Full Timeseries`$Q1$fig2a + labs(caption = "Quarter 1")
+
+quarterly_sets$`Full Timeseries`$Q1$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q2
+
+```{r}
+quarterly_sets$`Full Timeseries`$Q2$fig2a + labs(caption = "Quarter 2")
+
+quarterly_sets$`Full Timeseries`$Q2$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q3
+
+```{r}
+quarterly_sets$`Full Timeseries`$Q3$fig2a + labs(caption = "Quarter 3")
+
+quarterly_sets$`Full Timeseries`$Q3$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q4
+
+```{r}
+quarterly_sets$`Full Timeseries`$Q4$fig2a + labs(caption = "Quarter 4")
+
+quarterly_sets$`Full Timeseries`$Q4$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+
+### Early Period  {.tabset}
+
+#### Annual
+
+```{r}
+quarterly_sets$`1961 - 2003`$Annual$fig2a + labs(caption = "Annual")
+
+quarterly_sets$`1961 - 2003`$Annual$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q1
+
+```{r}
+quarterly_sets$`1961 - 2003`$Q1$fig2a + labs(caption = "Quarter 1")
+
+quarterly_sets$`1961 - 2003`$Q1$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q2
+
+```{r}
+quarterly_sets$`1961 - 2003`$Q2$fig2a + labs(caption = "Quarter 2")
+
+quarterly_sets$`1961 - 2003`$Q2$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q3
+
+```{r}
+quarterly_sets$`1961 - 2003`$Q3$fig2a + labs(caption = "Quarter 3")
+
+quarterly_sets$`1961 - 2003`$Q3$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q4
+
+```{r}
+quarterly_sets$`1961 - 2003`$Q4$fig2a + labs(caption = "Quarter 4")
+
+quarterly_sets$`1961 - 2003`$Q4$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+### Last 14 Years  {.tabset}
+
+
+#### Annual
+
+```{r}
+quarterly_sets$`2004 - 2017`$Annual$fig2a + labs(caption = "Annual")
+
+quarterly_sets$`2004 - 2017`$Annual$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q1
+
+```{r}
+quarterly_sets$`2004 - 2017`$Q1$fig2a + labs(caption = "Quarter 1")
+
+quarterly_sets$`2004 - 2017`$Q1$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q2
+
+```{r}
+quarterly_sets$`2004 - 2017`$Q2$fig2a + labs(caption = "Quarter 2")
+
+quarterly_sets$`2004 - 2017`$Q2$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q3
+
+```{r}
+quarterly_sets$`2004 - 2017`$Q3$fig2a + labs(caption = "Quarter 3")
+
+quarterly_sets$`2004 - 2017`$Q3$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```
+
+#### Q4
+
+```{r}
+quarterly_sets$`2004 - 2017`$Q4$fig2a + labs(caption = "Quarter 4")
+
+quarterly_sets$`2004 - 2017`$Q4$anom_mat %>% cor %>% 
+  corrplot::corrplot(method="color", 
+                     col=col(200),  
+                     diag=TRUE, 
+                     type = "lower", 
+                     addCoef.col = "black", # Add coefficient of correlation
+                     mar=c(0,0,2,2) # http://stackoverflow.com/a/14754408/54964
+)
+```

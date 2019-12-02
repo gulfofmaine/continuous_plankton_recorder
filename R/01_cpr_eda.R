@@ -7,13 +7,7 @@ library(tidyverse)
 library(here)
 
 ####  Functions  ####
-find_box_data <- function(box_project_name) {
-  box_project <- as.character(box_project_name)
-  box_path <- str_c("/Users/akemberling/Box/Adam Kemberling/Box_Projects/", paste(box_project))
-  return(box_path)
-}
-
-cpr_boxpath <- find_box_data("continuous_plankton_recorder")
+source(here::here("R", "cpr_helper_funs.R"))
 
 #Set ggplot theme
 theme_set(theme_bw())
