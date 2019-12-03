@@ -194,4 +194,4 @@ buoys_out <- full_join(buoy_dataset, strat_aggregates)
 
 
 ####  Export Out  ####
-write_csv(buoys_out, path = str_c(cpr_boxpath, "data/processed_data/buoys_aggregated.csv", sep = "/"))
+write_csv(buoys_out, path = str_c(cpr_boxpath, "data/processed_data/buoys_aggregated.csv", sep = "/"), col_names = TRUE)
