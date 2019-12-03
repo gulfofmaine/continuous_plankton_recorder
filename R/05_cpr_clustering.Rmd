@@ -634,9 +634,11 @@ analysis_sets$`1961 - 2003`$pca_data %>%
   
 ```
 
+---
 
+#Quarterly Time-Periods
 
-#Quarterly PCA's
+**Data Setup for Quarterly Analysis**
 
 ```{r quarterly data setup}
 
@@ -682,7 +684,7 @@ quarterly_sets <- list("Full Timeseries" = list(Annual = list(data = filter(full
 )
 ```
 
-
+**Analysis Loop for Quarterly Time Periods**
 
 ```{r quarterly analysis loop}
 ####  Analysis Loop  ####
@@ -736,7 +738,40 @@ for (i in 1:length(quarterly_sets)) {
 col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
 ```
 
-## PCA Weights {.tabset .tabset-pills}
+
+## Quarterly Abundance and SST Regressions {.tabset}
+
+The following plots show the results of simple linear regressions between plankton population anomalies and the corresponding SST anomalies for each quarterly period (left) and the same regressions using temperature anomalies from the previous quarter (right). For plankton anomalies in Q1, temperature anomalies from Q4 of the previous year are used.
+
+### Calanus V +
+
+![](presentations/temp_regressions/calanus_temp_corr.png)
+
+### Calanus I - IV
+
+![](presentations/temp_regressions/calanus1to4_temp_corr.png)
+
+### Centropages
+
+![](presentations/temp_regressions/centropages_temp_corr.png)
+
+### Euphausiacea
+
+![](presentations/temp_regressions/euphausiacea_temp_corr.png)
+
+### Metridia
+
+![](presentations/temp_regressions/metridia_temp_corr.png)
+
+### Oithona
+
+![](presentations/temp_regressions/oithona_temp_corr.png)
+
+### Para Pseudocalannus
+
+![](presentations/temp_regressions/para_pseudocalanus_temp_corr.png)
+
+## Quarterly PCA Weights {.tabset .tabset-pills}
 
 ### Full TS {.tabset}
 
