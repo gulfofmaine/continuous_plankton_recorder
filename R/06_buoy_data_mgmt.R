@@ -15,7 +15,8 @@ source(here::here("R", "cpr_helper_funs.R"))
 # 1. R/buoy_data/UpdateBuoy_functions.Rmd
 # 2. R/buoy_data/Update_Buoy.Rmd
 
-load(file = str_c(cpr_boxpath, "/data/processed_data/Buoy.RData"))
+#load(file = str_c(cpr_boxpath, "/data/processed_data/Buoy.RData"))
+load(file = str_c(cpr_boxpath, "/data/processed_data/Buoys_Md_2019.RData"))
 
 #Check Reference Tree to see list structure
 lobstr::ref(Buoys)
@@ -87,16 +88,17 @@ yearly_means <- buoys %>%
   ungroup() %>% 
   mutate(period = "Annual")
 
+#Quarters are 91 julian day increments
 quarterly_means <- buoys %>% 
-  mutate(year = lubridate::year(Date),
+  mutate(
+         year = lubridate::year(Date),
          year = factor(year),
-         month_col = lubridate::month(Date),
-         month_col = factor(month_col),
+         julian = lubridate::yday(Date), 
          period = case_when(
-           month_col %in% c(1:3)   ~ "Q1",
-           month_col %in% c(4:6)   ~ "Q2",
-           month_col %in% c(7:9)   ~ "Q3",
-           month_col %in% c(10:12) ~ "Q4"
+           julian <= 91                       ~ "Q1",
+           between(julian, left = 92, 182)    ~ "Q2",
+           between(julian, left = 183, 273)   ~ "Q3",
+           julian > 273                       ~ "Q4"
          )) %>% 
   group_by(buoy_id, year, period, reading_depth) %>% 
   summarise(mean_temp = mean(temp, na.rm = T),
@@ -110,11 +112,11 @@ bi_monthly_means <- buoys %>%
          month_col = lubridate::month(Date),
          month_col = factor(month_col),
          period = case_when(
-           month_col %in% c(1:2)   ~ "P1",
-           month_col %in% c(3:4)   ~ "P2",
-           month_col %in% c(5:6)   ~ "P3",
-           month_col %in% c(7:8)   ~ "P4",
-           month_col %in% c(9:10)   ~ "P5",
+           month_col %in% c(1:2)     ~ "P1",
+           month_col %in% c(3:4)     ~ "P2",
+           month_col %in% c(5:6)     ~ "P3",
+           month_col %in% c(7:8)     ~ "P4",
+           month_col %in% c(9:10)    ~ "P5",
            month_col %in% c(11:12)   ~ "P6",
          )) %>% 
   group_by(buoy_id, year, period, reading_depth) %>% 
@@ -157,13 +159,12 @@ yearly_strat <- strat_set %>%
 quarterly_strat <- strat_set %>% 
   mutate(year = lubridate::year(Date),
          year = factor(year),
-         month_col = lubridate::month(Date),
-         month_col = factor(month_col),
+         julian = lubridate::yday(Date),
          period = case_when(
-           month_col %in% c(1:3)   ~ "Q1",
-           month_col %in% c(4:6)   ~ "Q2",
-           month_col %in% c(7:9)   ~ "Q3",
-           month_col %in% c(10:12) ~ "Q4"
+           julian <= 91                       ~ "Q1",
+           between(julian, left = 92, 182)    ~ "Q2",
+           between(julian, left = 183, 273)   ~ "Q3",
+           julian > 273                       ~ "Q4"
          )) %>% 
   group_by(buoy_id, year, period) %>% 
   summarise(mean_diff = mean(difference, na.rm = T),

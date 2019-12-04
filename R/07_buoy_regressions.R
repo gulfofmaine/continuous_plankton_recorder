@@ -9,7 +9,6 @@
 library(ggpmisc)
 library(tidyverse)
 library(here)
-#devtools::install_github("vqv/ggbiplot")
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
@@ -38,9 +37,17 @@ buoy <- read.csv(str_c(cpr_boxpath, "data/processed_data/buoys_aggregated.csv", 
 cpr_buoys <- cpr_long %>%
   filter(period != "Annual") %>% 
   left_join(buoy, by = c("year", "period")) %>% 
-  mutate(reading_depth = factor(reading_depth), 
+  mutate(reading_depth = factor(reading_depth, 
          levels = c("1 meter", "20 meters", "50 meters", "100 meters", "150 meters", "180 meters"))
+  )
 
+
+####  Export cpr_buoys  ####
+write_csv(cpr_buoys, path = str_c(cpr_boxpath,"data", "processed_data", "cpr_quarters_buoys.csv", sep = "/"), col_names = TRUE)
+write_csv(cpr_buoys, path = here::here("R", "cpr_buoy_DE", "Data", "cpr_quarters_buoys.csv"), col_names = TRUE)
+
+
+####  Data Exploration  ####
 
 #What information do we want to highlight?
 cpr_buoys %>% 
@@ -54,8 +61,41 @@ cpr_buoys %>%
                  eq.with.lhs = "italic(hat(y))~`=`~",
                  aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                  parse = TRUE) +  
-    facet_grid(period ~ buoy_id) +
+    facet_grid(period ~ buoy_id, scales = "free") +
     labs(x = "Stratification Index ()",
          y = "Population Anomaly (sd)") +
     theme_bw()
     
+
+
+#Buoy N is the furthest offshore
+#Buoy M isn't loading correctly - but would be the next best
+# B, E, & I are a little offshore
+# F is in penobscot bay
+
+#Offshore Stratification - Buoy N
+species_l <- list(
+  species_01 =  c("calanus", "calanus1to4", "centropages", "euphausiacea"),
+  species_02 = c("metridia", "oithona", "para_pseudocalanus", "paraeucheata"))
+
+cpr_buoys %>% 
+  #Choose a Buoy
+  filter(buoy_id == "Buoy_N") %>% 
+  #Choose a species group
+  filter(species %in% species_l$species_01) %>% 
+  ggplot(aes(mean_strat_index, anomaly)) +
+  geom_smooth(method = "lm", se = FALSE, color = "gray50") +
+  geom_point() +
+  stat_poly_eq(formula = y ~ x, 
+               eq.with.lhs = "italic(hat(y))~`=`~",
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+               parse = TRUE) +  
+  facet_grid(period ~ species) +
+  labs(x = "Stratification Index",
+       y = "Population Anomaly (sd)") +
+  theme_bw()
+
+
+
+
+
