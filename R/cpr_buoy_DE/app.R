@@ -38,12 +38,13 @@ taxa_names <- set_names(taxa_names,
 
 
 ####_Buoy List  ####
-buoy_names <- c("Buoy_B", "Buoy_E", "Buoy_F", "Buoy_I", "Buoy_N")
+buoy_names <- c("Buoy_B", "Buoy_E", "Buoy_F", "Buoy_I", "Buoy_M", "Buoy_N")
 buoy_names <- set_names(buoy_names, 
                         nm = c("Buoy B - Western Maine Shelf", 
                                "Buoy C - Central Maine Shelf",
                                "Buoy F - Penobscot Bay",
                                "Buoy I - Eastern Maine Shelf",
+                               "Buoy M - Jordan Basin",
                                "Buoy N - Northeast Channel"))
 
 ####_Predictor List  ####
@@ -70,6 +71,7 @@ buoy_list <- list(
     "Buoy_E" = list(),
     "Buoy_F" = list(),
     "Buoy_I" = list(),
+    "Buoy_M" = list(),
     "Buoy_N" = list()
 )
 
@@ -106,7 +108,7 @@ for (taxa in 1:length(taxa_names)) {
         
         #Average Temperature Plots
         plot_list_out[[taxa]][[buoy]]$mean_temp <- taxa_buoy_list[[taxa]][[buoy]] %>% 
-            ggplot(aes(x = mean_sal, y = anomaly)) +
+            ggplot(aes(x = mean_temp, y = anomaly)) +
                 geom_smooth(method = "lm", se = FALSE, color = "gray50") +
                 geom_point() +
                 stat_poly_eq(formula = y ~ x, 
@@ -119,7 +121,7 @@ for (taxa in 1:length(taxa_names)) {
         
         #Average Density Plots
         plot_list_out[[taxa]][[buoy]]$mean_dens <- taxa_buoy_list[[taxa]][[buoy]] %>% 
-            ggplot(aes(x = mean_sal, y = anomaly)) +
+            ggplot(aes(x = mean_dens, y = anomaly)) +
             geom_smooth(method = "lm", se = FALSE, color = "gray50") +
             geom_point() +
             stat_poly_eq(formula = y ~ x, 
@@ -132,7 +134,7 @@ for (taxa in 1:length(taxa_names)) {
         
         #Stratification Index Plots
         plot_list_out[[taxa]][[buoy]]$mean_strat_index <- taxa_buoy_list[[taxa]][[buoy]] %>% 
-            ggplot(aes(x = mean_sal, y = anomaly)) +
+            ggplot(aes(x = mean_strat_index, y = anomaly)) +
                 geom_smooth(method = "lm", se = FALSE, color = "gray50") +
                 geom_point() +
                 stat_poly_eq(formula = y ~ x, 
