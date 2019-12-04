@@ -207,7 +207,7 @@ ui <- fluidPage(
                     
                     # Taxa 2 Selector
                     selectInput(inputId = "taxa2",
-                                label   = "1. Select a Taxa for the left-side plot",
+                                label   = "1. Select a Taxa for the right-side plot",
                                 choices = taxa_names
                                 
                     ),
