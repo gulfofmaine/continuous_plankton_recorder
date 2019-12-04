@@ -11,6 +11,10 @@ library(here)
 source(here::here("R", "cpr_helper_funs.R"))
 
 ####  Buoy Data  ####
+#Buoy data is generated using:
+# 1. R/buoy_data/UpdateBuoy_functions.Rmd
+# 2. R/buoy_data/Update_Buoy.Rmd
+
 load(file = str_c(cpr_boxpath, "/data/processed_data/Buoy.RData"))
 
 #Check Reference Tree to see list structure

@@ -3,10 +3,10 @@
 #### 12/02/2019
 
 ####  Packages  ####
-library(ggbiplot)
+library(patchwork)
 library(tidyverse)
+library(ggpmisc)
 library(here)
-#devtools::install_github("vqv/ggbiplot")
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
@@ -28,8 +28,8 @@ cpr_long <- read_csv(str_c(cpr_boxpath,"data", "processed_data", "cpr_allspecies
   )
 
 
+###Quarterly Species Abundance Timelines  ####
 
-####  Quarterly Species Abundance Timelines  ####
 species_list <- list(
   "calanus" = filter(cpr_long, species == "calanus"),
   "calanus1to4" = filter(cpr_long, species == "calanus1to4"),
@@ -57,7 +57,7 @@ species_list <- list(
 
 
 
-####  Quarterly SST Measures  ####
+###__Quarterly SST Measures  ####
 sst <- read.table(str_c(cpr_boxpath, "data", "ENV", "GoMSST_quartlery.txt", sep = "/")) %>% 
   dplyr::rename(year = V1,
                 Q1   = V2,
@@ -70,7 +70,7 @@ sst_long <- sst %>% pivot_longer(names_to = "period", cols = Q1:Q4, values_to = 
 
 
 
-####  Setting up Period Lags  ####
+###__Setting up Period Lags  ####
 lag_key <- sst_long %>% 
   mutate(
     lag_ref = case_when(
@@ -100,7 +100,7 @@ ggplot(sst_long_lagged, aes(year)) +
   geom_line(data = filter(sst_long_lagged, period == "Q2"), aes(year, lag_temp, color = "Q1 lagged")) #Should match Q2's lag
 
 
-####  Pair cpr data with quarterly anomalies  ####
+###__Pair cpr data with quarterly anomalies  ####
 cpr_sst <- cpr_long %>%
   filter(period != "Annual") %>% 
   left_join(sst_long_lagged, by = c("year", "period"))
@@ -132,11 +132,17 @@ cpr_sst %>%
   theme(panel.grid.major.x = element_line(color = "gray80", size = 0.2),
         panel.grid.minor.x = element_line(color = "gray80", size = 0.2))
 
-#Correlations
 
-#Temperature CPR in sync
-library(ggpmisc)
+####__Export Quaraterly CPR - SST Data  ####
 
+
+####__________________________________####
+####________Regression Plots___________####
+
+
+####Full TS  ####
+
+####__Temperature CPR Same Q  ####
 temp_anom_plots <- cpr_sst %>% 
   split(.$species) %>% 
   map(function(.x) {
@@ -159,12 +165,13 @@ temp_anom_plots <- cpr_sst %>%
                    parse = TRUE) +  
       theme_bw() +
       theme(legend.position = "none") +
-      labs(x = "Population Anomaly", y = "Temperature Anomaly")
+      labs(x = "Population Anomaly", 
+           y = "Temperature Anomaly")
   }
 )
 
 
-#Previous quarter's Temperature with  CPR
+###__Cpr lagged one quarter  ####
 lag_temp_plots <- cpr_sst %>% 
   split(.$species) %>% 
   map(function(.x) {
@@ -186,22 +193,103 @@ lag_temp_plots <- cpr_sst %>%
                    aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                    parse = TRUE) +  
       theme_bw() +
-      theme(legend.position = "none") +
-      labs(x = "Population Anomaly", y = "Previous Quarter's Temperature Anomaly")
+      labs(x = "Population Anomaly", 
+           y = "Previous Quarter's Temperature Anomaly",
+           caption = "Years: 1981 - 2017") +
+      theme(legend.position = "none",
+            plot.caption    = element_text(color = "gray60", size = 8) )
+      
   }
 )
 
 
 #Put them together to export them
-library(patchwork)
-
 twin_plots <- map2(temp_anom_plots, lag_temp_plots, function(x,y) {
   new_plot <- x + y
 })
 
 #Check them out
-twin_plots
+twin_plots$calanus
 
 twin_plots %>% imap(function(x,y) {
   ggsave(x, filename = here::here("R", "presentations", "temp_regressions", str_c(y, "_temp_corr.png")), device = "png")
+})
+
+
+
+
+####Recent Period  ####
+
+####__Temperature CPR Same Q  ####
+t_plots_2 <- cpr_sst %>% 
+  filter(year >= 2004) %>% 
+  split(.$species) %>% 
+  map(function(.x) {
+    
+    #Add Equation and r-squared values?  
+    my.formula <- y ~ x
+    
+    plot_out <- .x %>% 
+      ggplot(aes(anomaly, temp_anomaly, fill = temp_anomaly)) + 
+      geom_smooth(method = "lm", se=FALSE, 
+                  color = "gray", 
+                  formula = my.formula) +
+      geom_point(shape = 21, color = "gray50") +
+      scale_fill_gradientn(colours = c("steelblue", "white", "darkred")) +
+      facet_grid(period ~ species) +
+      stat_poly_eq(data = .x,
+                   formula = my.formula, 
+                   eq.with.lhs = "italic(hat(y))~`=`~",
+                   aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                   parse = TRUE) +  
+      theme_bw() +
+      theme(legend.position = "none") +
+      labs(x = "Population Anomaly", 
+           y = "Temperature Anomaly")
+  }
+  )
+
+
+###__Cpr lagged one quarter  ####
+lag_plots_2 <- cpr_sst %>% 
+  filter(year >= 2004) %>% 
+  split(.$species) %>% 
+  map(function(.x) {
+    
+    #Add Equation and r-squared values?    
+    my.formula <- y ~ x
+    
+    .x %>% 
+      ggplot(aes(anomaly, lag_temp, fill = lag_temp)) + 
+      geom_smooth(method = "lm", se=FALSE, 
+                  color = "gray", 
+                  formula = my.formula) +
+      geom_point(shape = 21, color = "gray50") +
+      scale_fill_gradientn(colours = c("steelblue", "white", "darkred")) +
+      facet_grid(period ~ species) +
+      stat_poly_eq(data = .x,
+                   formula = my.formula, 
+                   eq.with.lhs = "italic(hat(y))~`=`~",
+                   aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                   parse = TRUE) +  
+      theme_bw() +
+      labs(x = "Population Anomaly", 
+           y = "Previous Quarter's Temperature Anomaly",
+           caption = "Years 2004 - 2017") +
+      theme(legend.position = "none",
+            plot.caption    = element_text(color = "gray60", size = 8) )
+  }
+  )
+
+
+#Put them together to export them
+recent_plots <- map2(t_plots_2, lag_plots_2, function(x,y) {
+  new_plot <- x + y
+})
+
+#Check them out
+recent_plots$calanus
+
+recent_plots %>% imap(function(x,y) {
+  ggsave(x, filename = here::here("R", "presentations", "recent_period_regressions", str_c(y, "_temp_corr.png")), device = "png")
 })

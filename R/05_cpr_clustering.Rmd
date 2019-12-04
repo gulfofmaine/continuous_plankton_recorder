@@ -596,13 +596,13 @@ analysis_sets$`2004 - 2017`$cal2_x_cal_t
 ```
 
 
-# Comparing PCA modes and k-means cluster
+# Comparing PCA modes and k-means cluster {.tabset}
 
-**Original Period, PCA Mode Timeline**
+## Original Period, PCA Mode Timeline
 
 ![](presentations/Figure2b_recreation.png)
 
-**Kmeans Cluster Year Assignments**
+## Kmeans Cluster Year Assignments
 
 ```{r, out.width=800}
 cluster_1 <- analysis_sets$`1961 - 2003`$pca_data %>% 
@@ -634,9 +634,8 @@ analysis_sets$`1961 - 2003`$pca_data %>%
   
 ```
 
----
 
-#Quarterly Time-Periods
+# Quarterly SST Regressions {.tabset .tabset-pills}
 
 **Data Setup for Quarterly Analysis**
 
@@ -739,9 +738,11 @@ col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA")
 ```
 
 
-## Quarterly Abundance and SST Regressions {.tabset}
+**Quarterly Abundance and SST Regressions**
 
 The following plots show the results of simple linear regressions between plankton population anomalies and the corresponding SST anomalies for each quarterly period (left) and the same regressions using temperature anomalies from the previous quarter (right). For plankton anomalies in Q1, temperature anomalies from Q4 of the previous year are used.
+
+## 1981-2017 {.tabset}
 
 ### Calanus V +
 
@@ -771,11 +772,48 @@ The following plots show the results of simple linear regressions between plankt
 
 ![](presentations/temp_regressions/para_pseudocalanus_temp_corr.png)
 
-## Quarterly PCA Weights {.tabset .tabset-pills}
+## 2004 - 2017 {.tabset}
 
-### Full TS {.tabset}
 
-#### Annual
+### Calanus V +
+
+![](presentations/recent_period_regressions/calanus_temp_corr.png)
+
+### Calanus I - IV
+
+![](presentations/recent_period_regressions/calanus1to4_temp_corr.png)
+
+### Centropages
+
+![](presentations/recent_period_regressions/centropages_temp_corr.png)
+
+### Euphausiacea
+
+![](presentations/recent_period_regressions/euphausiacea_temp_corr.png)
+
+### Metridia
+
+![](presentations/recent_period_regressions/metridia_temp_corr.png)
+
+### Oithona
+
+![](presentations/recent_period_regressions/oithona_temp_corr.png)
+
+### Para Pseudocalannus
+
+![](presentations/recent_period_regressions/para_pseudocalanus_temp_corr.png)
+
+
+
+
+
+
+
+# Quarterly PCA Weights {.tabset .tabset-pills}
+
+## Full TS {.tabset}
+
+### Annual
 
 ```{r}
 quarterly_sets$`Full Timeseries`$Annual$fig2a + labs(caption = "Annual")
@@ -790,7 +828,7 @@ quarterly_sets$`Full Timeseries`$Annual$anom_mat %>% cor %>%
 )
 ```
 
-#### Q1
+### Q1
 
 ```{r}
 quarterly_sets$`Full Timeseries`$Q1$fig2a + labs(caption = "Quarter 1")
@@ -805,7 +843,7 @@ quarterly_sets$`Full Timeseries`$Q1$anom_mat %>% cor %>%
 )
 ```
 
-#### Q2
+### Q2
 
 ```{r}
 quarterly_sets$`Full Timeseries`$Q2$fig2a + labs(caption = "Quarter 2")
@@ -820,7 +858,7 @@ quarterly_sets$`Full Timeseries`$Q2$anom_mat %>% cor %>%
 )
 ```
 
-#### Q3
+### Q3
 
 ```{r}
 quarterly_sets$`Full Timeseries`$Q3$fig2a + labs(caption = "Quarter 3")
@@ -835,7 +873,7 @@ quarterly_sets$`Full Timeseries`$Q3$anom_mat %>% cor %>%
 )
 ```
 
-#### Q4
+### Q4
 
 ```{r}
 quarterly_sets$`Full Timeseries`$Q4$fig2a + labs(caption = "Quarter 4")
@@ -851,9 +889,9 @@ quarterly_sets$`Full Timeseries`$Q4$anom_mat %>% cor %>%
 ```
 
 
-### Early Period  {.tabset}
+## Early Period  {.tabset}
 
-#### Annual
+### Annual
 
 ```{r}
 quarterly_sets$`1961 - 2003`$Annual$fig2a + labs(caption = "Annual")
@@ -868,7 +906,7 @@ quarterly_sets$`1961 - 2003`$Annual$anom_mat %>% cor %>%
 )
 ```
 
-#### Q1
+### Q1
 
 ```{r}
 quarterly_sets$`1961 - 2003`$Q1$fig2a + labs(caption = "Quarter 1")
@@ -883,7 +921,7 @@ quarterly_sets$`1961 - 2003`$Q1$anom_mat %>% cor %>%
 )
 ```
 
-#### Q2
+### Q2
 
 ```{r}
 quarterly_sets$`1961 - 2003`$Q2$fig2a + labs(caption = "Quarter 2")
@@ -898,7 +936,7 @@ quarterly_sets$`1961 - 2003`$Q2$anom_mat %>% cor %>%
 )
 ```
 
-#### Q3
+### Q3
 
 ```{r}
 quarterly_sets$`1961 - 2003`$Q3$fig2a + labs(caption = "Quarter 3")
@@ -913,7 +951,7 @@ quarterly_sets$`1961 - 2003`$Q3$anom_mat %>% cor %>%
 )
 ```
 
-#### Q4
+### Q4
 
 ```{r}
 quarterly_sets$`1961 - 2003`$Q4$fig2a + labs(caption = "Quarter 4")
@@ -928,10 +966,10 @@ quarterly_sets$`1961 - 2003`$Q4$anom_mat %>% cor %>%
 )
 ```
 
-### Last 14 Years  {.tabset}
+## Last 14 Years  {.tabset}
 
 
-#### Annual
+### Annual
 
 ```{r}
 quarterly_sets$`2004 - 2017`$Annual$fig2a + labs(caption = "Annual")
@@ -946,7 +984,7 @@ quarterly_sets$`2004 - 2017`$Annual$anom_mat %>% cor %>%
 )
 ```
 
-#### Q1
+### Q1
 
 ```{r}
 quarterly_sets$`2004 - 2017`$Q1$fig2a + labs(caption = "Quarter 1")
@@ -961,7 +999,7 @@ quarterly_sets$`2004 - 2017`$Q1$anom_mat %>% cor %>%
 )
 ```
 
-#### Q2
+### Q2
 
 ```{r}
 quarterly_sets$`2004 - 2017`$Q2$fig2a + labs(caption = "Quarter 2")
@@ -976,7 +1014,7 @@ quarterly_sets$`2004 - 2017`$Q2$anom_mat %>% cor %>%
 )
 ```
 
-#### Q3
+### Q3
 
 ```{r}
 quarterly_sets$`2004 - 2017`$Q3$fig2a + labs(caption = "Quarter 3")
@@ -991,7 +1029,7 @@ quarterly_sets$`2004 - 2017`$Q3$anom_mat %>% cor %>%
 )
 ```
 
-#### Q4
+### Q4
 
 ```{r}
 quarterly_sets$`2004 - 2017`$Q4$fig2a + labs(caption = "Quarter 4")
