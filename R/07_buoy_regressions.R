@@ -96,6 +96,34 @@ cpr_buoys %>%
   theme_bw()
 
 
+#Buoy Regression super table - Attempt 1
+confusing_matrix <- cpr_buoys %>% 
+  filter(is.na(buoy_id) == FALSE) %>% 
+  split(.$species) %>% 
+  map(~ .x %>% split(.$period) %>% 
+    map(~ .x %>% split(.$buoy_id) %>% 
+      map(~ .x %>%  split(.$reading_depth) %>% 
+        map(~ .x %>% 
+              select(anomaly, mean_temp, mean_sal, mean_dens) %>% 
+              drop_na() %>% 
+              cor())
+              )
+        
+          )
+    )
 
 
+####  Attempt 2  ####
+cpr_buoys %>% 
+  filter(is.na(buoy_id) == FALSE) %>% 
+  split(.$year) %>% 
+      map(~ .x %>% split(.$period) %>% 
+        map(~ .x %>% 
+              pivot_wider(names_from = species, values_from = anomaly) %>% 
+                select(-year, -period, -buoy_id, -reading_depth) %>% 
+                drop_na() %>% 
+                cor()
+              )
+          
+        )
 

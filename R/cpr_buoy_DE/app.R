@@ -89,57 +89,68 @@ plot_list_out <- list(
     
 )
 
+
+
+####  Plotting Loop  ####
 for (taxa in 1:length(taxa_names)) {
     for (buoy in 1:length(buoy_names)) {
         
-        #Average Salinity Plots
+        ####_Average Salinity Plots  ####
         plot_list_out[[taxa]][[buoy]]$mean_sal <- taxa_buoy_list[[taxa]][[buoy]] %>% 
             ggplot(aes(x = mean_sal, y = anomaly)) +
                 geom_smooth(method = "lm", se = FALSE, color = "gray50") +
                 geom_point() +
                 stat_poly_eq(formula = y ~ x, 
-                             eq.with.lhs = "italic(hat(y))~`=`~",
-                             aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
-                             parse = TRUE) +  
+                             #eq.with.lhs = "italic(hat(y))~`=`~",
+                             #aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                             aes(label = ..rr.label..), 
+                             label.y = 0.1,
+                             parse = TRUE) +   
                 facet_grid(period ~ reading_depth) +
                 labs(x = "Average Salinity",
                      y = "Population Anomaly (sd)") +
                 theme_bw()
         
-        #Average Temperature Plots
+        ####_Average Temperature Plots  ####
         plot_list_out[[taxa]][[buoy]]$mean_temp <- taxa_buoy_list[[taxa]][[buoy]] %>% 
             ggplot(aes(x = mean_temp, y = anomaly)) +
                 geom_smooth(method = "lm", se = FALSE, color = "gray50") +
                 geom_point() +
                 stat_poly_eq(formula = y ~ x, 
-                             eq.with.lhs = "italic(hat(y))~`=`~",
-                             aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
-                             parse = TRUE) +  
+                             #eq.with.lhs = "italic(hat(y))~`=`~",
+                             #aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                             aes(label = ..rr.label..), 
+                             label.y = 0.1, 
+                             parse = TRUE) +   
                 facet_grid(period ~ reading_depth) +
                 labs(x = "Average Temperature",
                      y = "Population Anomaly (sd)")
         
-        #Average Density Plots
+        ####_Average Density Plots  ####
         plot_list_out[[taxa]][[buoy]]$mean_dens <- taxa_buoy_list[[taxa]][[buoy]] %>% 
             ggplot(aes(x = mean_dens, y = anomaly)) +
             geom_smooth(method = "lm", se = FALSE, color = "gray50") +
             geom_point() +
             stat_poly_eq(formula = y ~ x, 
-                         eq.with.lhs = "italic(hat(y))~`=`~",
-                         aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
-                         parse = TRUE) +  
+                         #eq.with.lhs = "italic(hat(y))~`=`~",
+                         #aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                         aes(label = ..rr.label..), 
+                         label.y = 0.1, 
+                         parse = TRUE) + 
             facet_grid(period ~ reading_depth) +
             labs(x = "Average Water Density",
                  y = "Population Anomaly (sd)")
         
-        #Stratification Index Plots
+        ####_Stratification Index Plots  ####
         plot_list_out[[taxa]][[buoy]]$mean_strat_index <- taxa_buoy_list[[taxa]][[buoy]] %>% 
             ggplot(aes(x = mean_strat_index, y = anomaly)) +
                 geom_smooth(method = "lm", se = FALSE, color = "gray50") +
                 geom_point() +
                 stat_poly_eq(formula = y ~ x, 
-                             eq.with.lhs = "italic(hat(y))~`=`~",
-                             aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                             #eq.with.lhs = "italic(hat(y))~`=`~",
+                             #aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                             aes(label = ..rr.label..), 
+                             label.y = 0.1, 
                              parse = TRUE) +  
                 facet_wrap(period ~ .) +
                 labs(x = "Stratification Index",
@@ -274,7 +285,7 @@ server <- function(input, output) {
     })
     
     ####  Observe Right Side  ####
-    observeEvent(input$left_button, {
+    observeEvent(input$right_button, {
         ####Right Side Plot  ####
         output$right_plot <- renderPlot({
             plot_list_out[[input$taxa2]][[input$buoy2]][input$predictor2]
