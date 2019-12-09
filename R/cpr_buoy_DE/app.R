@@ -24,7 +24,10 @@ theme_set(theme_bw())
 #                       col_types = cols())
 
 #For Publishing
-cpr_buoys <- read_csv("./Data/cpr_quarters_buoys.csv", col_types = cols())
+cpr_buoys <- read_csv("./Data/cpr_quarters_buoys.csv", col_types = cols()) %>% 
+    mutate(reading_depth = factor(reading_depth, 
+                                  levels = c("1 meter", "20 meters", "50 meters", "100 meters", "150 meters", "180 meters"))
+    )
 
 ####_________________####
 ####  Data Prep  ####

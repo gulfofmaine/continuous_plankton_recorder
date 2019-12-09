@@ -5,8 +5,8 @@ account: adamkemberling
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1562961
-bundleId: 2643752
+bundleId: 2652931
 url: https://adamkemberling.shinyapps.io/cpr_buoy_DE/
-when: 1575556339.74875
+when: 1575907428.14531
 asMultiple: FALSE
 asStatic: FALSE
