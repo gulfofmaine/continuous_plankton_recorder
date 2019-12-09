@@ -96,6 +96,7 @@ cpr_buoys %>%
   theme_bw()
 
 
+
 #Buoy Regression super table - Attempt 1
 confusing_matrix <- cpr_buoys %>% 
   filter(is.na(buoy_id) == FALSE) %>% 
@@ -112,6 +113,9 @@ confusing_matrix <- cpr_buoys %>%
           )
     )
 
+
+#We now have correlation matrices for any combination of taxa, quarter, buoy, and depth
+confusing_matrix$calanus$Q2$Buoy_M$`1 meter`
 
 ####  Attempt 2  ####
 confusing_matrix <- cpr_buoys %>% 
