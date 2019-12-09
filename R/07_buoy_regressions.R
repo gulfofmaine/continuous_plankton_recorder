@@ -114,7 +114,7 @@ confusing_matrix <- cpr_buoys %>%
 
 
 ####  Attempt 2  ####
-cpr_buoys %>% 
+confusing_matrix <- cpr_buoys %>% 
   filter(is.na(buoy_id) == FALSE) %>% 
   split(.$year) %>% 
       map(~ .x %>% split(.$period) %>% 
@@ -127,3 +127,9 @@ cpr_buoys %>%
           
         )
 
+
+#Patching them together
+ggplot(cpr_buoys %>% filter(is.na(buoy_id) == FALSE, species == "calanus"), aes(year, anomaly, color = period)) +
+  geom_line()
+append(confusing_matrix$`2001`$Q3
+,confusing_matrix$`2001`$Q4)
