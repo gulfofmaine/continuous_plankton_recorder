@@ -1,5 +1,8 @@
 ####  Helper Functions  ####
 
+#Set ggplot theme
+ggplot2::theme_set(ggplot2::theme_classic())
+
 #Find Project Box Path
 find_box_data <- function(box_project_name) {
   box_project <- as.character(box_project_name)

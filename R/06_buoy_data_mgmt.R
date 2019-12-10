@@ -1,11 +1,9 @@
 # Buoy Data Management
 # 12/2/2019
 
-
 ####  Packages  ####
 library(tidyverse)
 library(here)
-
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
@@ -70,7 +68,16 @@ head(buoys_collapsed)
 
 #Pivot the measurements into their own columns
 buoys <- buoys_collapsed %>% 
-  pivot_wider(names_from = var_name, values_from = daily_mean)
+  pivot_wider(names_from = var_name, values_from = daily_mean) %>% 
+  mutate(reading_depth = factor(
+    reading_depth, levels = c("1 meter", "20 meters", "50 meters", "100 meters", "150 meters", "180 meters")
+  ))
+
+
+#Export Dailies
+write_csv(buoys, 
+          path = str_c(cpr_boxpath, "data/processed_data/buoys_daily.csv", sep = "/"), 
+          col_names = TRUE)
 
 #clean environment
 rm(Buoys, buoy_b)
@@ -199,4 +206,6 @@ buoys_out <- full_join(buoy_dataset, strat_aggregates)
 
 
 ####  Export Out  ####
-write_csv(buoys_out, path = str_c(cpr_boxpath, "data/processed_data/buoys_aggregated.csv", sep = "/"), col_names = TRUE)
+write_csv(buoys_out, 
+          path = str_c(cpr_boxpath, "data/processed_data/buoys_aggregated.csv", sep = "/"), 
+          col_names = TRUE)
