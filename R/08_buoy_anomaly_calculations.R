@@ -1,10 +1,6 @@
 # Buoy Temp and Salinity Anomaly Calculations
 # 12/10/2019
 
-#### CPR Dataset - Principal Component Analysis - QUARTERLY Anomalies
-#### Adam A. Kemberling
-#### 12/02/2019
-
 ####  Packages  ####
 library(ggpmisc)
 library(tidyverse)
@@ -209,7 +205,11 @@ bi_monthly_means <- daily_anoms %>%
 
 #Put them back together
 anoms_dataset <- full_join(yearly_means, quarterly_means) %>% 
-  full_join(bi_monthly_means)
+  full_join(bi_monthly_means) %>% 
+  mutate(reading_depth = as.character(reading_depth),
+         reading_depth = if_else(buoy_id == "Buoy_M" & reading_depth == "150 meters", "180 meters", reading_depth),
+         reading_depth = factor(reading_depth, levels = c("1 meter", "20 meters", "50 meters", "100 meters",
+                                                          "150 meters", "180 meters")))
 
 
 

@@ -1,10 +1,6 @@
 # Buoy x CPR data Relationship
 # 12/3/2019
 
-#### CPR Dataset - Principal Component Analysis - QUARTERLY Anomalies
-#### Adam A. Kemberling
-#### 12/02/2019
-
 ####  Packages  ####
 library(ggpmisc)
 library(tidyverse)
