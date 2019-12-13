@@ -105,7 +105,6 @@ with_na <- buoys_aggregated %>%
 #Here  is our tester
 with_na
 
-
 #Here is our tester without NA's, just filling the hole
 without_na <- with_na
 without_na[is.na(without_na)] <- 2
@@ -175,32 +174,53 @@ dimnames(prcomp_pc) <- list(colnames(x_anoms), paste0("PC", seq_len(ncol(prcomp_
 prcomp_pc
 pca_full$rotation
 
-
-####  Compare manual eigenvalue estimation to prcomp()
-
-#Conversely you should be able to get the raw data from the eigenvalues and the principal components
-pca_test <- prcomp(x_anoms, scale. = FALSE, center = FALSE)
-pca_test$sdev  #sd of principal components (sqrt of the eigenvalues of the covariance/variance matrix)
-sqrt(E$values) #doesn't match
-pca_test$rotation #matrix of variable loadings, columns are the eigenvectors
-E$vectors
-
-pca_test$x #Input data multiplied by the rotation matrix
-x_anoms
-
-#We could also just omit the NA values
-prcomp(na.omit(with_na))
-
-#Compare to princomp()
-pca_test_2 <- princomp(cor = FALSE, covmat = S)
-
-#Do these loadings match?
-pca_test_2$loadings
-pca_test_2$sdev
-
-
-t(E$vectors) %*% x_anoms
-
+# ####  Singular Vector Decomposition  ####
+# #Is svd done on the covariance matrix or the raw values?
+# prcomp_pc #Match this
+# 
+# #SVD can be performed step-by-step with R by calculating ATA and AAT then finding the eigenvalues and eigenvectors of the matrices.
+# A <- x_anoms
+# ATA <- t(A) %*% A
+# 
+# #The V component of the singular value decomposition is then found by calculating the eigenvectors of the resultant ATA matrix.
+# ATA.e <- eigen(ATA)
+# v.mat <- ATA.e$vectors
+# v.mat
+# 
+# # Here we see the V matrix is the same as the output of the svd() but with some sign changes. These sign changes can happen, 
+# #as mentioned earlier, as the eigenvector scaled by −1 
+# v.mat[,1:2] <- v.mat[,1:2] * -1
+# v.mat
+# 
+# #The same routine is done for the AAT matrix.
+# AAT <- A %*% t(A)
+# AAT
+# 
+# #The eigenvectors are again found for the computed AAT matrix.
+# AAT.e <- eigen(AAT)
+# u.mat <- AAT.e$vectors
+# u.mat
+# 
+# #There are four eigenvectors in the resulting matrix; however, 
+# #we are only interested in the non-zero eigenvalues and their 
+# #respective eigenvectors. Therefore, we can remove the last 
+# #eigenvector from the matrix which gives us the U matrix. 
+# #Note the eigenvalues of AAT and ATA are the same except the 
+# #0 eigenvalue in the AAT matrix.
+# u.mat <- u.mat
+# 
+# #As mentioned earlier, the singular values r are 
+# #the square roots of the non-zero eigenvalues of the AAT and ATA matrices.
+# r <- sqrt(ATA.e$values)
+# r <- r * diag(length(r))
+# r 
+# 
+# #Our answers align with the output of the svd() function. 
+# #We can also show that the matrix A is indeed equal to the components resulting from singular value decomposition.
+# svd.matrix <- u.mat %*% r %*% t(v.mat)
+# svd.matrix
+# 
+# A == round(svd.matrix, 0)
 
 ####__#### 
 
@@ -225,11 +245,11 @@ buoys_pca_mat <- buoys_pca_dat %>%
 (days_dropped <- nrow(buoys_pca_dat) - nrow(drop_na(buoys_pca_dat)))
 
 #Every Day has a record, the measurements are the mean value for that sensor that day
-head(buoys_pca_dat)
-image(t(buoys_pca_mat))
 
 
-#PCA using prcomp
+####  PCA using prcomp  ####
+
+#PCA
 daily_pca <- prcomp(na.omit(buoys_pca_mat), center = FALSE, scale. = FALSE)
 summary(daily_pca)
 
@@ -243,11 +263,183 @@ pca_out <- daily_pca$x %>%
 
 #Fill in blank days 
 every_day <- data.frame(Date = seq.Date(from = min(buoys_pca_dat$Date), to = max(buoys_pca_dat$Date), by = 1))
-pca_out <- full_join(every_day, pca_out, by = "Date")
+every_day <- every_day %>% 
+  mutate(PC1 = NA, 
+         PC2 = NA,
+         PC3 = NA) %>% 
+  pivot_longer(names_to = "Principal Component", values_to = "Principal Component Loading", cols = c(PC1, PC2, PC3)) %>% 
+  select(-`Principal Component Loading`)
 
-#Pllot first three modes
+#merge in
+pca_out <- full_join(every_day, pca_out, by = c("Date", "Principal Component"))
+
+#Plot first three modes
 ggplot(filter(pca_out, `Principal Component` != "PC3" & is.na(`Principal Component`) == FALSE), 
        aes(x = Date,
            y = `Principal Component Loading`, 
            color = `Principal Component`)) +
-  geom_line()
+  geom_line() +
+  theme_minimal()
+
+
+####__####
+
+####  Regression Interpolations  ####
+
+#First of all where are our gaps
+pca_gaps <- pca_out %>% filter(is.na(`Principal Component Loading`))
+
+#Plot them over raw data
+daily_anoms %>% 
+  ggplot(aes(Date, temp_anom)) +
+  geom_line(alpha = 0.3, aes(color = reading_depth)) +
+  facet_grid(buoy_id~reading_depth) +
+  geom_point(data = pca_gaps, aes(x = Date, y = 0), shape = 3, size = .05, alpha = 0.5)
+
+
+#Data Matrix 
+buoys_pca_mat[1:6,1:6]
+image(t(buoys_pca_mat[nrow(buoys_pca_mat):1,]) , axes=FALSE,)
+#n column index
+#k row index
+
+#variance covariance matrix
+S_daily <- var(na.omit(buoys_pca_mat))
+image(t(S_daily[nrow(S_daily):1,]) , axes=FALSE,)
+
+#eigen values/vectors
+E_daily <- eigen(S_daily)
+
+#Should be able to get the principal components vectors this way... 
+U_daily <- t(E_daily$vectors) * buoys_pca_mat[1,] #Day 1 PC loadings
+#Need to combine them somehow
+
+
+
+#Set up objects we want to populate
+
+Y <- buoys_pca_mat #Y values
+X <- buoys_pca_mat #X values 
+#Covariance Matrix
+cov_matrix <- matrix(nrow = ncol(buoys_pca_mat), ncol = ncol(buoys_pca_mat), data = NA)
+#or
+dim(S_daily)
+
+####  List structure to fill with linear models of everything  ####
+
+#Base level, for lm object
+lm_list <- list("response_var" = list("lm_object" = list()))
+#One for each response var
+lm_list <- rep(lm_list, ncol(buoys_pca_mat))
+names(lm_list) <- colnames(buoys_pca_mat)
+#Down another level, for independent var
+lm_list_2 <- rep(list("x_var" = lm_list), ncol(buoys_pca_mat))
+names(lm_list_2) <- colnames(buoys_pca_mat)
+#Can now index down for organization sake
+lm_list_2$temp_001m_B$temp_001m_B$lm_object
+
+
+
+#Function for pulling p value from lm object
+lmp <- function (modelobject) {
+  if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
+  f <- summary(modelobject)$fstatistic
+  p <- pf(f[1],f[2],f[3],lower.tail=F)
+  attributes(p) <- NULL
+  return(p) }
+
+#Lm Loopz
+for (j in 1:ncol(buoys_pca_mat)) {
+  for (k in 1:ncol(buoys_pca_mat)) {
+   
+    #Fill linear model list
+    lm_list_2[[k]][[j]]$lm_object = lm(buoys_pca_mat[,j] ~ buoys_pca_mat[,k])
+    
+    #Extract p value seperately from each
+    lm_list_2[[k]][[j]]$pval <- lmp(lm_list_2[[k]][[j]]$lm_object)
+    
+    #Significance boolean
+    lm_list_2[[k]][[j]]$significant <- ifelse(lm_list_2[[k]][[j]]$pval <= 0.05, TRUE, FALSE)
+    
+    #As well as R-squared
+    lm_list_2[[k]][[j]]$rsquared <- summary(lm_list_2[[k]][[j]]$lm_object)$r.squared
+    
+    #Slope
+    lm_list_2[[k]][[j]]$slope <- coef(lm_list_2[[k]][[j]]$lm_object)[2]
+    
+    #Intercept
+    lm_list_2[[k]][[j]]$intercept <- coef(lm_list_2[[k]][[j]]$lm_object)[1]
+     
+  }
+}
+
+#Coefficients can be pulled this way
+lm_list_2$temp_001m_B$temp_020m_B$lm_object$coefficients
+#pvalues are here
+lm_list_2$temp_001m_B$temp_020m_B$pval
+#Significance
+lm_list_2$temp_001m_B$temp_020m_B$significant
+
+
+#Do we want to put them into matrices?
+base_mat <- matrix(data = NA, nrow = 46, ncol = 46)
+colnames(base_mat) <- colnames(buoys_pca_mat)
+rownames(base_mat) <- colnames(buoys_pca_mat)
+
+#Use base mat structure
+significance_mat <- base_mat
+slope_mat        <- base_mat
+intercept_mat    <- base_mat
+
+#Matrix loops
+for (j in 1:ncol(buoys_pca_mat)) {
+  for (k in 1:ncol(buoys_pca_mat)) {
+    
+    significance_mat[k,j] <- lm_list_2[[k]][[j]]$significant
+    slope_mat[k,j]        <- lm_list_2[[k]][[j]]$slope
+    intercept_mat[k,j]    <- lm_list_2[[k]][[j]]$intercept
+    
+    
+  }
+}
+
+
+# Filling in patchy DF with average regression parameters
+buoy_interpolated <- buoys_pca_dat[,2:47]
+
+#Loop 3
+for (row_j in 1:nrow(buoy_interpolated)) {
+  for (col_k in 1:ncol(buoy_interpolated)) {
+    if(is.na(buoy_interpolated[row_j, col_k]) == TRUE) {
+      #Mean Slope - significant regressions only
+      m <- mean(slope_mat[which(significance_mat[,col_k] == TRUE), col_k])
+      #Mean Intercept - significant regressions only
+      b <- mean(intercept_mat[which(significance_mat[,col_k] == TRUE), col_k])
+      #Mean X - all avaliable data from that day's measurements
+      x <- mean(t(buoy_interpolated[row_j,]), na.rm = T)
+      
+      #New Interpolated Value
+      buoy_interpolated[row_j, col_k] <- m*x + b
+    
+      }
+    
+  }
+  
+}
+#Add the dates back
+buoy_interpolated <- cbind(buoys_pca_dat[,1], buoy_interpolated)
+
+#What did we do
+var_list <- colnames(buoys_pca_mat)
+plot_list <- map(var_list, function(x){
+  col_name <- sym(x)
+  
+  ggplot() +
+    geom_line(data = buoy_interpolated, aes(Date, !!col_name, color = "Interpolated"), alpha = 0.8) + 
+    geom_line(data = buoys_pca_dat, aes(Date, !!col_name, color = "Raw"), alpha = 0.8) +
+    labs(x = NULL, y = paste0(col_name))
+
+})
+
+#Applying PCA weights to the interpolated Data:
+
