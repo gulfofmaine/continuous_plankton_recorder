@@ -91,7 +91,8 @@ ggbiplot(pca_2005, ellipse=TRUE, groups = cpr_decade_2005, obs.scale = T, var.sc
 
 #Figure 2a 
 #These are the weights we would use to adjust the values
-leading_modes <- rownames_to_column(as.data.frame(pca_2005$rotation)) %>% dplyr::select(species = rowname, PC1, PC2)
+leading_modes <- rownames_to_column(as.data.frame(pca_2005$rotation)) %>% 
+  dplyr::select(species = rowname, PC1, PC2)
 
 
 # figure 2a

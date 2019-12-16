@@ -12,9 +12,6 @@ library(patchwork)
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
 
-#Set ggplot theme
-theme_set(theme_classic())
-
 ####  Load Data  ####
 cpr_long <- read_csv(str_c(cpr_boxpath,"data", "processed_data", "cpr_allspecies_long_quarters.csv", sep = "/"),
                      col_types = cols()) %>% 
@@ -246,6 +243,10 @@ buoys_pca_mat <- buoys_pca_dat %>%
 
 #Every Day has a record, the measurements are the mean value for that sensor that day
 
+#Export the non-interpolated Buoy Data
+write_csv(buoys_pca_dat, 
+          path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv", sep = "/"), 
+          col_names = TRUE)
 
 ####  PCA using prcomp  ####
 
@@ -426,6 +427,7 @@ for (row_j in 1:nrow(buoy_interpolated)) {
   }
   
 }
+
 #Add the dates back
 buoy_interpolated <- cbind(buoys_pca_dat[,1], buoy_interpolated)
 
@@ -441,5 +443,17 @@ plot_list <- map(var_list, function(x){
 
 })
 
+#Export the interpolated Buoy Data
+write_csv(buoy_interpolated, 
+          path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"), 
+          col_names = TRUE)
+
+
+
+####  Applying PCA weights to interpolated DF  ####
 #Applying PCA weights to the interpolated Data:
+
+#Raw
+
+#With Interpolations
 
