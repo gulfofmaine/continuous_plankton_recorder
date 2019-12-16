@@ -1,0 +1,87 @@
+---
+title: "Consolidating Analyses for Paper Writing"
+author: "Adam A. Kemberling"
+date: "12/16/2019"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float:
+        collapsed: FALSE
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+options(knitr.kable.NA = '')
+
+```
+
+# Markdown Document Overview
+
+This markdown doc is set up for consolidating each analysis step I've done.
+ 
+ The first sections will mirror the steps taken in Pershing et al., 2005 in setting up the PCA and determining the weights and timelines for each time-period as shown in the following figure.
+
+![](presentations/pershing_05_PCA.png)
+
+**Data and Packages**
+
+```{r data import}
+####  Packages  ####
+library(cluster)
+library(factoextra)
+library(ggbiplot)
+library(tidyverse)
+library(here)
+
+####  Functions  ####
+source(here::here("R", "cpr_helper_funs.R"))
+
+#Set ggplot theme
+theme_set(theme_minimal())
+
+####  Load Data  ####
+
+####  Quarterly CPR Data with SST  ####
+#with quarterly sst measurements and a one-period lag - souce: 02b_quarterly_cpr_sst_regressions
+cpr_sst <- read_csv(str_c(cpr_boxpath, "data/processed_data/quarterly_cpr_sst.csv", sep = "/"), 
+          col_names = TRUE,
+          col_types = cols())
+
+
+####   Buoy Data  ####
+#Raw - source: 10_buoy_daily_interpolations
+buoy_raw <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv", sep = "/"),
+                     col_types = cols(),
+                     guess_max = 1e5)
+
+buoy_pca_mat <- buoy_raw %>% 
+  column_to_rownames(var = "Date") %>% 
+  as.matrix()
+
+#Interpolated NA's - source: 10_buoy_daily_interpolations
+buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"),
+                   col_types = cols())
+```
+
+
+# 1. CPR Dataset - Changes in PCA modes over time
+
+Parallel methods are used for each of the following three periods of the continuous plankton recorder dataset:
+
+ 1. All available years (1961 - 2017)   
+ 2. The early period (1961 - 2003)   
+ 3. The Most recent and warmest period (2003 - 2017)   
+
+# 2. CPR Dataset - Abundance Anomaly Correlation with SST
+
+Using quarterly averages in seas surface temperature anomalies we can compare the relationships between abundance anomalies and the simultaneous sea-surface temperature anomalies, as well as the sea surface anomalies from the previous 91-day period.
+
+# 3. Buoy Dataset - Correlations with CPR Anomalies
+
+Across the Gulf of Maine region there are a number of NERACOOS buoys recording real-time measurements at various depths. These measurements give a more fine-scale sense of oceanographic changes and should more acurately capture climate-modes hypothesized to influence plankton community structure.
+
+# 4. Buoy Dataset - Buoy PCA
+

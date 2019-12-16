@@ -105,6 +105,10 @@ cpr_sst <- cpr_long %>%
   filter(period != "Annual") %>% 
   left_join(sst_long_lagged, by = c("year", "period"))
 
+write_csv(cpr_sst, 
+          str_c(cpr_boxpath, "data/processed_data/quarterly_cpr_sst.csv", sep = "/"), 
+          col_names = TRUE)
+
 
 #Timelines
 cpr_sst %>% 
