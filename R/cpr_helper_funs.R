@@ -19,3 +19,25 @@ source("/Users/akemberling/Box/Adam Kemberling/Box_Projects/R_exercise_library/g
 
 #Get decades from years
 floor_decade <- function(value){ return(value - value %% 10) }
+
+#Apply PCA Loads to a new dataset from specific PC loading
+apply_pca_load <- function(pca_load, pca_rotations, mode_num = 1) {
+  
+  #Pull PCA rotations/loadings
+  rotations <- as.data.frame(pca_rotations)
+  rotations_t <- t(rotations)
+  
+  #Principal component whose weights we want to apply
+  mode_num <- as.integer(mode_num)
+  
+  #Copy of the initial values to apply them to
+  pca_adjusted <- pca_load[,2:ncol(pca_load)]
+  
+  #Multiply the columns by their PCA weights
+  for (i in 1:ncol(rotations_t)) {
+    pca_adjusted[, i] <- pca_adjusted[, i] * rotations_t[mode_num, i]
+    
+  }
+  
+  return(pca_adjusted)
+}
