@@ -160,7 +160,7 @@ plot_corr <- function(df, id) {
   df <- df %>% select(-year) %>% cor()
   
   #save name
-  save_name <- str_c(here::here("R/presentations/corrplots"), "/", id, ".png")
+  save_name <- str_c(here::here("R/presentations/corrplots/bimonthly"), "/", id, ".png")
    
   png(save_name, width = 800, height = 600, res = 100)
   corrplot::corrplot(df, method="color", col=col(200),  
@@ -197,7 +197,7 @@ temp_period_corrs <- imap(period_df_list, pull_temp_corr) %>%
 rownames(temp_period_corrs) <- c(species_05, "temp_anomaly")
 temp_period_corrs <- temp_period_corrs[1:7,] #Drop temperature row
 
-png(str_c(here::here("R/presentations/corrplots/all_seasons.png")), width = 800, height = 600, res = 100)
+png(str_c(here::here("R/presentations/corrplots/bimonthly/all_seasons.png")), width = 800, height = 600, res = 100)
 corrplot::corrplot(temp_period_corrs, method="color", col=col(200),  
                    # hide correlation coefficient on the principal diagonal
                    #title = "Seasonal Temperature Anomalies - Species Correlations \n 1982-2018", 

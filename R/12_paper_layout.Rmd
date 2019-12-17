@@ -4,6 +4,10 @@ author: "Adam A. Kemberling"
 date: "12/16/2019"
 output: 
   html_document:
+    css: stylesheets/gmri_rmarkdown.css
+    includes:
+        before_body: stylesheets/gmri_logo_header.html
+        after_body: stylesheets/akemberling_gmri_footer.html
     toc: TRUE
     toc_float:
         collapsed: FALSE
@@ -85,7 +89,7 @@ buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpola
 ```
 
 
-# 1. CPR Dataset - Changes in PCA modes over time
+# CPR Community Changes Over Time 
 
 Parallel methods are used for each of the following three periods of the continuous plankton recorder dataset:
 
@@ -177,7 +181,7 @@ for (i in 1:length(analysis_sets)) {
 ---
 
 
-## CPR PCA Analysis 
+## CPR PCA Analysis   {.tabset .tabset-pills}
 
 ### PCA Weights {.tabset}
 
@@ -306,13 +310,96 @@ ggsave(plot = quarterly_plots, filename = here::here("R", "presentations", "quar
 
 
 
-# 2. CPR Dataset - Abundance Anomaly Correlation with SST
+# CPR Anomaly Correlation with SST  {.tabset .tabset-pills}
 
 Using quarterly averages in seas surface temperature anomalies we can compare the relationships between abundance anomalies and the simultaneous sea-surface temperature anomalies, as well as the sea surface anomalies from the previous 91-day period.
 
-# 3. Buoy Dataset - Correlations with CPR Anomalies
+## Simultaneous SST Conditions with CPR Anomalies
+
+![](presentations/corrplots/quarterly/all_seasons.png)
+
+
+## CPR Anomalies with Prior Period's SST
+
+![](presentations/corrplots/quarterly/all_seasons_lagged.png)
+
+# Buoy Sensor Correlations with CPR Anomalies  {.tabset .tabset-pills}
 
 Across the Gulf of Maine region there are a number of NERACOOS buoys recording real-time measurements at various depths. These measurements give a more fine-scale sense of oceanographic changes and should more acurately capture climate-modes hypothesized to influence plankton community structure.
 
-# 4. Buoy Dataset - Buoy PCA
+## Individual Correlations - Sensors & Taxa
 
+The relationship between any given taxa and the measurements of a specific buoy on a quarterly observation level can be viewed using the [buoy regression shiny app](https://adamkemberling.shinyapps.io/cpr_buoy_DE/)
+
+
+## Quarterly Correlation Plot
+
+These individual relationships can also be viewed in the following correlation plot. `+` and `-` symbols indicate a significant positive or negative relationship.
+
+![](presentations/buoy_plots/buoy_quarterly_corrplot.png)
+
+# Buoy Sensor PCA {.tabset .tabset-pills}
+
+Buoy readings are available at a much finer resolution than the SST and CPR dataset, and capture a more detailed image of the physical environment. 
+
+## Buoy PCA Weights
+
+```{r, out.height = 600, out.width = 800}
+#Buoy Daily PCA
+buoy_pca_mat <- buoy_raw %>% 
+  column_to_rownames(var = "Date") %>% 
+  as.matrix()
+
+####  PCA on physical measurements  ####
+daily_pca <- prcomp(na.omit(buoy_pca_mat), center = FALSE, scale. = FALSE)
+
+#PCA Leading Modes
+leading_modes <- rownames_to_column(as.data.frame(daily_pca$rotation)) %>%
+    dplyr::select(sensor_id = rowname, PC1, PC2)
+  
+#Percent Deviance Explained (To slide into plots)
+deviance_explained <- pull_deviance(daily_pca$sdev)
+  
+#Plotting Buoy Weights
+buoy_weights <- leading_modes %>%
+  gather(key = "PC", value =  "Principal Component Weight", PC1, PC2) %>%
+  mutate(PC = if_else(PC == "PC1", 
+                     as.character(analysis_sets[[i]]$deviance_explained$PC1),
+                     as.character(analysis_sets[[i]]$deviance_explained$PC2)),
+         buoy_id = str_sub(sensor_id, -1, -1),
+         buoy_type = if_else(buoy_id %in% c("M", "N"), "Offshore", "Nearshore"),
+         reading_depth = str_sub(sensor_id, -6, -4),
+         reading_depth = str_c(reading_depth, " m"),
+         reading_depth = str_replace_all(reading_depth, "001", "1"),
+         reading_depth = str_replace_all(reading_depth, "010", "10"),
+         reading_depth = str_replace_all(reading_depth, "020", "20"),
+         reading_depth = str_replace_all(reading_depth, "050", "50"),
+         reading_depth = if_else(buoy_id == "M" & reading_depth == "150 m", 
+                                 "180 m", reading_depth),
+         reading_depth = factor(reading_depth, 
+                                levels = c("1 m", "10 m", "20 m", 
+                                           "50 m", "100 m", "150 m", "180 m")),
+         var_id = str_sub(sensor_id, 1, 1),
+         var_id = if_else(var_id == "s", "Salinity", "Temperature")
+         )
+
+
+
+buoy_weights %>% 
+  ggplot(aes(reading_depth, `Principal Component Weight`, fill = PC)) +
+    geom_col(position  = "dodge") +
+    scale_fill_gmri(palette = "mixed") +
+    labs(x = "") +
+    facet_grid(var_id ~ buoy_id) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.2))
+
+```
+
+
+## Buoy Timeline - Original Data
+![](presentations/buoy_plots/pca_ts_raw.png)
+
+## Buoy Timeline - Original Data with Gaps Interpolated
+
+![](presentations/buoy_plots/pca_ts_interp.png)

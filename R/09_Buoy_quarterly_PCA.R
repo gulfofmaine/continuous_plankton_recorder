@@ -187,8 +187,15 @@ q3_t <- cpr_corr_plot(Q3_corrs, period = "Q3", plot_style = "tall") + theme(axis
 q4_t <- cpr_corr_plot(Q4_corrs, period = "Q4", plot_style = "tall") + theme(axis.text.y = element_blank())
 
 #Patch them together
-patchwork <- q1_t | q2_t | q3_t | q4_t
-patchwork & theme(legend.position = "none")
+quarterly_corrplot <- q1_t | q2_t | q3_t | q4_t
+quarterly_corrplot <- quarterly_corrplot & theme(legend.position = "none")
+quarterly_corrplot
+
+#Export
+ggsave(quarterly_corrplot, 
+       filename =  here::here("R", "presentations", "buoy_plots", "buoy_quarterly_corrplot.png"), 
+       device = "png")
+
 ####__####
 
 ####  PCA  ####

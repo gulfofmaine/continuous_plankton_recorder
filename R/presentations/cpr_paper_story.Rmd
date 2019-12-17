@@ -298,7 +298,7 @@ class: top, center
 ### Annual Zooplankton & Temperature Correlations All Years
 
 ```{r full ts corrplot, out.height = 500}
-knitr::include_graphics("corrplots/corrplot_full.png") 
+knitr::include_graphics("corrplots/bimonthly/corrplot_full.png") 
 
 
 ```
@@ -310,7 +310,7 @@ class: top, center
 ### Annual Zooplankton & Temperature Correlations 1982-2003
 
 ```{r pre shift annual corrplot, out.height = 500}
-knitr::include_graphics("corrplots/corrplot_pre.png") 
+knitr::include_graphics("corrplots/bimonthly/corrplot_pre.png") 
 
 
 ```
@@ -321,7 +321,7 @@ class: top, center
 ### Annual Zooplankton & Temperature Correlations 2003-2018
 
 ```{r post shift annual corrplots, out.height = 500}
-knitr::include_graphics("corrplots/corrplot_post.png") 
+knitr::include_graphics("corrplots/bimonthly/corrplot_post.png") 
 
 
 ```
@@ -332,7 +332,7 @@ class: top, center
 ### Annual Zooplankton & Period Temperature Correlations 1982-2018
 
 ```{r seasonal corrplots, out.height = 500}
-knitr::include_graphics("corrplots/all_seasons.png") 
+knitr::include_graphics("corrplots/bimonthly/all_seasons.png") 
 
 
 ```

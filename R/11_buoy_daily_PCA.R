@@ -34,7 +34,17 @@ summary(daily_pca)
 
 
 #Bi-plots
-
+buoy_pca_dat        <- na.omit(buoy_raw)
+buoy_pca_dat$year   <- lubridate::year(buoy_pca_dat$Date)
+buoy_pca_dat$decade <- factor(floor_decade(buoy_pca_dat$year))
+buoy_pca_dat$year   <- factor(buoy_pca_dat$year)
+ggbiplot(na.omit(daily_pca), 
+         var.axes = FALSE,
+         ellipse=TRUE, 
+         #labels = buoy_pca_dat$year,
+         groups = buoy_pca_dat$year, 
+         obs.scale = T, 
+         var.scale = T)
 
 
 ####__####
@@ -65,11 +75,17 @@ pca_out <- full_join(every_day, pca_out, by = c("Date", "Principal Component"))
        aes(x = Date,
            y = `Principal Component Loading`, 
            color = `Principal Component`)) +
-  geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
-  geom_line() +
-  scale_color_gmri(palette = "mixed") +
-  labs(x = NULL, caption = "PCA weights applied to origianl buoy measurements") +
-  theme_minimal())
+    geom_line() +
+    geom_hline(yintercept = 0, color = "black", linetype = 2, alpha = 0.6) +
+    ylim(-11, 11) +
+    scale_color_gmri(palette = "mixed") +
+    labs(x = NULL, caption = "PCA weights applied to origianl buoy measurements") +
+    theme_minimal())
+
+#Export plot
+ggsave(timeline_raw, 
+       filename =  here::here("R", "presentations", "buoy_plots", "pca_ts_raw.png"), 
+       device = "png")
 
 
 
@@ -125,11 +141,17 @@ pc2_ts_i$"Principal Component" <- "PC2"
 #Plot on interpolated timeline
 (timeline_interp <- bind_rows(pc1_ts_i, pc2_ts_i) %>% 
   ggplot(aes(Date, `Principal Component Loading`, color = `Principal Component`)) +
-  geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
   geom_line() +
+  geom_hline(yintercept = 0, color = "black", linetype = 2, alpha = 0.6) +
   scale_color_gmri(palette = "mixed") +
+  ylim(-11, 11) +
   labs(x = NULL, caption = "PCA weights applied to interpolated buoy measurements") +
   theme_minimal())
+
+#Export plot
+ggsave(timeline_interp, 
+       filename =  here::here("R", "presentations", "buoy_plots", "pca_ts_interp.png"), 
+       device = "png")
 
 
 #Side-by-side
