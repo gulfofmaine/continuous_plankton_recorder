@@ -28,7 +28,7 @@ This markdown doc is set up for consolidating each analysis step I've done.
  
  The first sections will mirror the steps taken in Pershing et al., 2005 in setting up the PCA and determining the weights and timelines for each time-period as shown in the following figure.
 
-![](presentations/pershing_05_PCA.png)
+![](presentations/pershing05_recreations/pershing_05_PCA.png)
 
 **Data and Packages**
 
@@ -209,17 +209,17 @@ Taking the PCA weights from the 1961-2003 PCA (mimicking the 2005 paper) we can 
 
 ### Original Time-period
 
-![](presentations/Figure2b_recreation.png)
+![](presentations/pershing05_recreations/Figure2b_recreation.png)
 
 ### Extended Through 2017
 
-![](presentations/Figure2b_full.png)
+![](presentations/pershing05_recreations/Figure2b_full.png)
 
 ### Applying 1961-2005 Weights to 91-Day Quarters
 
 When applying 1961-2005 PCA weights to the bi-monthly period anomalies and extend them out through 2017 you get this figure.
 
-![](presentations/quarterly_modes.png)
+![](presentations/pershing05_recreations/quarterly_modes.png)
 
 
 ```{r, eval = FALSE}

@@ -124,10 +124,10 @@ class: top, center
 
 ```{r  out.height = 600}
 # local
-knitr::include_graphics("pershing_05_PCA.png") 
+knitr::include_graphics("pershing05_recreations/pershing_05_PCA.png") 
 
 # For pasting images outside of code blocks use:
-#![2005 results](pershing_05_PCA.png)
+#![2005 results](pershing05_recreations/pershing_05_PCA.png)
 
 
 ```
@@ -149,7 +149,7 @@ class: top
 
 ```{r figure 2a, out.height = 500}
 # local
-knitr::include_graphics("Figure2a_recreation.png") 
+knitr::include_graphics("pershing05_recreations/Figure2a_recreation.png") 
 
 ```
 
@@ -159,7 +159,7 @@ class: top
 
 ```{r figure 2b,  out.height = 500}
 # local
-knitr::include_graphics("Figure2b_recreation.png") 
+knitr::include_graphics("pershing05_recreations/Figure2b_recreation.png") 
 
 ```
 
@@ -171,7 +171,7 @@ class: top
 
 ```{r  out.height = 500}
 # local
-knitr::include_graphics("Figure2b_full.png") 
+knitr::include_graphics("pershing05_recreations/Figure2b_full.png") 
 
 ```
 
@@ -181,7 +181,7 @@ class: top
 
 ```{r  out.height = 500}
 # local
-knitr::include_graphics("2005pca_biplot.png") 
+knitr::include_graphics("pershing05_recreations/2005pca_biplot.png") 
 
 ```
 
@@ -276,7 +276,7 @@ class: top, center
 
 ```{r original ts plot, out.height = 500}
 
-knitr::include_graphics("2005_ts_temps.png") 
+knitr::include_graphics("pershing05_recreations/2005_ts_temps.png") 
 
 ```
 
@@ -287,7 +287,7 @@ class: top, center
 
 
 ```{r full ts plot, out.height = 500}
-knitr::include_graphics("full_ts_temps.png") 
+knitr::include_graphics("pershing05_recreations/full_ts_temps.png") 
 
 
 ```
@@ -344,7 +344,7 @@ class: top, center
 ### PCA Weights - Using Full Timeseries
 
 ```{r full ts pca weights, out.height = 500}
-knitr::include_graphics("full_ts_pca.png") 
+knitr::include_graphics("pershing05_recreations/full_ts_pca.png") 
 
 ```
 
@@ -354,7 +354,7 @@ class: top, center
 ### PCA Weights - Post 2003 Data Only
 
 ```{r 2003 pca weights, out.height = 500}
-knitr::include_graphics("post_shift_pca.png") 
+knitr::include_graphics("pershing05_recreations/post_shift_pca.png") 
 
 ```
 
