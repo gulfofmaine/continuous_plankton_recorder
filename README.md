@@ -13,7 +13,7 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
  
  
 ## R: Contents
- 1. [00_cprdata_first_look.R(https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/00_cprdata_first_look.R): Primary investigation of **bi-monthly** cpr anomaly dataset   
+ 1. [00_cprdata_first_look.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/00_cprdata_first_look.R): Primary investigation of **bi-monthly** cpr anomaly dataset   
  
  2. [00b_cprdata_first_look.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/00b_cprdata_first_look.R): Primary investigation of **bi-monthly** cpr anomaly dataset   
  
@@ -37,7 +37,7 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
  
  12. [05_cluster_analysis.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/05_cluster_analysis.R): k-means clustering analysis of bi-monthly CPR and SST data   
  
- 13. [05_cpr_clustering.Rmd]https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/05_cpr_clustering.Rmd): Rmarkdown document synthesizing research steps taken up to this point   
+ 13. [05_cpr_clustering.Rmd](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/05_cpr_clustering.Rmd): Rmarkdown document synthesizing research steps taken up to this point   
  
  14. [05_cpr_clustering.html](https://adamkemberling.github.io/continuous_plankton_recorder/R/05_cpr_clustering.html): Rendered output of Rmarkdown document   
  
