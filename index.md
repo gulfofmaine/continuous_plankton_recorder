@@ -19,6 +19,15 @@ The next links direct you to the clustering analysis markdown document and its c
 
 [HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/05_cpr_clustering.html)
 
-Finally: this link directs you to the shiny web app for comparing species abundance relationships to the buoy measurements.
+
+This link directs you to the shiny web app for comparing species abundance relationships to the buoy measurements.
 
 [Buoy Web App](https://adamkemberling.shinyapps.io/cpr_buoy_DE/)
+
+
+This link is for the report consolidating results from the various analyses.
+
+[Rmarkdown Code Link](/R/12_paper_layout.Rmd)
+
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/12_paper_layout.html)
+

@@ -71,11 +71,6 @@ Q4 <- corr_setup_full %>% filter(period == "Q4") %>% drop_na()
 
 ####  Corrplot Functions  ####
 
-# Get upper triangle of the correlation matrix
-get_upper_tri <- function(cormat){
-  cormat[lower.tri(cormat)] <- NA
-  return(cormat)
-}
 
 #Pull correlations with p-values
 corr_plot_setup <- function(wide_df) {
@@ -117,8 +112,6 @@ corr_plot_setup <- function(wide_df) {
   return(corr_full)
 }
 
-#Not in Function
-`%notin%` <- purrr::negate(`%in%`)
 
 # custom corr plot
 cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall"){

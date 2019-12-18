@@ -7,17 +7,19 @@
 /* Level 1 Headers */
 h1 { text-align: left;
 	 margin: 10px 0 15px 0; 
-	 font-size: 38px; } 
+	 font-size: 38px; 
+	 font-family: serif;} 
 
 
 /* Headers 2 - 6 */
 h2, h3, h4, h5, h6 { 
 	color: #333333; 
 	margin: 20px 0 5px 0; 
-	text-align: left;}
+	text-align: left;
+	font-family: serif;}
 
 
-/* Sizing For Each */
+/* Sizing/font For Each Header Type */
 h2 { font-size: 24px; }
 h3 { font-size: 20px; }
 h4 { font-size: 18px; }
@@ -26,17 +28,23 @@ h6 { font-size: 14px; font-weight: normal; color: #3069aa; }
 
 
 /* Paragraph Text */
-p { margin-top: 10px; }
+p { margin-top: 10px; 
+	font-family: helvetica;}
 
 
-/* Author and Date Headers */
-h4.author {margin-top: 10px; margin-bottom: 10px;}
-h4.date   {margin-top: 10px; margin-bottom: 10px;}
+/* Title Author and Date Headers */
+h1.title.toc-ignore {margin-top: 10px;}
+h4.author, h4.date {
+	color: rgb(0,115,109);
+	margin-top: 0px; 
+	margin-bottom: 5px; 
+	font-size: 12px;}
+
 
 
 /* Add Spacing Above Headers */
 h1, .h1, h2, .h2, h3, .h3 {
-    margin-top: 84px;
+    margin-top: 40px;
 }
 
 
@@ -49,6 +57,8 @@ a {
 /***********************************************/
 
 
+/********  Table of Contents  **********/
+
 /* Highlighted TOC Element */
 .list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
     z-index: 2;
@@ -57,6 +67,16 @@ a {
     border-color: rgb(0,96,138);
 }
 
+/* Default TOC Elements */
+.list-group-item, .list-group-item:focus, .list-group-item:hover {
+    z-index: 2;
+    color: rgb(0,96,138);
+    background-color: #fff;
+    border-color: rgb(0,96,138);
+}
+
+
+/********  Tab Panels  **********/
 
 /* Navigation Tabs - Highlighted Tabset Pills */
 .nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
@@ -66,10 +86,22 @@ a {
 
 /* Navigation Tabs - Default Tabset Pills */
 .nav-pills > li > a, .nav-pills > li > a:hover, .nav-pills > li > a:focus {
-    color: rgb(0,96,138);
+    color: rgb(0,115,109);
     background-color: #fff;
     }
 
+
+/* Second Level Tabs - Active */
+.nav.nav-tabs > li.active  > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+    color: #fff;
+    background-color: rgb(83,83,83) ;
+    }
+
+/* Second Level Tabs - Inactive */
+.nav.nav-tabs > li  > a, .nav-tabs > li > a:hover, .nav-tabs > li > a:focus {
+    color: rgb(83,83,83);
+    background-color: #fff;
+    }
 
 
 

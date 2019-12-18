@@ -68,3 +68,115 @@ apply_pca_load <- function(pca_load, pca_rotations, mode_num = 1) {
   
   return(pca_adjusted)
 }
+
+
+####  Corrplot Functions  ####
+
+# Get upper triangle of the correlation matrix
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)] <- NA
+  return(cormat)
+}
+
+#Pull correlations with p-values
+corr_plot_setup <- function(wide_df) {
+  
+  # 1. Pull data used for corellation matrix
+  corr_data <- wide_df %>% 
+    select(-year, -period)
+  
+  # 2. Pull the correlation matrix and melt to a dataframe
+  corr_mat <- corr_data %>% cor() 
+  
+  # 2b. Correlation Matrix as a dataframe
+  corr_out <- corr_mat %>% reshape2::melt(na.rm = TRUE)
+  
+  # 2c. Upper Triangle of correlation matrix
+  upper_tri <- corr_mat %>% 
+    get_upper_tri() %>%
+    reshape2::melt() %>% 
+    drop_na()
+  
+  # 3. do it again but pull the p-values
+  p_data <- corrplot::cor.mtest(corr_mat)$p 
+  
+  #Assign the same names as the corr matrix
+  dimnames(p_data) <- dimnames(corr_mat)
+  
+  #reshape to match correlation df
+  p_data <- reshape2::melt(p_data, na.rm = T) %>% rename(pval = value)
+  
+  
+  #Put the two together
+  corr_full <- inner_join(corr_out, p_data, by = c("Var1", "Var2")) %>% 
+    #Format levels and labels
+    mutate(Var1 = fct_relevel(Var1, sort),
+           Var2 = fct_relevel(Var2, sort),
+           sig_symbol = if_else(pval <= 0.05 & value > 0, "+", " "),
+           sig_symbol = if_else(pval <= 0.05 & value < 0, "-", sig_symbol))
+  
+  return(corr_full)
+}
+
+#Not in Function
+`%notin%` <- purrr::negate(`%in%`)
+
+# custom corr plot
+cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall"){
+  
+  #Filter Var1 and Var2 to reshape plot
+  
+  #Taxa
+  my_taxa <- c("calanus", "calanus1to4", "centropages", "chaetognatha",
+               "euphausiacea", "metridia", "oithona", "para_pseudocalanus",
+               "paraeucheata", "temora")
+  
+  long_plot <- corr_dataframe %>% 
+    filter(Var1 %notin% my_taxa,
+           Var2 %in% my_taxa)
+  
+  tall_plot <- corr_dataframe %>% 
+    filter(Var1 %in% my_taxa,
+           Var2 %notin% my_taxa)
+  
+  if(plot_style == "tall") {
+    plot_option  <- tall_plot
+    leg_position <- "right"
+  } else {
+    plot_option  <- long_plot
+    leg_position <- "bottom"
+  }
+  
+  
+  ggplot(plot_option, aes(x = Var1, y = fct_rev(Var2), fill = value)) +
+    geom_tile(color = "white") +
+    geom_text(aes(label = sig_symbol), 
+              color = "black", 
+              size = 3) +
+    scale_fill_gradient2(low = "blue", 
+                         high = "red", 
+                         mid = "white", 
+                         midpoint = 0, 
+                         limit = c(-1,1), 
+                         space = "Lab", 
+                         name="Pearson\nCorrelation") +
+    labs(x = NULL, 
+         y = NULL, 
+         title = period) +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 6),
+          axis.text.y = element_text(size = 6),
+          legend.position = leg_position) +
+    coord_fixed()
+  
+  
+}
+
+
+# Get upper triangle of the correlation matrix
+get_upper_tri <- function(correlation_matrix){
+  correlation_matrix[lower.tri(correlation_matrix)] <- NA
+  return(correlation_matrix)
+}
+
+#Not-in Function
+`%notin%` <- purrr::negate(`%in%`)

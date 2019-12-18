@@ -1,5 +1,5 @@
 ---
-title: "Consolidating Analyses for Paper Writing"
+title: "Consolidation of WARMEM Analyses"
 author: "Adam A. Kemberling"
 date: "12/16/2019"
 output: 
@@ -89,7 +89,7 @@ buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpola
 ```
 
 
-# CPR Community Changes Over Time 
+# CPR Community Changes Over Time {.tabset .tabset-pills}
 
 Parallel methods are used for each of the following three periods of the continuous plankton recorder dataset:
 
@@ -180,25 +180,22 @@ for (i in 1:length(analysis_sets)) {
 
 ---
 
+## PCA Weights {.tabset}
 
-## CPR PCA Analysis   {.tabset .tabset-pills}
-
-### PCA Weights {.tabset}
-
-#### Full TS
+### Full TS
 
 ```{r}
 analysis_sets$`Full Timeseries`$fig2a
 ```
 
 
-#### Early Period
+### Early Period
 
 ```{r}
 analysis_sets$`1961 - 2003`$fig2a
 ```
 
-#### Last 14 Years
+### Last 14 Years
 
 
 ```{r}
@@ -206,19 +203,19 @@ analysis_sets$`2004 - 2017`$fig2a
 ```
 
 
-### PCA Timelines {.tabset}
+## PCA Timelines {.tabset}
 
 Taking the PCA weights from the 1961-2003 PCA (mimicking the 2005 paper) we can recreate the original timeline and extend those weights out through 2017 to create the following figures:
 
-#### Original Time-period
+### Original Time-period
 
 ![](presentations/Figure2b_recreation.png)
 
-#### Extended Through 2017
+### Extended Through 2017
 
 ![](presentations/Figure2b_full.png)
 
-#### Applying 1961-2005 Weights to 91-Day Quarters
+### Applying 1961-2005 Weights to 91-Day Quarters
 
 When applying 1961-2005 PCA weights to the bi-monthly period anomalies and extend them out through 2017 you get this figure.
 
@@ -316,14 +313,14 @@ Using quarterly averages in seas surface temperature anomalies we can compare th
 
 ## Simultaneous SST Conditions with CPR Anomalies
 
-![](presentations/corrplots/quarterly/all_seasons.png)
+![](presentations/sst_plots/sst_quarterly_corrplot.png)
 
 
 ## CPR Anomalies with Prior Period's SST
 
-![](presentations/corrplots/quarterly/all_seasons_lagged.png)
+![](presentations/sst_plots/sst_qlagged_corrplot.png)
 
-# Buoy Sensor Correlations with CPR Anomalies  {.tabset .tabset-pills}
+# Buoy Correlations with CPR Anomalies  {.tabset .tabset-pills}
 
 Across the Gulf of Maine region there are a number of NERACOOS buoys recording real-time measurements at various depths. These measurements give a more fine-scale sense of oceanographic changes and should more acurately capture climate-modes hypothesized to influence plankton community structure.
 
