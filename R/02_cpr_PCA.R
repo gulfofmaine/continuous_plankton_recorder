@@ -59,7 +59,7 @@ species_05 <- c("calanus", "centropages", "oithona", "para_pseudocalanus",
     geom_line(aes(group = species)) + 
     facet_wrap(~species, ncol = 1) +
     labs(x = NULL, y = NULL))
-ggsave(plot = fig1, filename = here::here("R", "presentations", "Figure1_recreation.png"), device = "png")
+ggsave(plot = fig1, filename = here::here("R", "presentations", "pershing05_recreations", "Figure1_recreation.png"), device = "png")
 
 
 #2005 paper setup 1961-2003
@@ -110,7 +110,7 @@ leading_modes <- rownames_to_column(as.data.frame(pca_2005$rotation)) %>%
       scale_fill_gmri(palette = "mixed") +
       labs(x = "") +
       theme(legend.position = c(0.85, 0.2)))
-ggsave(plot = fig2a, filename = here::here("R", "presentations", "Figure2a_recreation.png"), device = "png")
+ggsave(plot = fig2a, filename = here::here("R", "presentations", "pershing05_recreations", "Figure2a_recreation.png"), device = "png")
 
 # Figure 2b pca time-series
 pca_timeseries <- cpr_2005_vals
@@ -161,7 +161,7 @@ all_years <- tibble(year = rep(c(1975, 1976),2),
       scale_color_gmri(palette = "mixed") +
       #theme(legend.position = c(0.15, 0.2))) #original
       theme(legend.position = c(0.15, 0.8))) #flipped
-ggsave(plot = fig2b, filename = here::here("R", "presentations", "Figure2b_recreation.png"), device = "png")
+ggsave(plot = fig2b, filename = here::here("R", "presentations", "pershing05_recreations", "Figure2b_recreation.png"), device = "png")
 
 
 
@@ -204,7 +204,7 @@ all_years <- tibble(year = rep(c(1975, 1976),2),
       scale_x_continuous(breaks = c(1960, 1970, 1980, 1990, 2000, 2010)) +
       #theme(legend.position = c(0.15, 0.2))) #original
       theme(legend.position = c(0.15, 0.8))) #flipped
-ggsave(plot = fig2c, filename = here::here("R", "presentations", "Figure2b_full.png"), device = "png")
+ggsave(plot = fig2c, filename = here::here("R", "presentations", "pershing05_recreations", "Figure2b_full.png"), device = "png")
 
 
 
@@ -275,7 +275,7 @@ bi_monthly_out <- bind_rows(bi_monthly_mode_1, bi_monthly_mode_2, .id = "period"
     facet_wrap( ~ period, ncol = 2) +
     #facet_grid(period ~ PC) +
     labs(x = NULL))
-ggsave(plot = bi_monthly_plots, filename = here::here("R", "presentations", "bi_monthly_modes.png"), device = "png")
+ggsave(plot = bi_monthly_plots, filename = here::here("R", "presentations", "pershing05_recreations", "bi_monthly_modes.png"), device = "png")
 
 
 

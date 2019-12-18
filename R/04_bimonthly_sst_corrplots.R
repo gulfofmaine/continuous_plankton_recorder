@@ -257,7 +257,7 @@ summary(pca_full)
     scale_fill_gmri(palette = "mixed") +
     labs(x = "", title = "PCA leading Mode Weights", subtitle = "1982-2018") +
     theme(legend.position = c(0.85, 0.2)))
-ggsave(weights_fig, filename =  here::here("R", "presentations", "full_ts_pca.png"), device = "png")
+ggsave(weights_fig, filename =  here::here("R", "presentations", "pershing05_recreations", "full_ts_pca.png"), device = "png")
 
 
 
@@ -293,7 +293,7 @@ summary(pca_post)
     scale_fill_gmri(palette = "mixed") +
     labs(x = "", title = "PCA leading Mode Weights", subtitle = "2003-2018") +
     theme(legend.position = c(0.25, 0.8)))
-ggsave(weights_fig_post, filename =  here::here("R", "presentations", "post_shift_pca.png"), device = "png")
+ggsave(weights_fig_post, filename =  here::here("R", "presentations", "pershing05_recreations", "post_shift_pca.png"), device = "png")
 
 
 

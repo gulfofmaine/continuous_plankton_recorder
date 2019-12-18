@@ -270,7 +270,7 @@ pca_modes_2005 <- bind_rows(mode_1_timeseries, mode_2_timeseries) %>%
     geom_line() +
     scale_color_gmri(palette = "mixed") +
     theme(legend.position = c(0.15, 0.8))) #flipped
-ggsave(plot = fig2b, filename = here::here("R", "presentations", "Figure2b_recreation.png"), device = "png")
+ggsave(plot = fig2b, filename = here::here("R", "presentations", "pershing05_recreations", "Figure2b_recreation.png"), device = "png")
 
 
 
@@ -290,7 +290,7 @@ ggsave(plot = fig2b, filename = here::here("R", "presentations", "Figure2b_recre
   theme(legend.position = "bottom") +
   facet_wrap(~PC, nrow = 2) +
   labs(y = "Magnitude", x = NULL))
-ggsave(plot = fig3a, filename = here::here("R", "presentations", "2005_ts_temps.png"), device = "png")
+ggsave(plot = fig3a, filename = here::here("R", "presentations", "pershing05_recreations", "2005_ts_temps.png"), device = "png")
 
 
 
@@ -341,7 +341,7 @@ pca_2005_extended$x <- rbind(pca_2005_extended$x, cpr_recent_pred)
   labs(subtitle = "2003:2018 Data Extra-Sample Projections") +
   guides(color = guide_legend(title = NULL, nrow = 1)) +
   theme(legend.position = "bottom"))
-ggsave(biplot_2005_on, filename = here::here("R", "presentations", "2005pca_biplot.png"), device = "png")
+ggsave(biplot_2005_on, filename = here::here("R", "presentations", "pershing05_recreations", "2005pca_biplot.png"), device = "png")
 
 
 
@@ -412,7 +412,7 @@ all_years <- tibble(year = rep(c(1975, 1976),2),
 #       #theme(legend.position = c(0.15, 0.2))) #original
 #       theme(legend.position = c(0.15, 0.8))) #flipped
 #
-# ggsave(plot = fig2c, filename = here::here("R", "presentations", "Figure2c_extended_timeline.png"), device = "png")
+# ggsave(plot = fig2c, filename = here::here("R", "presentations",  "pershing05_recreations", "Figure2c_extended_timeline.png"), device = "png")
 
 
 
@@ -435,7 +435,7 @@ pca_modes_master <- bind_rows(mode_1_timeseries, mode_2_timeseries) %>%
   theme(legend.position = "bottom") +
   facet_wrap(~PC, nrow = 2) +
   labs(y = "Magnitude", x = NULL))
-ggsave(plot = fig3b, filename = here::here("R", "presentations", "full_ts_temps.png"), device = "png")
+ggsave(plot = fig3b, filename = here::here("R", "presentations", "pershing05_recreations", "full_ts_temps.png"), device = "png")
 
 
 
