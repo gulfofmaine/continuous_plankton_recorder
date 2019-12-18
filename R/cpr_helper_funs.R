@@ -72,10 +72,17 @@ apply_pca_load <- function(pca_load, pca_rotations, mode_num = 1) {
 
 ####  Corrplot Functions  ####
 
-# Get upper triangle of the correlation matrix
-get_upper_tri <- function(cormat){
-  cormat[lower.tri(cormat)] <- NA
-  return(cormat)
+#' Extract upper triangle of the correlation matrix
+#'
+#' @param correlation_matrix Correlation matrix object created by cor()
+#'
+#' @return correlation_matrix Correlation matrix with NA values substituted for lower-triangle correlations
+#' @export
+#'
+#' @examples
+get_upper_tri <- function(correlation_matrix){
+  correlation_matrix[lower.tri(correlation_matrix)] <- NA
+  return(correlation_matrix)
 }
 
 #Pull correlations with p-values
@@ -172,11 +179,5 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall"){
 }
 
 
-# Get upper triangle of the correlation matrix
-get_upper_tri <- function(correlation_matrix){
-  correlation_matrix[lower.tri(correlation_matrix)] <- NA
-  return(correlation_matrix)
-}
 
-#Not-in Function
-`%notin%` <- purrr::negate(`%in%`)
+
