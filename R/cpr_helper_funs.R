@@ -18,6 +18,7 @@ find_box_data <- function(box_project_name) {
 }
 
 cpr_boxpath <- find_box_data("continuous_plankton_recorder")
+ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
 
 
 #Load GMRI color Palettes
