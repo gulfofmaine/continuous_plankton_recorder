@@ -52,8 +52,40 @@ head(noaa_phyto_header, 10)
 #Reshape Taxon Key
 noaa_phyto_key <- noaa_phyto_header %>% pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% arrange(`Taxon Name`)
 
-####  ISSSUE 1 - non-unique key  ####
+####  Repair MARMAP Key  ####
+#MARMAP code key: https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html
 noaa_phyto_key <- noaa_phyto_key %>% pivot_wider(names_from = code_type, values_from = `Accepted ID`, )
+noaa_phyto_key <- noaa_phyto_key %>% rename_all(tolower)
+
+
+#Check duplicate columns to compare values
+noaa_p_duplicates <- noaa_phyto_key %>% filter(.copy == 2) %>% pull(`taxon name`)
+noaa_phyto_key %>% filter(`taxon name` %in% noaa_p_duplicates)
+
+#Reference the NEFSC key to find mismatches
+noaa_phyto_key[noaa_phyto_key$`taxon name` %in% noaa_p_duplicates,]
+
+#Repair taxon names using NEFSC marmap key
+which(noaa_phyto[1,] == 9101) #Index for Trichodesmium
+which(noaa_phyto[1,] == 9169) #Index for Ceratium ranipes
+colnames(noaa_phyto_abundances)[which(noaa_phyto[1,] == 9101)] <- "Trichodesmium"
+colnames(noaa_phyto_abundances)[which(noaa_phyto[1,] == 9169)] <- "Ceratium ranipes"
+
+#Repair key using NEFSC marmap key
+noaa_phyto_key <- noaa_phyto_key %>% mutate(
+  `taxon name` = ifelse(`marmap code:` == 9169, "Ceratium ranipes", `taxon name`),
+  `taxon name` = ifelse(`marmap code:` == 9101, "Trichodesmium", `taxon name`)
+) %>% select(-.copy)
+
+
+####  Prep for Export  ####
+noaa_phyto_abundances <- noaa_phyto_abundances %>%  
+  rename_all(tolower)  %>% 
+  mutate(cruise = str_replace_all(cruise, "'", ""))
+
+rm(noaa_phyto, noaa_phyto_header, phyto_group_stage_names, noaa_p_duplicates)
+
+
 
 ####  End NOAA Phyto  ####
 ####__####
@@ -100,15 +132,49 @@ head(names(noaa_zoo_header), 10)
 
 #Reshape Taxon Key
 noaa_zoo_key <- noaa_zoo_header %>% pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% arrange(`Taxon Name`)
-#Taxon with the same accepted ID
-filter(noaa_zoo_key, .copy > 1) 
-#Taxon with the same accepted ID
-filter(noaa_zoo_key, `Taxon Name` %in% c("Carinariidae_unstaged", "Ischocalanus plumulosus_unstaged")) 
-#noaa_zoo_key <- noaa_zoo_key %>% select(-.copy)
 
 
-####  ISSSUE 1 - non-unique key  ####
+####  Repair MARMAP Key  ####
 noaa_zoo_key <- noaa_zoo_key %>% pivot_wider(names_from = code_type, values_from = `Accepted ID`, )
+noaa_zoo_key <- noaa_zoo_key %>% rename_all(tolower)
+
+
+#Check duplicate columns to compare values
+noaa_z_duplicates <- noaa_zoo_key %>% filter(.copy == 2) %>% pull(`taxon name`)
+noaa_zoo_key %>% filter(`taxon name` %in% noaa_z_duplicates)
+
+#Repair taxon names using NEFSC marmap key
+which(noaa_zoo[2,] == 3300) #Index for Heteropoda
+which(noaa_zoo[2,] == 4039) #Index for something...or nothing...
+colnames(noaa_zoo_abundances)[which(noaa_zoo[2,] == 3300)] <- "Heteropoda"
+colnames(noaa_zoo_abundances)[which(noaa_zoo[2,] == 4039)] <- "No record"
+
+#Drop column that has no taxa match for the marmap code 
+noaa_zoo_abundances[,"No record"] <- NULL
+
+#Repair key using NEFSC marmap key
+noaa_zoo_key <- noaa_zoo_key %>% mutate(
+  `taxon name` = ifelse(`marmap taxonomic code:` == 3300, "Heteropoda", `taxon name`),
+  `taxon name` = ifelse(`marmap taxonomic code:` == 4039, "No record", `taxon name`)) %>% 
+  select(-.copy) %>% 
+  filter(`taxon name` != "No record")
+
+#Seperate taxa and stage
+noaa_zoo_key <- noaa_zoo_key %>% mutate(
+  taxa = str_extract(`taxon name`, "[^_]*"),
+  stage = str_extract(`taxon name`, "_.*"),
+  stage = str_replace(stage, "_", "")
+)
+
+
+####  Prep for Export  ####
+noaa_zoo_abundances <- noaa_zoo_abundances %>%  
+  rename_all(tolower) %>% 
+  mutate(cruise = str_replace_all(cruise, "'", ""))
+
+rm(noaa_zoo, noaa_zoo_header, group_stage_names, noaa_z_duplicates)
+
+
 
 ####  End NOAA Zooplankton  ####
 ####____________________________####
@@ -186,11 +252,11 @@ mc1_eye <- mc_cleanup(messy_df = mc1_eye, taxon_key = mc1_taxa, taxa = "eye")
 mc1_trav <- mc_cleanup(messy_df = mc1_trav, taxon_key = mc1_taxa, taxa = "trav")
 
 
-####  Ready For Export  ####
-mc1_phyto  #Phytoplankton 
-mc1_eye    #Eye sheet
-mc1_trav   #Tav sheet
-mc1_taxa   #Taxonomic Key
+####  prep For Export  ####
+mc1_phyto <- mc1_phyto %>% rename_all(tolower)  #Phytoplankton 
+mc1_eye   <- mc1_eye   %>% rename_all(tolower)  #Eye sheet
+mc1_trav  <- mc1_trav  %>% rename_all(tolower)  #Tav sheet
+mc1_taxa  <- mc1_taxa  %>% rename_all(tolower)  #Taxonomic Key
 
 
 
@@ -234,11 +300,11 @@ mc2_eye  <- mc_cleanup(mc2_eye, mc2_taxa, "eye")
 ####_Trav  ####
 mc2_trav <- mc_cleanup(mc2_trav, mc2_taxa, "trav")
 
-####  Ready for Export  ####
-mc2_phyto  #Phytoplankton 
-mc2_eye    #Eye sheet
-mc2_trav   #Tav sheet
-mc2_taxa   #Taxonomic Key
+####  Prep for Export  ####
+mc2_phyto <- mc2_phyto %>% rename_all(tolower)  #Phytoplankton 
+mc2_eye   <- mc2_eye   %>% rename_all(tolower)  #Eye sheet
+mc2_trav  <- mc2_trav  %>% rename_all(tolower)  #Tav sheet
+mc2_taxa  <- mc2_taxa  %>% rename_all(tolower)  #Taxonomic Key
 
 ####  End MC Part 2  ####
 
@@ -248,7 +314,7 @@ mc2_taxa   #Taxonomic Key
 ####____________________________####
 
 ####  Combining SAHFOS "Trav" & "Eye"  ####
-
+mc1_trav
 
 
 ####____________________________####
@@ -261,4 +327,26 @@ mc1_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/2
 mc2_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/2019_processed/")
 
 
+# NOAA phytoplankton
+write_csv(noaa_phyto_abundances, str_c(noaa_out, "phyto_abundances_2019.csv"), col_names = TRUE)
+write_csv(noaa_phyto_key, str_c(noaa_out, "phyto_key_2019.csv"), col_names = TRUE)
 
+# NOAA zooplankton
+write_csv(noaa_zoo_abundances, str_c(noaa_out, "zoo_abundances_2019.csv"), col_names = TRUE)
+write_csv(noaa_zoo_key, str_c(noaa_out, "zoo_key_2019.csv"), col_names = TRUE)
+
+
+# mc1 export
+write_csv(mc1_phyto, str_c(mc1_out, "mc1_phyto_2019.csv"),    col_names = TRUE)
+write_csv(mc1_trav,  str_c(mc1_out, "mc1_traverse_2019.csv"), col_names = TRUE)
+write_csv(mc1_eye,   str_c(mc1_out, "mc1_eyecount_2019.csv"), col_names = TRUE)
+write_csv(mc1_taxa,  str_c(mc1_out, "mc1_taxa_key_2019.csv"), col_names = TRUE)
+
+# mc2 export
+write_csv(mc2_phyto, str_c(mc2_out, "mc2_phyto_2019.csv"),    col_names = TRUE)
+write_csv(mc2_trav,  str_c(mc2_out, "mc2_traverse_2019.csv"), col_names = TRUE)
+write_csv(mc2_eye,   str_c(mc2_out, "mc2_eyecount_2019.csv"), col_names = TRUE)
+write_csv(mc2_taxa,  str_c(mc2_out, "mc2_taxa_key_2019.csv"), col_names = TRUE)
+zzoo
+
+####____________________________####
