@@ -314,7 +314,7 @@ mc2_taxa  <- mc2_taxa  %>% rename_all(tolower)  #Taxonomic Key
 ####____________________________####
 
 ####  Combining SAHFOS "Trav" & "Eye"  ####
-mc1_trav
+
 
 
 ####____________________________####
@@ -322,18 +322,18 @@ mc1_trav
 
 
 ####  Data Export  ####
-noaa_out  <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/NOAA_1961-2013/2019_processed/")
-mc1_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/2019_processed/")
-mc2_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/2019_processed/")
+noaa_out  <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/2019_data_processing/")
+mc1_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/2019_data_processing/")
+mc2_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/2019_data_processing/")
 
 
 # NOAA phytoplankton
-write_csv(noaa_phyto_abundances, str_c(noaa_out, "phyto_abundances_2019.csv"), col_names = TRUE)
-write_csv(noaa_phyto_key, str_c(noaa_out, "phyto_key_2019.csv"), col_names = TRUE)
+write_csv(noaa_phyto_abundances, str_c(noaa_out, "noaa_phyto_abundances_2019.csv"), col_names = TRUE)
+write_csv(noaa_phyto_key, str_c(noaa_out, "noaa_phyto_key_2019.csv"), col_names = TRUE)
 
 # NOAA zooplankton
-write_csv(noaa_zoo_abundances, str_c(noaa_out, "zoo_abundances_2019.csv"), col_names = TRUE)
-write_csv(noaa_zoo_key, str_c(noaa_out, "zoo_key_2019.csv"), col_names = TRUE)
+write_csv(noaa_zoo_abundances, str_c(noaa_out, "noaa_zoo_abundances_2019.csv"), col_names = TRUE)
+write_csv(noaa_zoo_key, str_c(noaa_out, "noaa_zoo_key_2019.csv"), col_names = TRUE)
 
 
 # mc1 export
@@ -347,6 +347,6 @@ write_csv(mc2_phyto, str_c(mc2_out, "mc2_phyto_2019.csv"),    col_names = TRUE)
 write_csv(mc2_trav,  str_c(mc2_out, "mc2_traverse_2019.csv"), col_names = TRUE)
 write_csv(mc2_eye,   str_c(mc2_out, "mc2_eyecount_2019.csv"), col_names = TRUE)
 write_csv(mc2_taxa,  str_c(mc2_out, "mc2_taxa_key_2019.csv"), col_names = TRUE)
-zzoo
+
 
 ####____________________________####
