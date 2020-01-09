@@ -39,6 +39,7 @@ options(knitr.kable.NA = '')
 
 ####  Packages  ####
 library(ggbiplot)
+library(ggpmisc)
 library(tidyverse)
 library(here)
 #devtools::install_github("vqv/ggbiplot")
@@ -193,7 +194,7 @@ class: top
 ### Trends in SST - Gulf of Maine
 
 .pull-left[
-```{r}
+```{r, out.height=450}
 sst_long_lagged %>% filter(period == "Annual") %>% 
   ggplot(aes(year, temp_anomaly)) +
     geom_hline(yintercept = 0, color = "darkred", alpha = 0.3, linetype = 2) +
@@ -207,7 +208,7 @@ sst_long_lagged %>% filter(period == "Annual") %>%
 
 
 .pull-right[
-```{r}
+```{r, out.height=450}
 sst_long_lagged %>% filter(period != "Annual") %>% 
   ggplot(aes(year, temp_anomaly)) +
     geom_hline(yintercept = 0, color = "darkred", alpha = 0.3, linetype = 2) +
@@ -225,8 +226,20 @@ class: top
 ### SST Increases - Last ~15 Years
 
 .pull-left[
-```{r}
+```{r, out.height=450}
 sst_annual <- sst_long_lagged %>% filter(period == "Annual")
+
+#GG color hues
+#It is just equally spaced hues around the color wheel, starting from 15:
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+#For example:
+
+n = 2
+cols = gg_color_hue(n)
 
 sst_annual %>% 
   ggplot(aes(year, temp_anomaly)) +
@@ -235,20 +248,36 @@ sst_annual %>%
     geom_smooth(data = filter(sst_annual, year <= 2010),
                 aes(year, temp_anomaly, color = "1982 - 2010"),
                 method = "lm") +
-  geom_smooth(data = filter(sst_annual, year >= 2000),
-                aes(year, temp_anomaly, color = "2000 - 2018"),
-                method = "lm") +
-  guides(color = guide_legend(title = NULL)) +
-    facet_wrap(~period, ncol = 1) +
-    labs(x = NULL, y = NULL) +
-    theme(legend.position = c(0.85, 0.2))
+    geom_smooth(data = filter(sst_annual, year >= 2000),
+                  aes(year, temp_anomaly, color = "2000 - 2018"),
+                  method = "lm") +
+    stat_poly_eq(data = filter(sst_annual, year <= 2010),
+                 formula = y ~ x, 
+                 aes(label = paste(..eq.label.., "~\n~", ..rr.label..)), 
+                 label.y = 0.0125,
+                 #geom = "debug", #checks what labels are available
+                 parse = TRUE, 
+                 color = cols[1]) + 
+    stat_poly_eq(data = filter(sst_annual, year >= 2000),
+                 formula = y ~ x, 
+                 aes(label = paste(..eq.label.., "~\n~", ..rr.label..)), 
+                 label.x = 0.75,
+                 label.y = 0.85,
+                 #geom = "debug", #checks what labels are available
+                 parse = TRUE, 
+                 color = cols[2]) + 
+    guides(color = guide_legend(title = NULL)) +
+      facet_wrap(~period, ncol = 1) +
+      labs(x = NULL, y = NULL) +
+      theme(legend.position = c(0.85, 0.2))
+
 ```
 
 ]
 
 
 .pull-right[
-```{r}
+```{r, out.height=450}
 sst_periods <- sst_long_lagged %>% filter(period != "Annual")
 
 sst_periods %>% 
@@ -258,15 +287,75 @@ sst_periods %>%
     geom_smooth(data = filter(sst_periods, year <= 2010),
                 aes(year, temp_anomaly, color = "1982 - 2010"),
                 method = "lm", show.legend = FALSE) +
-  geom_smooth(data = filter(sst_periods, year >= 2000),
-                aes(year, temp_anomaly, color = "2000 - 2018"),
-                method = "lm", show.legend = FALSE) +
-  scale_x_continuous(breaks = c(1980, 1990, 2000, 2010)) +
-  guides(color = guide_legend(title = NULL)) +
-    facet_wrap(~period, ncol = 2) +
-    labs(x = NULL, y = NULL)
+    geom_smooth(data = filter(sst_periods, year >= 2000),
+                  aes(year, temp_anomaly, color = "2000 - 2018"),
+                  method = "lm", show.legend = FALSE) + 
+    stat_poly_eq(data = filter(sst_periods, year <= 2010),
+                 formula = y ~ x, 
+                 aes(label = paste(..eq.label.., "~\n~", ..rr.label..)), 
+                 label.y = 0.0125,
+                 #geom = "debug", #checks what labels are available
+                 parse = TRUE, 
+                 color = cols[1]) + 
+    stat_poly_eq(data = filter(sst_periods, year >= 2000),
+                 formula = y ~ x, 
+                 aes(label = paste(..eq.label.., "~\n~", ..rr.label..)), 
+                 label.x = 0.75,
+                 label.y = 0.85,
+                 #geom = "debug", #checks what labels are available
+                 parse = TRUE, 
+                 color = cols[2]) + 
+    scale_x_continuous(breaks = c(1980, 1990, 2000, 2010)) +
+    guides(color = guide_legend(title = NULL)) +
+      facet_wrap(~period, ncol = 2) +
+      labs(x = NULL, y = NULL)
 ```
 ]
+
+---
+class: top
+
+
+<br/>
+
+```{r, out.height=400}
+#Function for pulling f-test p-values for a linear model
+lmp <- function (modelobject) {
+	if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
+	f <- summary(modelobject)$fstatistic
+	p <- pf(f[1],f[2],f[3],lower.tail=F)
+	attributes(p) <- NULL
+	return(p)
+}
+
+lm_summaries <- sst_long_lagged %>% 
+  mutate(Year_split = ifelse(year <= 2000, "1982-2000", "2000-2017")) %>% 
+  group_by(Year_split, period) %>% 
+  nest() %>% 
+  mutate(linear_mod = map(data, function(data) lm(temp_anomaly ~ year, data)),
+         pvals = map(linear_mod, lmp)) %>% 
+  unnest(pvals) %>% 
+  select(period, Year_split, pvals) %>% 
+  split(.$Year_split) %>%
+  bind_cols() %>%
+  ungroup() %>% 
+  mutate_if(is.numeric, round, 3)
+  
+
+names(lm_summaries) <- c("Bi-monthly Period", "Early Years", "pval", "Bi-monthly Period", "Recent Years", "pval")
+library(formattable)
+
+lm_summaries %>% 
+  #formattable()
+  # knitr::kable()
+  DT::datatable(options=list(
+       pageLength = 7,
+       lengthMenu = FALSE,
+       searching= FALSE ))
+  
+```
+
+
 
 ---
 class: top, center

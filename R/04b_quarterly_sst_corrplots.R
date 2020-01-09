@@ -128,7 +128,7 @@ temp_period_corrs <- imap(period_df_list, pull_temp_corr) %>%
 rownames(temp_period_corrs) <- c(species_05, "temp_anomaly")
 temp_period_corrs <- temp_period_corrs[1:7,] #Drop temperature row
 
-png(str_c(here::here("R/presentations/corrplots/quarterly/all_seasons.png")), width = 800, height = 600, res = 100)
+#png(str_c(here::here("R/presentations/corrplots/quarterly/all_seasons.png")), width = 800, height = 600, res = 100)
 corrplot::corrplot(temp_period_corrs, method="color", col=col(200),  
                    # hide correlation coefficient on the principal diagonal
                    #title = "Seasonal Temperature Anomalies - Species Correlations \n 1982-2018", 
@@ -136,7 +136,7 @@ corrplot::corrplot(temp_period_corrs, method="color", col=col(200),
                    #Adjust Margin
                    mar=c(0,0,2,2) 
 )
-dev.off()
+#dev.off()
 
 ####__####
 
@@ -264,7 +264,8 @@ q4_t <- cpr_corr_plot(Q4_corrs, period = "Q4", plot_style = "wide") + theme(axis
 #Patch them together
 quarterly_corrplot <- q1_t | q2_t | q3_t | q4_t
 quarterly_corrplot <- quarterly_corrplot & theme(legend.position = "none")
-quarterly_corrplot <- quarterly_corrplot + labs(caption = "Correlations between quarterly mean SST and simulataneous abundance anomalies for focal taxa from CPR data.")
+quarterly_corrplot <- quarterly_corrplot + 
+  labs(caption = "Correlations between quarterly mean SST and simulataneous abundance anomalies for focal taxa from CPR data.\n Years used in this analysis were from 1982 to 2017.")
 quarterly_corrplot
 
 #Export ggplot version
@@ -314,7 +315,7 @@ lag_period_corrs <- lag_period_corrs[1:7,] #Drop temperature row
 #Rename columns to show lag structure
 colnames(lag_period_corrs) <- c("Q4 SST & Q1 CPR", "Q1 SST & Q2 CPR", "Q2 SST & Q3 CPR", "Q3 SST & Q4 CPR")
 
-png(str_c(here::here("R/presentations/corrplots/quarterly/all_seasons_lagged.png")), width = 800, height = 700, res = 100)
+#png(str_c(here::here("R/presentations/corrplots/quarterly/all_seasons_lagged.png")), width = 800, height = 700, res = 100)
 corrplot::corrplot(lag_period_corrs, method="color", col=col(200),  
                    # hide correlation coefficient on the principal diagonal
                    #title = "Seasonal Temperature Anomalies - Species Correlations \n 1982-2018", 
@@ -322,7 +323,7 @@ corrplot::corrplot(lag_period_corrs, method="color", col=col(200),
                    #Adjust Margin
                    mar=c(0,0,2,2) 
 )
-dev.off()
+#dev.off()
 
 
 
@@ -425,7 +426,8 @@ q4_l <- lagged_corr_plot(Q4_corrs_l, cpr_period = "Q4", plot_style = "wide") + t
 #Patch them together
 lagged_corrplot <- q1_l | q2_l | q3_l | q4_l
 lagged_corrplot <- lagged_corrplot & theme(legend.position = "none")
-lagged_corrplot <- lagged_corrplot + labs(caption = "Correlations between mean SST from previous quarter and subsequent abundance anomalies.")
+lagged_corrplot <- lagged_corrplot + 
+  labs(caption = "Correlations between mean SST from previous quarter and subsequent abundance anomalies.\n Years used in this analysis were from 1982 to 2017.")
 lagged_corrplot
 
 #Export ggplot version
