@@ -4,11 +4,16 @@
 /********** Begin Style Sheet **********/
 /********** Begin Style Sheet **********/
 
+/* Lato import from google fonts */
+/* add as needed: font-family: 'Lato', sans-serif; */
+
+
 /* Level 1 Headers */
 h1 { text-align: left;
 	 margin: 10px 0 15px 0; 
 	 font-size: 38px; 
-	 font-family: serif;} 
+	 font-family: serif;
+} 
 
 
 /* Headers 2 - 6 */
@@ -29,7 +34,7 @@ h6 { font-size: 14px; font-weight: normal; color: #3069aa; }
 
 /* Paragraph Text */
 p { margin-top: 10px; 
-	font-family: helvetica;}
+	font-family: 'Raleway', sans-serif;}
 
 
 /* Title Author and Date Headers */

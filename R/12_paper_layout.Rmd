@@ -22,6 +22,11 @@ options(knitr.kable.NA = '')
 
 ```
 
+
+<style>
+@import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+</style>
+
 # Markdown Document Overview 
 
 This markdown doc is set up for consolidating each analysis step I've done.
