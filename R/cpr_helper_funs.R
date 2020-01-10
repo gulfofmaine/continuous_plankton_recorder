@@ -36,6 +36,7 @@ source("/Users/akemberling/Box/Adam Kemberling/Box_Projects/R_exercise_library/g
 #' @examples
 floor_decade <- function(year_vector){ 
   decade_vector <- year_vector - year_vector %% 10
+  decade_vector <- factor(decade_vector)
   return(decade_vector)
 }
 

@@ -535,10 +535,97 @@ map(sahfos_m3, dim)
 janitor::compare_df_cols(strav_m3, seye_m3)
 janitor::compare_df_cols_same(strav_m3, seye_m3)
 
-
-sahfos_eye %>% select(1:10) %>% 
-  bind_cols(seye_m3) %>% 
-  pivot_longer(names_to = "taxa", values_to = "abundance", cols = names(seye_m3)[1]:names(seye_m3)[ncol(seye_m3)])
-
-
 #Idea, create a dataframe with names found in both, make the values the added contribution from one or both the subsample types
+unique_names <- sort(unique(c(names(strav_m3), names(seye_m3))))
+new_df <- data.frame(matrix(0, nrow = nrow(strav_m3), ncol = length(unique_names)))
+colnames(new_df) <- unique_names
+
+
+#Function to add columns as they appear in either set. Overwrites NA's with zeros
+taxa_fill <- function(empty_frame = new_df,  df_1 = strav_m3, df_2 = seye_m3) {
+  
+  #taxa names
+  taxa_names <- colnames(empty_frame)
+  
+  #traverse abundances
+  traverse_counts <- vector(mode = "list", length = length(taxa_names))
+  names(traverse_counts) <- taxa_names
+  traverse_counts <- imap(traverse_counts, function(x,y) {
+    taxa_counts <- rep(0, nrow(strav_m3))
+    if(y %in% names(strav_m3)) {
+      taxa_counts <- strav_m3 %>% select(one_of(y)) %>% pull()
+      taxa_counts[is.na(taxa_counts)] <- 0
+    }
+    
+    return(taxa_counts)
+  })
+  
+  traverse_out <- bind_cols(traverse_counts)
+    
+  #eyecount abundances
+  eyecount_counts <- vector(mode = "list", length = length(taxa_names))
+  names(eyecount_counts) <- taxa_names
+  eyecount_counts <- imap(eyecount_counts, function(x,y) {
+    taxa_counts <- rep(0, nrow(strav_m3))
+    if(y %in% names(strav_m3)) {
+      taxa_counts <- strav_m3 %>% select(one_of(y)) %>% pull()
+      taxa_counts[is.na(taxa_counts)] <- 0
+    }
+    
+    return(taxa_counts)
+  })
+  
+  eyecount_out <- bind_cols(eyecount_counts)
+  
+  
+  #Add the two of them
+  zooplankton_abundances = traverse_out + eyecount_out
+  return(zooplankton_abundances)
+  
+  
+  
+  
+}
+
+
+# 1:1 sum of traverse and eyecount abunndances in # per cubic meter
+combined_trav_eye <- taxa_fill(empty_frame = new_df, df_1 = strav_m3, df_2 = seye_m3)
+
+
+####  Data Exploration - Spatial and temporal coverage  ####
+library(sf)
+library(rnaturalearth)
+#devtools::install_github("https://github.com/ropensci/rnaturalearthhires") #need this
+
+northeast <- ne_states(country = "united states of america") %>% st_as_sf() %>% 
+  filter(region == "Northeast")
+
+#Noaa spatial coverage
+noaa_coverage <- noaa_zoo_2 %>% 
+  mutate(`longitude (degrees)` = -1 * `longitude (degrees)`,
+         decade = floor_decade(year)) %>% 
+  st_as_sf(coords = c("longitude (degrees)", "latitude (degrees)"), crs = 4326, remove = FALSE) %>% 
+  ggplot() +
+    geom_sf(aes(color = decade)) +
+    geom_sf(data = northeast) + 
+    coord_sf(xlim = c(-72, -65), ylim = c(41,44)) +
+    theme(panel.border = element_rect(colour = "black", fill = NA),
+          axis.line = element_blank()) +
+    labs(caption = "NOAA CPR data")
+
+
+#Sahfos data spatial coverage
+sahfos_coverage <- bind_cols(list(sahfos_trav %>% select(1:10), combined_trav_eye)) %>% 
+  mutate(year = factor(year)) %>% 
+  st_as_sf(coords = c("longitude (degrees)", "latitude (degrees)"), crs = 4326, remove = FALSE) %>% 
+  ggplot() +
+  geom_sf(aes(color = year)) +
+  geom_sf(data = northeast) + 
+  coord_sf(xlim = c(-72, -65), ylim = c(41,44)) +
+  theme(panel.border = element_rect(colour = "black", fill = NA),
+        axis.line = element_blank()) +
+  labs(caption = "SAHFOS CPR data")
+
+
+#Plot them together
+noaa_coverage / sahfos_coverage
