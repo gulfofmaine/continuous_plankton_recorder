@@ -2,10 +2,12 @@
 
 
 /********** Begin Style Sheet **********/
-/********** Begin Style Sheet **********/
 
-/* Lato import from google fonts */
-/* add as needed: font-family: 'Lato', sans-serif; */
+/* Lato + Raleway font import from google fonts */
+@import url('https://fonts.googleapis.com/css?family=Lato');
+@import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+
+/* add font families as needed: font-family: 'Lato', sans-serif; */
 
 
 /* Level 1 Headers */
@@ -33,7 +35,7 @@ h6 { font-size: 14px; font-weight: normal; color: #3069aa; }
 
 
 /* Paragraph Text */
-p { margin-top: 10px; 
+p, ol { margin-top: 10px; 
 	font-family: 'Raleway', sans-serif;}
 
 

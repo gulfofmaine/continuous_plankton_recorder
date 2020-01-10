@@ -4,10 +4,10 @@ author: "Adam A. Kemberling"
 date: "12/16/2019"
 output: 
   html_document:
-    css: stylesheets/gmri_rmarkdown.css
     includes:
         before_body: stylesheets/gmri_logo_header.html
         after_body: stylesheets/akemberling_gmri_footer.html
+    css: stylesheets/gmri_rmarkdown.css
     toc: TRUE
     toc_float:
         collapsed: FALSE
@@ -22,10 +22,6 @@ options(knitr.kable.NA = '')
 
 ```
 
-
-<style>
-@import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-</style>
 
 # Markdown Document Overview 
 
