@@ -4,7 +4,11 @@
 ####  Packages  ####
 library(patchwork)
 library(sf)
+library(janitor)
 library(tidyverse)
+
+####  Functions  ####
+source(here::here("R", "cpr_helper_funs.R"))
 
 
 ####  Data  ####
@@ -22,13 +26,17 @@ source("R/16_SAHFOS_CPR_Cleanup.R")
 
 
 ####__####
-####  Data Exploration - Spatial and temporal coverage  ####
+####  Data Exploration ####
+
+
+
+####  1. Spatial Coverage  ####
 
 #devtools::install_github("https://github.com/ropensci/rnaturalearthhires") #need this to use ne_states()
 
 #Shapefiles
 northeast <- ne_states(country = "united states of america") %>% st_as_sf() %>% filter(region == "Northeast")
-canada <- ne_states(country = "canada") %>% st_as_sf()
+canada    <- ne_states(country = "canada") %>% st_as_sf()
 
 #Noaa spatial coverage
 noaa_coverage <- noaa_zoo_2 %>% 
@@ -66,9 +74,7 @@ noaa_coverage / sahfos_coverage
 
 
 
-###__####
-
-#SAHFOS NOAA Abundance Comparisons
+###  2. Abundance Units  ####
 
 #Catch differences 
 noaa_calanus <- noaa_zoo_2 %>% 
@@ -79,7 +85,7 @@ noaa_calanus <- noaa_zoo_2 %>%
   geom_point(aes(year, `calanus_v-vi`, color = "calanus_v-vi")) +
   geom_point(aes(year, `calanus_i-iv`, color = "calanus_i-iv")) +
   scale_y_continuous(labels = scales::comma_format()) +
-  xlim(c(2010,2018)) +
+  #xlim(c(2010,2018)) +
   labs(caption = "source: NOAA",
        y = "C. finmarchicus",
        x = NULL)
@@ -92,9 +98,14 @@ sahfos_calanus <-  sahfos_zoo %>%
   geom_point(aes(year, `calanus_v-vi`, color = "calanus_v-vi")) +
   geom_point(aes(year, `calanus_i-iv`, color = "calanus_i-iv")) +
   scale_y_continuous(labels = scales::comma_format()) +
-  xlim(c(2010,2018)) +
+  #xlim(c(2010,2018)) +
   labs(caption = "source: SAHFOS",
        y = "C. finmarchicus",
        x = NULL)
 
 noaa_calanus / sahfos_calanus
+
+
+
+####  Taxon Mismatches  ####
+
