@@ -62,7 +62,13 @@ rm(mc2_eye, mc2_phyto, mc2_taxa, mc2_trav)
 # 1852 meters in nautical mile * 10
 # volume in square meters per 10cm silk = 2.987091 meters^3
 
+
+####  Conversion Rate  ####
+#Original calculation to get to # per meters cubed
 conversion_rate <- 1/2.987091
+
+#Appears to be 1/1000th to scale of NOAA data in 100 meters cubed for some reason
+conversion_rate <- conversion_rate * 1000
 
 #Listed by source
 sahfos_abundances <- list("traverse" = sahfos_trav   %>% select(11:ncol(sahfos_trav)), 

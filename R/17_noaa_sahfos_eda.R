@@ -70,8 +70,12 @@ sahfos_coverage <- sahfos_zoo %>%
 #Plot them together
 noaa_coverage / sahfos_coverage
 
-
-
+#If we decide to clip the SAHFOS data we can use this:
+noaa_zoo_2 %>% 
+  mutate(`longitude (degrees)` = -1 * `longitude (degrees)`,
+         decade = floor_decade(year)) %>% 
+  st_as_sf(coords = c("longitude (degrees)", "latitude (degrees)"), crs = 4326, remove = FALSE) %>% 
+  st_bbox(noaa_zoo_2 %>% st_as_sf())
 
 
 ###  2. Abundance Units  ####
@@ -108,4 +112,81 @@ noaa_calanus / sahfos_calanus
 
 
 ####  Taxon Mismatches  ####
+
+
+#Quick comparison test of which columns match and/or are missing from either
+compare_df_cols(noaa_zoo_2, sahfos_zoo)
+
+
+#Renaming of sahfos data to match the refined noaa list
+sahfos_zoo_2 <- sahfos_zoo %>% 
+  rename(
+    `acartia spp.` = `acartia spp. (unidentified)`,
+    `amphipoda spp.` = `amphipoda (unidentified)`,
+    `appendicularia spp.` = appendicularia,
+    `bivalvia spp.` = `bivalvia larvae`,
+    `calanus finmarchicus v-vi` = `calanus finmarchicus`,
+    `calanus finmarchicus i-iv` = `calanus i-iv`,
+    `calanus spp.` = `calanus v-vi unidentified`, 
+    `centropages spp.` = `centropages spp. (unidentified)`,
+    `cumacea spp.` = cumacea,
+    `doliolidae spp.` = doliolidae,
+    `euchaeta spp.` = `euchaetidae (unidentified)`,
+    `euphausiacea spp.` = `euphausiacea total`,
+    `foraminifera spp.` = `foraminifera (total)`,
+    `gammaridea spp.` = gammaridea,
+    `gastropoda spp.` = `gastropoda (unidentified)`,
+    `gymnosomoata spp.` = `gymnosomata (unidentified)`,
+    `harpacticoida spp.` = `harpacticoida total traverse`,
+    `hyperiidea spp.` = `hyperiidea (total)`,
+    `ischnocalanus spp.` =  ischnocalanus,
+    `lepas spp.` = `lepas nauplii`,
+    `metridia spp.` = `metridia spp. (v-vi) (unidentified)`,
+    `monstrilloida spp.` = monstrilloida,
+    `ostracoda spp.` = ostracoda,
+    `pleuromamma spp.` = `pleuromamma spp. (unidentified)`,
+    `polychaeta larva` = `polychaete larvae (unidentified)`,
+    `salpidae spp.` = `salpidae (total)`,
+    `siphonostomatoida spp.` = siphonostomatoida,
+    `thecosomata spp.` = `thecosomata (north atlantic)`,
+    `tintinnidae spp.` = `tintinnida total`
+    
+    
+    ) %>% 
+  #This section is for when multiple columns need to be reduced to a single aggregate
+  mutate(
+    `candacia spp.` = `candacia i-iv` + `candacia spp. (unidentified)`, 
+    `candacia i-iv` = NULL,
+    `candacia spp. (unidentified)` = NULL,
+    `copepoda spp.` = `copepod eggs` + `copepod nauplii`,
+    `copepod eggs` = NULL,
+    `copepod nauplii` = NULL,
+    `decapoda spp.` = `decapod megalopa` + `decapod zoea` + `decapoda larvae (total)`,
+    `decapod megalopa` = NULL, 
+    `decapod zoea` = NULL,
+    `decapoda larvae (total)` = NULL,
+    `fish eggs` = `fish eggs (total)` + `fish eggs with oil globules` + `fish eggs without oil globules`,
+    `fish eggs (total)` = NULL,
+    `fish eggs with oil globules` = NULL,
+    `fish eggs without oil globules` = NULL,
+    `pseudocalanus spp.` = `pseudocalanus spp. adult atlantic` + `pseudocalanus spp. adult total`,
+    `pseudocalanus spp. adult atlantic` = NULL, 
+    `pseudocalanus spp. adult total` = NULL,
+    `radiolaria spp.` = `radiolaria non-acantharian` + `radiolaria total`,
+    `radiolaria non-acantharian` = NULL,
+    `radiolaria total` = NULL,
+    
+  )
+
+
+
+####  And Voila  ####
+compare_df_cols(noaa_zoo_2, sahfos_zoo_2)
+
+
+combined_set <- bind_rows(list("NOAA" = noaa_zoo_2, "SAHFOS" =  sahfos_zoo_2), .id = "agency")
+combined_set %>%
+  ggplot(aes(year, `calanus finmarchicus i-iv`, color = agency)) +
+    geom_point()
+
 

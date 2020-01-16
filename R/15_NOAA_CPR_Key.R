@@ -158,7 +158,7 @@ new_taxa_key <- list(
   `homarus americanus`                  = c("homarus americanus_larva",                                                                  
                                             "homarus americanus_unstaged"),
   
-  `hyperiidae`                          = c("hyperiidea_unstaged"),
+  `hyperiidea spp.`                          = c("hyperiidea_unstaged"),
   
   `isopoda spp.`                        = c("isopoda_larva",                                                                             
                                             "isopoda_unstaged"),
@@ -202,7 +202,7 @@ new_taxa_key <- list(
   
   `paedoclione doliiformis`             = c("paedoclione doliiformis_unstaged"),
   
-  `paracalanus or pseudocalanus`        = c("paracalanus or pseudocalanus_copepodite i-v",
+  `para-pseudocalanus spp.`        = c("paracalanus or pseudocalanus_copepodite i-v",
                                             "paracalanus or pseudocalanus_copepodite i-v (pseudocalanus / copepodite i-vi (paracalanus)"),
   
   `paracalanus spp.`                    = c("paracalanus_copepodite vi",                                                                 
