@@ -65,5 +65,5 @@ station_data$temp <- karen_dat$T
 
 ####  header  ####
 
-#is missing details on what the header is
+#missing details on what the header is
 karen_dat$header
