@@ -56,6 +56,18 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
 [12_paper_layout.Rmd](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/12_paper_layout.Rmd): Consolidation report of analyses run thus far   
  
 [12_paper_layout.html](https://adamkemberling.github.io/continuous_plankton_recorder/R/12_paper_layout.html): Rendered output of Rmarkdown document   
+
+[13_sahfos_cpr_cleanup.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/13_sahfos_cpr_cleanup.R): Reads in the full CPR datasets from NOAA and from SAHFOS. Splits both into a key created from the header space, and the abundances/concentrations by station.  
+
+[14_taxa_check_heatplots.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/14_taxa_check_heatplots.R): Visualization tools for determining which taxa-stage groupings are in use and how that changes over time.   
+
+[15_NOAA_CPR_Key.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/15_NOAA_CPR_Key.R): Script for reducing the NOAA dataset down to groupings that are more similar to the SAHFOS data, drops taxa that are not ever observed.   
+
+[16_SAHFOS_CPR_Cleanup.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/16_SAHFOS_CPR_Cleanup.R): Partner script to the NOAA CPR Key. Converts SAHFOS data from concentration per 10cm silk mesh to concentration per $m^3$   
+
+[17_noaa_sahfos_eda.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/17_noaa_sahfos_eda.R): Exploratory Data Analysis of the NOAA/SAHFOS data, post-cleanup.   
+
+[18_karen_s_analysis_funs.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/18_karen_s_analysis_funs.R): Re-coding of MATLAB code obtained from Karen Stamieszkin. Splits taxa proportionally into contributing stages. Determines the predicted length for each stage at a given temperature. 
  
 [cpr_buoy_DE](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/cpr_buoy_DE): Shiny App Files for exploring correlations between buoy sensor data and quarterly CPR data   
  
