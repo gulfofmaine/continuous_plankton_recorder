@@ -6,6 +6,7 @@ library(patchwork)
 library(sf)
 library(janitor)
 library(tidyverse)
+library(rnaturalearth)
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
@@ -188,6 +189,9 @@ compare_df_cols(noaa_zoo_2, sahfos_zoo_2)
 combined_set <- bind_rows(list("NOAA" = noaa_zoo_2, "SAHFOS" =  sahfos_zoo_2), .id = "agency")
 combined_set %>%
   ggplot(aes(year, `calanus finmarchicus i-iv`, color = agency)) +
-    geom_point()
+    geom_point() +
+    #geom_hline(yintercept = 310000) +
+    xlim(c(2010,2017))
 
+#Are the jumps realistic?
 
