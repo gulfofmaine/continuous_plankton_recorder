@@ -219,19 +219,128 @@ mc2_heat_plots <- taxon_splits %>% imap(function (df_test, taxa_name) {
 #Plotting
 mc2_heat_plots[1:10]
 
+####  4.SAHFOS CPR Taxa Diagnostics  ####
 
+#MC1 and MC2 are non-overlapping periods so we can combine into one group
+sahfos_trav <- bind_rows(mc1_trav, mc2_trav)
+sahfos_eye <- bind_rows(mc1_eye, mc2_eye)
+sahfos_phyto <- bind_rows(mc1_phyto, mc2_phyto)
 
+# Taxa Consolidation
 
-####__####
-
-####  Taxa Consolidation  ####
-
-#All in use taxa group from SAHFOS mc1 & mc2 sets, traverse data
+# All in use taxa group from SAHFOS mc1 & mc2 sets, traverse and eye-count data
 SAHFOS_Zooplankton_Key <- bind_rows(list(
   "mc1" = filter(mc1_taxa, taxa_class != "phyto"),
   "mc2" = filter(mc2_taxa, taxa_class != "phyto")
 ), .id = "data_source") %>% 
-  distinct(`taxon name`, data_source, taxa_class) %>% arrange(`taxon name`)
+  distinct(`taxon name`, data_source, taxa_class) %>% 
+  arrange(`taxon name`) %>% 
+  mutate(taxa = word(`taxon name`, 1))
+
+#### _a. Traverse  ####
+#List for each taxa
+traverse_splits <- taxa_diagnostics(SAHFOS_Zooplankton_Key, sahfos_trav)
+
+#Plot them
+sahfos_traverse_plots <- traverse_splits %>% imap(function (df_test, taxa_name) {
+  
+  #Check that there are taxa that match
+  if (ncol(df_test) <= 10) {
+    return("No associated Taxa")
+  } else{
+    
+    #First and last taxon names to key on for pivot    
+    start_taxa   <- names(df_test)[11]
+    end_taxa     <- names(df_test)[ncol(df_test)]
+    
+    #Pivot longer for plot
+    if(start_taxa == end_taxa | is.na(end_taxa) == TRUE) {
+      names(df_test)[11] <- "abundance"
+      df_test$taxon <- start_taxa
+    } else {
+      df_test <- df_test %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = start_taxa:end_taxa)
+    }
+    
+    #heatmap plot
+    heat_plot_out <- df_test %>% 
+      group_by(year, taxon) %>% 
+      summarise(
+        abundance = sum(abundance, na.rm = T),
+        presence = ifelse(abundance > 0, "present", "absent")) %>% 
+      ungroup() %>% 
+      mutate(year = factor(year)) %>% 
+      ggplot(aes(year, taxon, fill = presence)) +
+      geom_tile(color = "white", size = 0.1) +
+      labs(x = NULL, y = NULL, title = str_c(taxa_name, "  |  Traverse Data")) +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 8), legend.title = element_blank())
+    
+    return(heat_plot_out)
+    
+  }
+  
+})
+
+#Plotting
+sahfos_traverse_plots$Calanus
+
+
+#### _b. Eyecount  ####
+#List for each taxa
+eyecount_splits <- taxa_diagnostics(SAHFOS_Zooplankton_Key, sahfos_eye)
+
+#Plot them
+sahfos_eyecount_plots <- eyecount_splits %>% imap(function (df_test, taxa_name) {
+  
+  #Check that there are taxa that match
+  if (ncol(df_test) <= 10) {
+    return("No associated Taxa")
+  } else{
+    
+    #First and last taxon names to key on for pivot    
+    start_taxa   <- names(df_test)[11]
+    end_taxa     <- names(df_test)[ncol(df_test)]
+    
+    #Pivot longer for plot
+    if(start_taxa == end_taxa | is.na(end_taxa) == TRUE) {
+      names(df_test)[11] <- "abundance"
+      df_test$taxon <- start_taxa
+    } else {
+      df_test <- df_test %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = start_taxa:end_taxa)
+    }
+    
+    #heatmap plot
+    heat_plot_out <- df_test %>% 
+      group_by(year, taxon) %>% 
+      summarise(
+        abundance = sum(abundance, na.rm = T),
+        presence = ifelse(abundance > 0, "present", "absent")) %>% 
+      ungroup() %>% 
+      mutate(year = factor(year)) %>% 
+      ggplot(aes(year, taxon, fill = presence)) +
+      geom_tile(color = "white", size = 0.1) +
+      labs(x = NULL, y = NULL, title = str_c(taxa_name, "  |  Eyecount Data")) +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 8), legend.title = element_blank())
+    
+    return(heat_plot_out)
+    
+  }
+  
+})
+
+#Plotting
+sahfos_eyecount_plots$Calanus
 
 
 
+
+####  Category Counting System Check  ####
+
+#SAHFOS
+sahfos_eye %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = 11:ncol(sahfos_eye)) %>% count(abundance)
+sahfos_trav %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = 11:ncol(sahfos_trav)) %>% count(abundance)
+sahfos_phyto %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = 12:ncol(sahfos_phyto)) %>% count(abundance)
+
+#NOAA
+noaa_zoo_abundances %>% 
+  pivot_longer(names_to = "taxon", values_to = "abundance", cols = 11:ncol(noaa_zoo_abundances)) %>% 
+  count(abundance)

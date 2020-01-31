@@ -180,18 +180,38 @@ sahfos_zoo_2 <- sahfos_zoo %>%
   )
 
 
-
-
-####  And Voila  ####
+####  Compare Columns  ####
 compare_df_cols(noaa_zoo_2, sahfos_zoo_2)
 
 
-combined_set <- bind_rows(list("NOAA" = noaa_zoo_2, "SAHFOS" =  sahfos_zoo_2), .id = "agency")
+####__####
+
+####  Zooplankton Merge  ####
+
+#Make sample id column present in sahfos data
+noaa_zoo_2 <- noaa_zoo_2 %>% mutate(sample_id = str_c(cruise, station, sep = "-"))
+
+
+
+#Bind them
+combined_set <- bind_rows(list("NOAA" = noaa_zoo_2, "SAHFOS" =  sahfos_zoo_2), .id = "Data Source")
+
+#Plot Calanus I-V
 combined_set %>%
-  ggplot(aes(year, `calanus finmarchicus i-iv`, color = agency)) +
+  ggplot(aes(year, `calanus finmarchicus i-iv`, color = `Data Source`)) +
     geom_point() +
-    #geom_hline(yintercept = 310000) +
-    xlim(c(2010,2017))
+    #xlim(c(2010,2017)) +
+    labs(y = "C. finmarchicus I-IV      (#/100 cubic meters)",
+         x = NULL) +
+    scale_y_continuous(labels = scales::comma_format()) +
+    theme_minimal() +
+    theme(axis.text = element_text(size = 12), legend.text = element_text(size = 12))
 
 #Are the jumps realistic?
 
+
+
+####  Export  ####
+write_csv(combined_set, 
+         str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
+         col_names = TRUE)
