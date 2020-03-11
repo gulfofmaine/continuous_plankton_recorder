@@ -77,7 +77,7 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
  
 [NAO_import](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/NAO_import): Code for importing north atlantic oscillation data   
  
-[new_anom_analyses]((https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R): Scripts for refined workflow using NOAA/SAHFOS combined dataset
+[new_anom_analyses](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R): Scripts for refined workflow using NOAA/SAHFOS combined dataset
  
 [presentations](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/presentations): Code & images for xaringan presentations   
  
@@ -86,7 +86,18 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
 
 
 ## R/new_anom_analyses: Contents
- 
+
+[01_new_anoms_eda.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/01_new_anoms_eda.R): Verificaation that new anomalies resemble matlab anomaly routine with exploratory analyses.
+
+[02_new_anoms_pca.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/02_new_anoms_pca.R): Recreation of PCA analyses using R routine anomaly data
+
+[03_new_anoms_quarterly_sst.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/03_new_anoms_quarterly_sst.R): Quarterly SST anomalu regression figures for all taxa in new dataset
+
+[04_new_anoms_sst_corrplots.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/04_new_anoms_sst_corrplots.R)
+
+[05_new_anoms_buoys.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/05_new_anoms_buoys.R): Quarterly buoy sensor data correlations
+
+[figures](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/figures)
  
  
 
