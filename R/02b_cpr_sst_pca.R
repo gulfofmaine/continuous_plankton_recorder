@@ -13,8 +13,6 @@ library(here)
 source(here::here("R", "cpr_helper_funs.R"))
 
 
-#Set ggplot theme
-theme_set(theme_classic())
 
 ####  Load Data  ####
 cpr_long <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/"),

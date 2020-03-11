@@ -12,7 +12,8 @@ library(tidyverse)
 
 
 ####  Data  ####
-noaa_zoo_abundances <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/noaa_zoo_abundances_2019.csv")
+noaa_zoo_abundances <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/noaa_zoo_abundances_2019.csv",
+                                col_types = cols(), guess_max = 1e5)
 
 
 ####  Cleaner NOAA Consolidation  ####
@@ -57,7 +58,7 @@ new_taxa_key <- list(
   `brachyura spp.`                      = c("bivalvia_larva",                                                                            
                                             "brachyura_nauplius"),
   
-  `calanus finmarchicus i-iv`           = c("calanus_copepodite i-iv"),
+  `calanus i-iv`                        = c("calanus_copepodite i-iv"),
   
   `calanus finmarchicus v-vi`           = c("calanus finmarchicus_copepodite v-vi"),
   
@@ -202,7 +203,7 @@ new_taxa_key <- list(
   
   `paedoclione doliiformis`             = c("paedoclione doliiformis_unstaged"),
   
-  `para-pseudocalanus spp.`        = c("paracalanus or pseudocalanus_copepodite i-v",
+  `para-pseudocalanus spp.`             = c("paracalanus or pseudocalanus_copepodite i-v",
                                             "paracalanus or pseudocalanus_copepodite i-v (pseudocalanus / copepodite i-vi (paracalanus)"),
   
   `paracalanus spp.`                    = c("paracalanus_copepodite vi",                                                                 

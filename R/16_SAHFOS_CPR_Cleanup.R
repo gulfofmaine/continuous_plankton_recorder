@@ -77,6 +77,8 @@ conversion_rate <- conversion_rate * 100
 sahfos_abundances <- list("traverse" = sahfos_trav   %>% select(11:ncol(sahfos_trav)), 
                           "eyecount" = sahfos_eye    %>% select(11:ncol(sahfos_eye)), 
                           "phyto"    = sahfos_phyto  %>% select(11:ncol(sahfos_phyto)))
+
+
 sahfos_m3 <-  map(sahfos_abundances, function(x){
   x_meters_cubed <- x * conversion_rate
   return(x_meters_cubed)
