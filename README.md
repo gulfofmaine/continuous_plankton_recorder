@@ -91,9 +91,9 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
 
 [02_new_anoms_pca.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/02_new_anoms_pca.R): Recreation of PCA analyses using R routine anomaly data
 
-[03_new_anoms_quarterly_sst.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/03_new_anoms_quarterly_sst.R): Quarterly SST anomalu regression figures for all taxa in new dataset
+[03_new_anoms_quarterly_sst.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/03_new_anoms_quarterly_sst.R): Quarterly SST anomaly regression figures for all taxa in new dataset
 
-[04_new_anoms_sst_corrplots.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/04_new_anoms_sst_corrplots.R)
+[04_new_anoms_sst_corrplots.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/04_new_anoms_sst_corrplots.R): Correlograms between CPR taxa anomalies and SST anomalies
 
 [05_new_anoms_buoys.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/05_new_anoms_buoys.R): Quarterly buoy sensor data correlations
 
