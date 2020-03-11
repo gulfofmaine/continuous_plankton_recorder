@@ -9,7 +9,7 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
 [index.md](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/index.md) - Quick links to reports, presentations, & web apps   
  
 [R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R) - Folder containing R code for data cleanup and analyses   
- 
+[matlab](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/matlab) - Folder with matlab CalProc routine for estimating seasonal splines
  
  
 ## R: Contents
@@ -61,7 +61,7 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
 
 [14_taxa_check_heatplots.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/14_taxa_check_heatplots.R): Visualization tools for determining which taxa-stage groupings are in use and how that changes over time.   
 
-[15_NOAA_CPR_Key.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/15_NOAA_CPR_Key.R): Script for reducing the NOAA dataset down to groupings that are more similar to the SAHFOS data, drops taxa that are not ever observed.   
+[15_NOAA_CPR_Cleanup.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/15_NOAA_CPR_Cleanup.R): Script for reducing the NOAA dataset down to groupings that are more similar to the SAHFOS data, drops taxa that are not ever observed.   
 
 [16_SAHFOS_CPR_Cleanup.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/16_SAHFOS_CPR_Cleanup.R): Partner script to the NOAA CPR Key. Converts SAHFOS data from concentration per 10cm silk mesh to concentration per $m^3$   
 
@@ -69,11 +69,15 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
 
 [18_karen_s_analysis_funs.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/18_karen_s_analysis_funs.R): Re-coding of MATLAB code obtained from Karen Stamieszkin. Splits taxa proportionally into contributing stages. Determines the predicted length for each stage at a given temperature. 
  
+[19_cpr_splines.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/19_cpr_splines.R): Seasonal abundance anomaly calculations for combined NOAA/SAHFOS CPR data
+ 
 [cpr_buoy_DE](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/cpr_buoy_DE): Shiny App Files for exploring correlations between buoy sensor data and quarterly CPR data   
  
 [cpr_helper_funs.R](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/R/cpr_helper_funs.R): Shortcut to commonly used functions   
  
 [NAO_import](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/NAO_import): Code for importing north atlantic oscillation data   
+ 
+[new_anom_analyses](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R): Scripts for refined workflow using NOAA/SAHFOS combined dataset
  
 [presentations](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/presentations): Code & images for xaringan presentations   
  
@@ -81,8 +85,19 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
  
 
 
- 
- 
+## R/new_anom_analyses: Contents
+
+[01_new_anoms_eda.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/01_new_anoms_eda.R): Verificaation that new anomalies resemble matlab anomaly routine with exploratory analyses.
+
+[02_new_anoms_pca.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/02_new_anoms_pca.R): Recreation of PCA analyses using R routine anomaly data
+
+[03_new_anoms_quarterly_sst.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/03_new_anoms_quarterly_sst.R): Quarterly SST anomaly regression figures for all taxa in new dataset
+
+[04_new_anoms_sst_corrplots.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/04_new_anoms_sst_corrplots.R): Correlograms between CPR taxa anomalies and SST anomalies
+
+[05_new_anoms_buoys.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/05_new_anoms_buoys.R): Quarterly buoy sensor data correlations
+
+[figures](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/figures): Figure recreations created using the new R anomaly routine from the combined NOAA/SAHFOS dataset
  
  
 

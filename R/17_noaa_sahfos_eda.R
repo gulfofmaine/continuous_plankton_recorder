@@ -16,7 +16,7 @@ source(here::here("R", "cpr_helper_funs.R"))
 
 ####  1. NOAA Consolidated  ####
 #Reduced NOAA dataset obtained from 15_NOAA_CPR_Key.R
-source("R/15_NOAA_CPR_Key.R")
+source("R/15_NOAA_CPR_Cleanup.R")
 
 
 ####  2. SAHFOS Consolidated  ####
@@ -85,7 +85,7 @@ noaa_zoo_2 %>%
 noaa_calanus <- noaa_zoo_2 %>% 
   group_by(year) %>% 
   dplyr::summarise(`calanus_v-vi` = sum(`calanus finmarchicus v-vi`, na.rm = T),
-                   `calanus_i-iv` = sum(`calanus finmarchicus i-iv`, na.rm = T)) %>% 
+                   `calanus_i-iv` = sum(`calanus i-iv`, na.rm = T)) %>% 
   ggplot() +
   geom_point(aes(year, `calanus_v-vi`, color = "calanus_v-vi")) +
   geom_point(aes(year, `calanus_i-iv`, color = "calanus_i-iv")) +
@@ -122,76 +122,95 @@ compare_df_cols(noaa_zoo_2, sahfos_zoo)
 #Renaming of sahfos data to match the refined noaa list
 sahfos_zoo_2 <- sahfos_zoo %>% 
   rename(
-    `acartia spp.` = `acartia spp. (unidentified)`,
-    `amphipoda spp.` = `amphipoda (unidentified)`,
-    `appendicularia spp.` = appendicularia,
-    `bivalvia spp.` = `bivalvia larvae`,
+    `acartia spp.`              = `acartia spp. (unidentified)`,
+    `amphipoda spp.`            = `amphipoda (unidentified)`,
+    `appendicularia spp.`       =  appendicularia,
+    `bivalvia spp.`             = `bivalvia larvae`,
     `calanus finmarchicus v-vi` = `calanus finmarchicus`,
-    `calanus finmarchicus i-iv` = `calanus i-iv`,
-    `calanus spp.` = `calanus v-vi unidentified`, 
-    `centropages spp.` = `centropages spp. (unidentified)`,
-    `cumacea spp.` = cumacea,
-    `doliolidae spp.` = doliolidae,
-    `euchaeta spp.` = `euchaetidae (unidentified)`,
-    `euphausiacea spp.` = `euphausiacea total`,
-    `foraminifera spp.` = `foraminifera (total)`,
-    `gammaridea spp.` = gammaridea,
-    `gastropoda spp.` = `gastropoda (unidentified)`,
-    `gymnosomoata spp.` = `gymnosomata (unidentified)`,
-    `harpacticoida spp.` = `harpacticoida total traverse`,
-    `hyperiidea spp.` = `hyperiidea (total)`,
-    `ischnocalanus spp.` =  ischnocalanus,
-    `lepas spp.` = `lepas nauplii`,
-    `metridia spp.` = `metridia spp. (v-vi) (unidentified)`,
-    `monstrilloida spp.` = monstrilloida,
-    `ostracoda spp.` = ostracoda,
-    `pleuromamma spp.` = `pleuromamma spp. (unidentified)`,
-    `polychaeta larva` = `polychaete larvae (unidentified)`,
-    `salpidae spp.` = `salpidae (total)`,
-    `siphonostomatoida spp.` = siphonostomatoida,
-    `thecosomata spp.` = `thecosomata (north atlantic)`,
-    `tintinnidae spp.` = `tintinnida total`
+    `calanus i-iv`              = `calanus i-iv`,
+    `calanus spp.`              = `calanus v-vi unidentified`, 
+    `centropages spp.`          = `centropages spp. (unidentified)`,
+    `cumacea spp.`              =  cumacea,
+    `doliolidae spp.`           =  doliolidae,
+    `euchaeta spp.`             = `euchaetidae (unidentified)`,
+    `euphausiacea spp.`         = `euphausiacea total`,
+    `foraminifera spp.`         = `foraminifera (total)`,
+    `gammaridea spp.`           =  gammaridea,
+    `gastropoda spp.`           = `gastropoda (unidentified)`,
+    `gymnosomoata spp.`         = `gymnosomata (unidentified)`,
+    `harpacticoida spp.`        = `harpacticoida total traverse`,
+    `hyperiidea spp.`           = `hyperiidea (total)`,
+    `ischnocalanus spp.`        =  ischnocalanus,
+    `lepas spp.`                = `lepas nauplii`,
+    `metridia spp.`             = `metridia spp. (v-vi) (unidentified)`,
+    `monstrilloida spp.`        =  monstrilloida,
+    `ostracoda spp.`            =  ostracoda,
+    `pleuromamma spp.`          = `pleuromamma spp. (unidentified)`,
+    `polychaeta larva`          = `polychaete larvae (unidentified)`,
+    `salpidae spp.`             = `salpidae (total)`,
+    `siphonostomatoida spp.`    =  siphonostomatoida,
+    `thecosomata spp.`          = `thecosomata (north atlantic)`,
+    `tintinnidae spp.`          = `tintinnida total`
     
     
     ) %>% 
   #This section is for when multiple columns need to be reduced to a single aggregate
   mutate(
-    `candacia spp.` = `candacia i-iv` + `candacia spp. (unidentified)`, 
-    `candacia i-iv` = NULL,
-    `candacia spp. (unidentified)` = NULL,
-    `copepoda spp.` = `copepod eggs` + `copepod nauplii`,
-    `copepod eggs` = NULL,
-    `copepod nauplii` = NULL,
-    `decapoda spp.` = `decapod megalopa` + `decapod zoea` + `decapoda larvae (total)`,
-    `decapod megalopa` = NULL, 
-    `decapod zoea` = NULL,
-    `decapoda larvae (total)` = NULL,
-    `fish eggs` = `fish eggs (total)` + `fish eggs with oil globules` + `fish eggs without oil globules`,
-    `fish eggs (total)` = NULL,
-    `fish eggs with oil globules` = NULL,
-    `fish eggs without oil globules` = NULL,
-    `pseudocalanus spp.` = `pseudocalanus spp. adult atlantic` + `pseudocalanus spp. adult total`,
-    `pseudocalanus spp. adult atlantic` = NULL, 
-    `pseudocalanus spp. adult total` = NULL,
-    `radiolaria spp.` = `radiolaria non-acantharian` + `radiolaria total`,
-    `radiolaria non-acantharian` = NULL,
-    `radiolaria total` = NULL,
+    `candacia spp.`                     = `candacia i-iv` + `candacia spp. (unidentified)`, 
+    `candacia i-iv`                     =  NULL,
+    `candacia spp. (unidentified)`      =  NULL,
+    `copepoda spp.`                     = `copepod eggs` + `copepod nauplii`,
+    `copepod eggs`                      =  NULL,
+    `copepod nauplii`                   =  NULL,
+    `decapoda spp.`                     = `decapod megalopa` + `decapod zoea` + `decapoda larvae (total)`,
+    `decapod megalopa`                  =  NULL, 
+    `decapod zoea`                      =  NULL,
+    `decapoda larvae (total)`           =  NULL,
+    `fish eggs`                         = `fish eggs (total)` + `fish eggs with oil globules` + `fish eggs without oil globules`,
+    `fish eggs (total)`                 =  NULL,
+    `fish eggs with oil globules`       =  NULL,
+    `fish eggs without oil globules`    =  NULL,
+    `pseudocalanus spp.`                = `pseudocalanus spp. adult atlantic` + `pseudocalanus spp. adult total`,
+    `pseudocalanus spp. adult atlantic` =  NULL, 
+    `pseudocalanus spp. adult total`    =  NULL,
+    `radiolaria spp.`                   = `radiolaria non-acantharian` + `radiolaria total`,
+    `radiolaria non-acantharian`        =  NULL,
+    `radiolaria total`                  =  NULL,
+    sample_id                           =  NULL
     
   )
 
 
-
-
-####  And Voila  ####
+####  Compare Columns  ####
 compare_df_cols(noaa_zoo_2, sahfos_zoo_2)
 
 
-combined_set <- bind_rows(list("NOAA" = noaa_zoo_2, "SAHFOS" =  sahfos_zoo_2), .id = "agency")
+####__####
+
+####  Zooplankton Merge  ####
+
+# #Make sample id column present in sahfos data
+# noaa_zoo_2 <- noaa_zoo_2 %>% mutate(sample_id = str_c(cruise, station, sep = "-"))
+
+
+
+#Bind them
+combined_set <- bind_rows(list("NOAA" = noaa_zoo_2, "SAHFOS" =  sahfos_zoo_2), .id = "Data Source")
+
+#Plot Calanus I-V
 combined_set %>%
-  ggplot(aes(year, `calanus finmarchicus i-iv`, color = agency)) +
+  ggplot(aes(year, `calanus i-iv`, color = `Data Source`)) +
     geom_point() +
-    #geom_hline(yintercept = 310000) +
-    xlim(c(2010,2017))
+    #xlim(c(2010,2017)) +
+    labs(y = "Calanus I-IV      (#/100 cubic meters)",
+         x = NULL) +
+    scale_y_continuous(labels = scales::comma_format()) +
+    theme_minimal() +
+    theme(axis.text = element_text(size = 12), legend.text = element_text(size = 12))
 
-#Are the jumps realistic?
 
+
+####  Export  ####
+write_csv(combined_set, 
+         str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
+         col_names = TRUE)

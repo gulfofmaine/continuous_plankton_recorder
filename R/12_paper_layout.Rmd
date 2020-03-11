@@ -112,23 +112,7 @@ analysis_sets <- list("Full Timeseries" = list(data = full_ts),
                       "1961 - 2003"     = list(data = pre_split),
                       "2004 - 2017"     = list(data = post_split))
 
-#Function for extracting %variance explained from PCA object
-pull_deviance <- function(pca_sdev) {
-  
-  eigs <- pca_sdev ^ 2
-  
-  deviance_df <- rbind(
-    SD = sqrt(eigs),
-    Proportion = eigs/sum(eigs),
-    Cumulative = cumsum(eigs)/sum(eigs))
-  
-  pca_dev_out <- data.frame(
-    "PC1" = str_c(as.character(round(deviance_df[2,1] * 100, 2)), "% of Variance"),
-    "PC2" = str_c(as.character(round(deviance_df[2,2] * 100, 2)), "% of Variance"))
-  
-  return(pca_dev_out)
-  
-}
+
 
 # Perform all analyses on this list for consistency and for organization
 

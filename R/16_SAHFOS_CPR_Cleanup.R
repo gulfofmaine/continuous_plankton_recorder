@@ -46,12 +46,12 @@ sahfos_eye %>% count(`calanus finmarchicus`)
 
 
 # #Question: are the counts already converted to the number expected for a full transect?
-ggplot() +
-  geom_point(data = mc1_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
-  geom_point(data = mc1_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
-  geom_point(data = mc2_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
-  geom_point(data = mc2_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
-  labs(x = NULL, y = "C. finmarchicus", title = "Calanus Check")
+# ggplot() +
+#   geom_point(data = mc1_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
+#   geom_point(data = mc1_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
+#   geom_point(data = mc2_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
+#   geom_point(data = mc2_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
+#   labs(x = NULL, y = "C. finmarchicus", title = "Calanus Check")
 
 #Appears that way, would not expect to see >1000 on 1.25 square cm
 # Conclusion all three (eye, phyto, traverse) are in numbers per transect
@@ -70,13 +70,15 @@ ggplot() +
 #Original calculation to get to # per meters cubed
 conversion_rate <- 1/2.987091
 
-#Appears to be 1/1000th to scale of NOAA data in 100 meters cubed for some reason
-conversion_rate <- conversion_rate * 1000
+#Multiply by 100 to get to 100 cubic meters
+conversion_rate <- conversion_rate * 100
 
 #Listed by source
 sahfos_abundances <- list("traverse" = sahfos_trav   %>% select(11:ncol(sahfos_trav)), 
                           "eyecount" = sahfos_eye    %>% select(11:ncol(sahfos_eye)), 
                           "phyto"    = sahfos_phyto  %>% select(11:ncol(sahfos_phyto)))
+
+
 sahfos_m3 <-  map(sahfos_abundances, function(x){
   x_meters_cubed <- x * conversion_rate
   return(x_meters_cubed)
