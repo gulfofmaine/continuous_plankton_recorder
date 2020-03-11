@@ -102,6 +102,34 @@ pull_deviance <- function(pca_sdev) {
 
 ####  Corrplot Functions  ####
 
+#' @title Pull Time Periods for Corrplots
+#'
+#' @param time_period Time period of interest identifying the "period" value to extract
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+pull_period <- function(cpr_long_df = cpr_sst, time_period = annual) {
+  
+  plankton_ts <- cpr_long_df %>% 
+    filter(period %in% c("Annual", "annual")) %>% 
+    pivot_wider(names_from = taxa, values_from = anomaly) %>% 
+    select(year, one_of(species_05))
+  
+  temp_ts <- cpr_long_df %>% 
+    distinct(year, period, .keep_all = T) %>% 
+    pivot_wider(names_from = period, values_from = temp_anomaly) %>% 
+    select(year, one_of(time_period)) #%>%  setNames(c("year", "period"))
+  
+  df_out <- inner_join(plankton_ts, temp_ts, by = "year") %>% drop_na()
+  return(df_out)
+  
+}
+
+
+
+
 #' Extract upper triangle of the correlation matrix
 #'
 #' @param correlation_matrix Correlation matrix object created by cor()
@@ -115,12 +143,25 @@ get_upper_tri <- function(correlation_matrix){
   return(correlation_matrix)
 }
 
-#Pull correlations with p-values
+
+
+
+
+ 
+#' Pull correlations and p-values for Correlogram
+#'
+#' @param wide_df 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 corr_plot_setup <- function(wide_df) {
   
   # 1. Pull data used for corellation matrix
   corr_data <- wide_df %>% 
-    select(-year, -period)
+    select(-year#, -period
+           )
   
   # 2. Pull the correlation matrix and melt to a dataframe
   corr_mat <- corr_data %>% cor() 
@@ -158,15 +199,28 @@ corr_plot_setup <- function(wide_df) {
 #Not in Function
 `%notin%` <- purrr::negate(`%in%`)
 
-# custom corr plot
-cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall"){
+
+#' CPR Correlogram
+#'
+#' @param corr_dataframe 
+#' @param period 
+#' @param plot_style 
+#' @param taxa 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall", taxa = NULL){
   
   #Filter Var1 and Var2 to reshape plot
   
   #Taxa
-  my_taxa <- c("calanus", "calanus1to4", "centropages", "chaetognatha",
-               "euphausiacea", "metridia", "oithona", "para_pseudocalanus",
-               "paraeucheata", "temora")
+  if(is.null(taxa)) {
+    my_taxa <- c("calanus", "calanus1to4", "centropages", "chaetognatha",
+                 "euphausiacea", "metridia", "oithona", "para_pseudocalanus",
+                 "paraeucheata", "temora")
+  } else{my_taxa = taxa}
   
   long_plot <- corr_dataframe %>% 
     filter(Var1 %notin% my_taxa,
@@ -202,8 +256,9 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall"){
          title = period) +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, size = 6),
           axis.text.y = element_text(size = 6),
-          legend.position = leg_position) +
-    coord_fixed()
+          legend.position = leg_position,
+          axis.text = element_text(color = "black")) +
+    coord_fixed() 
   
   
 }
