@@ -97,7 +97,7 @@ Analysis of zooplankton trends in the gulf of maine region. Identifying changes 
 
 [05_new_anoms_buoys.R](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/05_new_anoms_buoys.R): Quarterly buoy sensor data correlations
 
-[figures](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/figures)
+[figures](https://github.com/adamkemberling/continuous_plankton_recorder/tree/master/R/new_anom_analyses/figures): Figure recreations created using the new R anomaly routine from the combined NOAA/SAHFOS dataset
  
  
 
