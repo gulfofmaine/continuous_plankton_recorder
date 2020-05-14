@@ -347,8 +347,8 @@ deviance_explained <- pull_deviance(daily_pca$sdev)
 buoy_weights <- leading_modes %>%
   gather(key = "PC", value =  "Principal Component Weight", PC1, PC2) %>%
   mutate(PC = if_else(PC == "PC1", 
-                     as.character(analysis_sets[[i]]$deviance_explained$PC1),
-                     as.character(analysis_sets[[i]]$deviance_explained$PC2)),
+                     as.character(deviance_explained$PC1), 
+                     as.character(deviance_explained$PC2)),
          buoy_id = str_sub(sensor_id, -1, -1),
          buoy_type = if_else(buoy_id %in% c("M", "N"), "Offshore", "Nearshore"),
          reading_depth = str_sub(sensor_id, -6, -4),
