@@ -35,8 +35,7 @@ buoys_aggregated <- read.csv(str_c(cpr_boxpath, "data/processed_data/buoy_anomal
 
 
 #Daily Reads
-buoys <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoys_daily.csv", sep = "/"),
-                  col_types = cols())
+buoys <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoys_daily.csv", sep = "/"), col_types = cols())
 buoys <- buoys %>% 
   mutate(
     #Create julian days for quarter assignment
@@ -65,9 +64,11 @@ daily_anoms <- buoys %>%
          sal_anom  = (sal - avg_sal) / sal_sd) %>% 
   ungroup()
 
-####__####
+####________________________________####
 
-####  Manual PCA  ####
+####  Dealing with Gappy Matrix  ####
+
+###1.  Manual PCA  ####
 
 ####  Need a Matrix with and without NA values
 buoys_aggregated %>% filter(is.na(temp_anom == TRUE))
@@ -97,7 +98,7 @@ with_na <- buoys_aggregated %>%
   as.matrix()
 
 
-####  Matrix Algebra Testing  ####
+###__ Matrix Algebra Testing  ####
 
 #Here  is our tester
 with_na
@@ -119,7 +120,7 @@ var(without_na)
 cor(with_na)     
 cor(without_na)
 
-####  Computation of eigenvalues  ####
+###__ Computation of eigenvalues  ####
 
 #The eigen() function computes the eigenvalues and eigenvectors simultaneously. 
 #Therefore it’s typically best to save the results in a variable and access the appropriate vector.
@@ -137,9 +138,8 @@ e_full$vectors
 #The squared eigenvecctors all sum to 1
 colSums(e_full$vectors ^ 2) 
 
-####__####
 
-####  PCA from covariance matrix  ####
+#### 2.  PCA from covariance matrix  ####
 x_anoms <- without_na
 S <- var(x_anoms)
 E <- eigen(S)
@@ -171,7 +171,7 @@ dimnames(prcomp_pc) <- list(colnames(x_anoms), paste0("PC", seq_len(ncol(prcomp_
 prcomp_pc
 pca_full$rotation
 
-# ####  Singular Vector Decomposition  ####
+##### 3. Singular Vector Decomposition  ####
 # #Is svd done on the covariance matrix or the raw values?
 # prcomp_pc #Match this
 # 
@@ -219,9 +219,9 @@ pca_full$rotation
 # 
 # A == round(svd.matrix, 0)
 
-####__#### 
+####________________________________####
 
-####  Daily Scale PCA  ####
+####  Daily Scale Buoy PCA  ####
 buoys_pca_dat <- daily_anoms %>% 
   select(-avg_temp, -avg_sal, -temp_sd, -sal_sd, -density, - temp, -sal) %>% 
   rename(temp = temp_anom, sal = sal_anom) %>% 
@@ -248,7 +248,10 @@ write_csv(buoys_pca_dat,
           path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv", sep = "/"), 
           col_names = TRUE)
 
-####  PCA using prcomp  ####
+
+
+
+####__ PCA using prcomp  ####
 
 #PCA
 daily_pca <- prcomp(na.omit(buoys_pca_mat), center = FALSE, scale. = FALSE)
@@ -283,9 +286,9 @@ ggplot(filter(pca_out, `Principal Component` != "PC3" & is.na(`Principal Compone
   theme_minimal()
 
 
-####__####
+####________________________________####
 
-####  Regression Interpolations  ####
+####  Buoy-Gap Interpolations  ####
 
 #First of all where are our gaps
 pca_gaps <- pca_out %>% filter(is.na(`Principal Component Loading`))
@@ -314,7 +317,6 @@ E_daily <- eigen(S_daily)
 #Should be able to get the principal components vectors this way... 
 U_daily <- t(E_daily$vectors) * buoys_pca_mat[1,] #Day 1 PC loadings
 #Need to combine them somehow
-
 
 
 #Set up objects we want to populate
@@ -413,11 +415,11 @@ for (row_j in 1:nrow(buoy_interpolated)) {
   for (col_k in 1:ncol(buoy_interpolated)) {
     if(is.na(buoy_interpolated[row_j, col_k]) == TRUE) {
       #Mean Slope - significant regressions only
-      m <- mean(slope_mat[which(significance_mat[,col_k] == TRUE), col_k])
+      m <- mean(slope_mat[which(significance_mat[, col_k] == TRUE), col_k])
       #Mean Intercept - significant regressions only
-      b <- mean(intercept_mat[which(significance_mat[,col_k] == TRUE), col_k])
+      b <- mean(intercept_mat[which(significance_mat[, col_k] == TRUE), col_k])
       #Mean X - all avaliable data from that day's measurements
-      x <- mean(t(buoy_interpolated[row_j,]), na.rm = T)
+      x <- mean(t(buoy_interpolated[row_j, ]), na.rm = T)
       
       #New Interpolated Value
       buoy_interpolated[row_j, col_k] <- m*x + b
@@ -441,19 +443,11 @@ plot_list <- map(var_list, function(x){
     geom_line(data = buoys_pca_dat, aes(Date, !!col_name, color = "Raw"), alpha = 0.8) +
     labs(x = NULL, y = paste0(col_name))
 
-})
+}) %>% setNames(var_list)
 
 #Export the interpolated Buoy Data
 write_csv(buoy_interpolated, 
           path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"), 
           col_names = TRUE)
 
-
-
-####  Applying PCA weights to interpolated DF  ####
-#Applying PCA weights to the interpolated Data:
-
-#Raw
-
-#With Interpolations
 

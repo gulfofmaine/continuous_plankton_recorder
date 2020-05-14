@@ -46,16 +46,7 @@ sahfos_eye %>% count(`calanus finmarchicus`)
 
 
 # #Question: are the counts already converted to the number expected for a full transect?
-# ggplot() +
-#   geom_point(data = mc1_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
-#   geom_point(data = mc1_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
-#   geom_point(data = mc2_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
-#   geom_point(data = mc2_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
-#   labs(x = NULL, y = "C. finmarchicus", title = "Calanus Check")
-
-#Appears that way, would not expect to see >1000 on 1.25 square cm
 # Conclusion all three (eye, phyto, traverse) are in numbers per transect
-
 
 # B. transect to water volume
 

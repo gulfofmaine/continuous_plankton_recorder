@@ -250,7 +250,7 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall", ta
                          midpoint = 0, 
                          limit = c(-1,1), 
                          space = "Lab", 
-                         name="Pearson\nCorrelation") +
+                         name = "Pearson\nCorrelation") +
     labs(x = NULL, 
          y = NULL, 
          title = period) +
@@ -289,7 +289,7 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
   
   area_bboxes <- tribble( ##### Area BBbox Open  ####
     ~"area",  ~"lon",  ~"lat",
-    
+    #Gulf of Maine - Historic
     "GOM",   -70.000000,	42.200000,
     "GOM",   -68.600000,	42.200000,
     "GOM",   -68.600000,	42.400000,
@@ -299,7 +299,7 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
     "GOM",   -68.600000,	43.200000,
     "GOM",   -70.000000,	43.200000,
     "GOM",   -70.000000,	42.200000,
-    
+    #Gulf of Maine - Extended North to capture cpr route change
     "GOM_new",   -70.000000,	42.200000, 
     "GOM_new",   -66.600000,	42.200000, 
     "GOM_new",   -66.600000,	43.800000, 
@@ -311,13 +311,13 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
     "CCB",   -70.000000,	42.800000,
     "CCB",   -70.800000,	42.800000,
     "CCB",   -70.800000,	42.200000,
-    
+    #Western Gulf of Maine
     "WGOM",  -70.000000, 	42.200000,
     "WGOM",  -68.600000, 	42.200000,
     "WGOM",  -68.600000, 	43.200000,
     "WGOM",  -70.000000, 	43.200000,
     "WGOM",  -70.000000, 	42.200000,
-    
+    #Eastern Gulf of Maine
     "EGOM",  -68.600000,	42.400000,
     "EGOM",  -66.600000,	42.400000,
     "EGOM",  -66.600000,	43.400000,

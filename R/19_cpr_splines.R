@@ -52,7 +52,7 @@ ggplot(cal_test, aes(jday, abundance)) +
 ggplot(cal_test, aes(jday,abundance)) +
   geom_point(alpha = 0.1) +
   geom_smooth(formula = y ~ s(x, bs = "cc", k = 4), 
-              method = "gam")#Working with the data
+              method = "gam") #Working with the data
 
 
 ####  Test Splines  ####
@@ -199,7 +199,9 @@ cpr_dat <- cpr %>%
          jday = lubridate::yday(cal_date),
          abundance = `calanus i-iv`,
          log_abundance = log(abundance),
-         `longitude (degrees)` = ifelse(`longitude (degrees)` > 0, `longitude (degrees)` * -1, `longitude (degrees)`)) %>%
+         `longitude (degrees)` = ifelse(`longitude (degrees)` > 0, 
+                                        `longitude (degrees)` * -1, 
+                                        `longitude (degrees)`)) %>%
   select(year, jday, lat = `latitude (degrees)`, lon = `longitude (degrees)`, abundance)
 
 

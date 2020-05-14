@@ -38,6 +38,7 @@ This markdown doc is set up for consolidating each analysis step I've done.
 library(patchwork)
 library(ggbiplot)
 library(tidyverse)
+library(gmRi)
 library(here)
 
 ####  Functions  ####
@@ -320,9 +321,9 @@ These individual relationships can also be viewed in the following correlation p
 
 ![](presentations/buoy_plots/buoy_quarterly_corrplot.png)
 
-# Buoy Sensor PCA {.tabset .tabset-pills}
+# Buoy Sensor PCA  {.tabset .tabset-pills}
 
-Buoy readings are available at a much finer resolution than the SST and CPR dataset, and capture a more detailed image of the physical environment. 
+Buoy readings are available at a much finer resolution than the SST and CPR dataset, and capture a more detailed image of the physical environment. A decomposition of this more-detailed picture of the physical environment into 1-2 principal components should give 
 
 ## Buoy PCA Weights
 
@@ -385,3 +386,24 @@ buoy_weights %>%
 ## Buoy Timeline - Original Data with Gaps Interpolated
 
 ![](presentations/buoy_plots/pca_ts_interp.png)
+
+## Timelines Stacked
+
+![](presentations/buoy_plots/buoy_pca_timelines_stacked.png)
+
+# Apply Buoy PCA Weights to CPR  {.tabset .tabset-pills}
+
+The PCA analysis of the NERACOOS buoy sensor information allows us to characterize the physical environment of the Gulf of Maine in terms of 2 or more principal components rather than each individual sensor.
+
+If we take the average principal component loading for each 91-day quarter in the year we can compare how these first two principal components (representing region-wide relationships between buoy sensor readings) correlate with the concentrations of zooplankton observed in the CPR dataset.
+
+Principal component loadings can only be applied on days that all sensors have data, this corresponds to the dates in the above section with the buoy PCA timelines. To get a more complete timeseries we can apply the weights to the matrix of sensor readings that has had its gaps imputed.
+
+## Forcings Applied to Complete Daily Records {.tabset .tabset-pills}
+
+
+![](presentations/buoy_plots/quarterly_buoy_pca_correlations_actual.png)
+
+## Forcings Applied to Imputed Buoy Records
+
+![](presentations/buoy_plots/quarterly_buoy_pca_correlations_interpolated.png)

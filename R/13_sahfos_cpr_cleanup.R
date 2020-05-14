@@ -221,12 +221,14 @@ mc_cleanup <- function(messy_df = mc1_phyto, taxon_key = mc1_taxa, taxa = "phyto
   
   #Phytoplankton sheet has the phytoplankton color index
   if(taxa == "phyto"){
+    
     clean_df <- clean_df %>% 
       select(Sample_Id, Cruise, Station, Year, Month, Day, Hour, Minute, 
              `Latitude (degrees)` = Latitude, `Longitude (degrees)` = Longitude, 
              `Phytoplankton Color Index` = Chlorophyll_Index,  everything()) %>% 
       select(-Midpoint_Date_Local)
   } else {
+    
     clean_df <- clean_df %>% 
       select(Sample_Id, Cruise, Station, Year, Month, Day, Hour, Minute, 
              `Latitude (degrees)` = Latitude, `Longitude (degrees)` = Longitude, everything()) %>% 
