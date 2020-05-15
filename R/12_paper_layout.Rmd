@@ -25,9 +25,9 @@ options(knitr.kable.NA = '')
 
 # Markdown Document Overview 
 
-This markdown doc is set up for consolidating each analysis step I've done.
+This markdown document is set up to consolidate each analysis step I've done. Inital analyses were performed on the dataset obtained from NOAA. This has been changed to incorporate additional years of data obtained from the Sir Alister Hardy Foundation (SAHFOS).
  
- The first sections will mirror the steps taken in Pershing et al., 2005 in setting up the PCA and determining the weights and timelines for each time-period as shown in the following figure.
+ The first sections will mirror the steps taken in Pershing et al., 2005 in setting up the PCA and determining the weights and timelines for each time-period as shown in the following figure. The analyses for these steps used bi-monthly averages of zooplankton concentrations.
 
 ![](presentations/pershing05_recreations/pershing_05_PCA.png)
 
@@ -71,8 +71,8 @@ period = factor(period, levels = c("Annual", "January - February", "March - Apri
 ####  Quarterly CPR Data with SST  ####
 #with quarterly sst measurements and a one-period lag - souce: 02b_quarterly_cpr_sst_regressions
 cpr_sst <- read_csv(str_c(cpr_boxpath, "data/processed_data/quarterly_cpr_sst.csv", sep = "/"), 
-          col_names = TRUE,
-          col_types = cols())
+                    col_names = TRUE,
+                    col_types = cols())
 
 
 ####   Buoy Data  ####
@@ -319,7 +319,12 @@ The relationship between any given taxa and the measurements of a specific buoy 
 
 These individual relationships can also be viewed in the following correlation plot. `+` and `-` symbols indicate a significant positive or negative relationship.
 
+```{r, eval = FALSE}
+# hiding old photo link
 ![](presentations/buoy_plots/buoy_quarterly_corrplot.png)
+```
+
+![](new_anom_analyses/figures/buoy_quarterly_corrplot.png)
 
 # Buoy Sensor PCA  {.tabset .tabset-pills}
 
@@ -401,9 +406,18 @@ Principal component loadings can only be applied on days that all sensors have d
 
 ## Forcings Applied to Complete Daily Records {.tabset .tabset-pills}
 
-
+```{r, eval = FALSE}
+# hiding old photo link
 ![](presentations/buoy_plots/quarterly_buoy_pca_correlations_actual.png)
+```
+![](new_anom_analyses/figures/quarterly_buoy_pca_correlations_actual.png)
+
+
 
 ## Forcings Applied to Imputed Buoy Records
-
+```{r, eval = FALSE}
+# hiding old photo link
 ![](presentations/buoy_plots/quarterly_buoy_pca_correlations_interpolated.png)
+```
+![](new_anom_analyses/figures/quarterly_buoy_pca_correlations_interpolated.png)
+
