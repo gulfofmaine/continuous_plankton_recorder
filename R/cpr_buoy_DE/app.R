@@ -44,7 +44,7 @@ taxa_names <- set_names(taxa_names,
 buoy_names <- c("Buoy_B", "Buoy_E", "Buoy_F", "Buoy_I", "Buoy_M", "Buoy_N")
 buoy_names <- set_names(buoy_names, 
                         nm = c("Buoy B - Western Maine Shelf", 
-                               "Buoy C - Central Maine Shelf",
+                               "Buoy E - Central Maine Shelf",
                                "Buoy F - Penobscot Bay",
                                "Buoy I - Eastern Maine Shelf",
                                "Buoy M - Jordan Basin",

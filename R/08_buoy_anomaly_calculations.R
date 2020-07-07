@@ -41,14 +41,16 @@ buoys <- buoys %>%
 
 head(buoys)
 
-####  Explore Monthly Measures  ####
+
+####____________________________####
+####  Monthly Data Exploration  ####
 theme_set(theme_bw())
 
 #Pull Select Depths
 our_depths <- c("1 meter", "50 meters", "150 meters")
 
 
-#plot method testing
+# linear regression of each quarter over time
 buoys %>% 
   filter(reading_depth %in% our_depths,
          buoy_id == "Buoy_M") %>% 
@@ -111,9 +113,9 @@ sal_plots <- buoys %>%
 #Single plot
 sal_plots$Buoy_M
 
-####__####
+####____________________________####
 
-####  Daily Anomalies Estimations  ####
+####  Calculate Daily Anomalies  ####
 daily_anoms <- buoys %>% 
   group_by(buoy_id, reading_depth, julian) %>% 
   summarise(avg_temp = mean(temp, na.rm = T),
@@ -127,7 +129,7 @@ daily_anoms <- buoys %>%
 
 
 
-####  Plotting Anomaly Values  ####
+####  Plotting Daily Anomaly Values  ####
 temp_anom_plots <- daily_anoms %>% 
   filter(reading_depth %in% our_depths) %>% 
   split(.$buoy_id) %>% 
@@ -150,9 +152,9 @@ temp_anom_plots <- daily_anoms %>%
 #single plot
 temp_anom_plots$Buoy_M + temp_anom_plots$Buoy_N
 
-####__####
+####____________________________####
 
-#####  Estimate  Aggregate Values  ####
+#####  Calculate  Aggregate Values  ####
 yearly_means <- daily_anoms %>% 
   mutate(year = lubridate::year(Date),
          year = factor(year)) %>% 

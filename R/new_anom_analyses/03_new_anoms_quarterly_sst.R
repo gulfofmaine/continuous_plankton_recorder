@@ -83,10 +83,10 @@ cpr_sst <- cpr_long %>%
   left_join(sst_combined, by = c("year", "period"))
 
 
-#Save it
-write_csv(cpr_sst,
-          str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "anomalies_w_quarterlysst.csv", sep = "/"),
-          col_names = TRUE)
+# #Save it
+# write_csv(cpr_sst,
+#           str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "anomalies_w_quarterlysst.csv", sep = "/"),
+#           col_names = TRUE)
 
 
 ####___________________________####

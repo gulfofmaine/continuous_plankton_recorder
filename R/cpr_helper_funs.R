@@ -359,7 +359,7 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
     )
   
   
-  #Build spling model using mgsv::gam using cyclic penalized cubic regression spline smooth
+  #Build spline model using mgsv::gam using cyclic penalized cubic regression spline smooth
   cc_spline_mod <- gam(log_abund ~  s(jday, bs = "cc", k = spline_bins),
                        data = cpr_dat)
   

@@ -9,6 +9,7 @@ library(ggpmisc)
 library(tidyverse)
 library(here)
 library(patchwork)
+library(gmRi)
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
@@ -29,19 +30,19 @@ species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp
 cpr_sst <- cpr_sst %>% filter(taxa %in% species_05)
 
 
-# Raw - source: 10_buoy_daily_interpolations
+# Gappy Buoy data - source: 10_buoy_daily_interpolations
 buoy_raw <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv", sep = "/"),
                      col_types = cols(),
                      guess_max = 1e5)
+
+# Interputed NA Buoy data - source: 10_buoy_daily_interpolations.R
+buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"),
+                   col_types = cols())
 
 # Matrix used for daily PCA
 buoy_pca_mat <- buoy_raw %>% 
   column_to_rownames(var = "Date") %>% 
   as.matrix()
-
-# Interpolated NA's - source: 10_buoy_daily_interpolations.R
-buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"),
-                   col_types = cols())
 
 ####__####
 ####  Daily Buoy PCA   ####
@@ -91,8 +92,8 @@ timeline_raw
 
 
 # #Export plot
-# ggsave(timeline_raw, 
-#        filename =  here::here("R", "presentations", "buoy_plots", "pca_ts_raw.png"), 
+# ggsave(timeline_raw,
+#        filename =  here::here("R", "new_anom_analyses", "figures", "pca_ts_raw.png"),
 #        device = "png")
 
 
@@ -125,6 +126,8 @@ interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>%
                                          as.character(percent_explained$PC1), 
                                          as.character(percent_explained$PC2)))
 
+
+
 #Plot on interpolated timeline
 (timeline_interp <- interp_timeline %>% 
     ggplot(aes(Date, `Principal Component Loading`, color = `Principal Component`)) +
@@ -137,8 +140,15 @@ interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>%
 
 
 
+# #Export plot
+ggsave(timeline_interp,
+       filename =  here::here("R", "new_anom_analyses", "figures", "pca_ts_interp.png"),
+       device = "png")
 
 
+# Save for future use
+write_csv(pca_out, here("R/new_anom_analyses/derived_data/buoy_pca_raw.csv"))
+write_csv(interp_timeline, here("R/new_anom_analyses/derived_data/buoy_pca_interp.csv"))
 
 
 ####________________________________####
@@ -244,13 +254,13 @@ ggplot(buoy_w_cpr, aes(x = Q_Date)) +
   geom_line(aes(y = PC1_interpolated, color = "Buoy PC1 Interpolated")) +
   geom_line(aes(y = PC2_interpolated, color = "Buoy PC2 Interpolated")) +
   labs(x = "Date", y = "Principal Component Loading") +
-  scale_color_gmri(palette = "mixed")
+  scale_color_gmri(name = "", palette = "mixed")
 
 ggplot(buoy_w_cpr, aes(x = Q_Date)) +
   geom_line(aes(y = PC1_actual, color = "Buoy PC1 Measured")) +
   geom_line(aes(y = PC2_actual, color = "Buoy PC2 Measured")) +
   labs(x = "Date", y = "Principal Component Loading") +
-  scale_color_gmri(palette = "mixed")
+  scale_color_gmri(name = "", palette = "mixed")
 
 
 ####________________________________####
@@ -299,15 +309,22 @@ obs_quarterly_corrplot <- obs_plots[[1]] | obs_plots[[2]] | obs_plots[[3]] | obs
 obs_quarterly_corrplot <- obs_quarterly_corrplot & theme(legend.position = "none")
 obs_quarterly_corrplot <- obs_quarterly_corrplot + labs(caption = "PCA Loadings Applied to all Non-NA records")
 obs_quarterly_corrplot
-ggsave(plot = obs_quarterly_corrplot, filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_actual.png"), device = "png")
+
 
 #Patch them together
 interp_quarterly_corrplot <- interp_plots[[1]] | interp_plots[[2]] | interp_plots[[3]] | interp_plots[[4]]
 interp_quarterly_corrplot <- interp_quarterly_corrplot & theme(legend.position = "none")
-interp_quarterly_corrplot <-interp_quarterly_corrplot + labs(caption = "PCA Loadings Applied to all Imputed Measurements")
+interp_quarterly_corrplot <- interp_quarterly_corrplot + labs(caption = "PCA Loadings Applied to all Imputed Measurements")
 interp_quarterly_corrplot
-ggsave(plot = interp_quarterly_corrplot, filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_interpolated.png"), device = "png")
 
 
 
+# Save them
+ggsave(plot = obs_quarterly_corrplot, 
+       filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_actual.png"), device = "png")
+ggsave(plot = interp_quarterly_corrplot, 
+       filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_interpolated.png"), device = "png")
+
+# Possible better way to impute gappy matrix
+# http://menugget.blogspot.com/2012/10/dineof-data-interpolating-empirical.html
 

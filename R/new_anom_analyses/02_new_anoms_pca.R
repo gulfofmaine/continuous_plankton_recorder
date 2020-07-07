@@ -26,16 +26,29 @@ species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp
 
 
 #### Figure 1 from Pershing et al. 2005
+# add gap years for plot of annual anomalies
+gap_years <- data.frame(year = c(1975, 1976),
+                        anomaly = c(NA, NA))
+gap_anoms <- map_dfr(species_05, function(x){
+  df_out <- mutate(gap_years, taxa = x)}
+)
+
 (fig1 <- cpr_long %>% 
     filter(taxa %in% species_05,
            #is.na(anomaly) == FALSE,
            period == "annual",
            between(year, 1961, 2003)) %>% 
-    mutate(taxa = factor(taxa, levels = species_05)) %>% 
+    full_join(gap_anoms) %>% 
+    mutate(taxa = factor(taxa, levels = species_05),
+           taxa = factor(taxa, levels = species_05),
+           taxa = str_replace_all(taxa, "i_i", "i-i"),
+           taxa = str_replace_all(taxa, "v_v", "v-v"),
+           taxa = str_replace_all(taxa, "_", " ")) %>% 
     ggplot(aes(year, anomaly)) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.4) +
     geom_line(aes(group = taxa), color = gmri_cols("gmri blue")) + 
-    facet_wrap(~taxa, ncol = 1) +
+    facet_wrap(~taxa, ncol = 1) + 
+    scale_y_continuous(breaks = c(-2, 0, 2), limits = c(-2, 2)) +
     labs(x = NULL, y = NULL))
 
 # Export
@@ -207,12 +220,16 @@ pc_modes <- bind_rows(pc1, pc2)
 
 
 ####  1. Figure 4a Full PCA Time-Series  ####
-(fig_4a <- ggplot(pc_modes, aes(year, `Principal component value` * -1, color = PC)) +
+(fig_4a <- ggplot(pc_modes) +
+    geom_rect(xmin = 1990, xmax = 2000, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+    geom_rect(xmin = 2010, xmax = 2017, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
-    geom_line() +
+    geom_line(aes(year, `Principal component value` * -1, color = PC)) +
     scale_color_gmri(palette = "mixed") +
     labs(x = NULL) + 
-    theme(legend.position = c(0.85, 0.1)))
+    theme(legend.position = c(0.85, 0.1), 
+          legend.box.background = element_rect(fill = "transparent"))
+ )
 
 # Export
 ggsave(plot = fig_4a, filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"), device = "png")

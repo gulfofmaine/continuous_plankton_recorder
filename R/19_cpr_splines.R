@@ -19,6 +19,8 @@ source(here("R", "cpr_helper_funs.R"))
 
 
 ####  Data  ####
+
+# Combined dataset from NOAA/SAHFOS, concentrations in common units: # / meters cubed
 cpr <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
                 guess_max = 1e6, col_types = cols())
 
@@ -44,7 +46,7 @@ cal_test <- cpr %>%
 
 #Annual Spline - 10 knots
 ggplot(cal_test, aes(jday, abundance)) +
-  geom_point(alpha = 0.2) +
+  geom_point(alpha = 0.1) +
   geom_smooth(formula = y ~ s(x, bs = "cc", k = 10), 
               method = "gam")
 
