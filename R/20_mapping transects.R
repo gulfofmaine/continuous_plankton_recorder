@@ -101,6 +101,9 @@ area_polygons <- st_sf(area = unique(area_bboxes$area), st_sfc(area_polygons), c
 ####_______________####
 ####  Making Maps  ####
 
+# Cruises by year
+cpr %>% group_by(year) %>% summarise(n_cruises = n_distinct(cruise)) %>% View("cruise counts")
+
 ####__Sample Coverage + Study Area  ####
 t_2017 <- cpr %>% filter(year == "2017") 
 t_2017_sf <- t_2017 %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)

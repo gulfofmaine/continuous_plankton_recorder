@@ -17,12 +17,26 @@ cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_comb
                      guess_max = 1e6, 
                      col_types = cols())
 
-cpr_long <- cpr_wide %>% pivot_longer(names_to = "taxa", values_to = "anomaly", cols = 5:ncol(.))
 
 #Reference Taxa
-species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
-                "metridia_lucens", "calanus_i_iv", "euphausiacea_spp")
+# species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
+#                 "metridia_lucens", "calanus_i_iv", "euphausiacea_spp")
+species_05 <- c("Calanus finmarchicus V-VI", "Centropages typicus", 
+                "Oithona spp.","Para-Pseudocalanus spp.", 
+                "Metridia lucens", "Calanus I-IV", "Euphausiacea spp.")
   
+
+# Add some label formatting
+cpr_long <- cpr_wide %>% pivot_longer(names_to = "taxa", values_to = "anomaly", cols = 5:ncol(.)) %>% 
+  mutate(taxa = stringr::str_to_sentence(taxa),
+         taxa = str_replace_all(taxa, "Para_pseu", "Para-Pseu"),
+         taxa = str_replace_all(taxa, "i_iv", "I-IV"),
+         taxa = str_replace_all(taxa, "v_vi", "V-VI"),
+         taxa = str_replace_all(taxa, "_", " "),
+         taxa = str_replace_all(taxa, "spp", "spp."),
+         taxa = factor(taxa, levels = species_05)) %>% 
+  filter(taxa %in% species_05)
+
 
 
 #### Figure 1 from Pershing et al. 2005
@@ -34,22 +48,14 @@ gap_anoms <- map_dfr(species_05, function(x){
 )
 
 (fig1 <- cpr_long %>% 
-    filter(taxa %in% species_05,
-           #is.na(anomaly) == FALSE,
-           period == "annual",
-           between(year, 1961, 2003)) %>% 
+    filter(period == "annual") %>% 
     full_join(gap_anoms) %>% 
-    mutate(taxa = factor(taxa, levels = species_05),
-           taxa = factor(taxa, levels = species_05),
-           taxa = str_replace_all(taxa, "i_i", "i-i"),
-           taxa = str_replace_all(taxa, "v_v", "v-v"),
-           taxa = str_replace_all(taxa, "_", " ")) %>% 
     ggplot(aes(year, anomaly)) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.4) +
     geom_line(aes(group = taxa), color = gmri_cols("gmri blue")) + 
     facet_wrap(~taxa, ncol = 1) + 
     scale_y_continuous(breaks = c(-2, 0, 2), limits = c(-2, 2)) +
-    labs(x = NULL, y = NULL))
+    labs(x = NULL, y = "Abundance Index"))
 
 # Export
 ggsave(plot = fig1, filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"), device = "png")
@@ -65,8 +71,7 @@ cpr_2005 <- cpr_long %>%
               values_from = anomaly) 
 
 cpr_2005_vals <- cpr_2005 %>% 
-  select(calanus_finmarchicus_v_vi, centropages_typicus, oithona_spp, para_pseudocalanus_spp,
-         metridia_lucens, calanus_i_iv, euphausiacea_spp)
+  select(one_of(species_05))
 
 #Perform PCA
 pca_2005 <- prcomp(cpr_2005_vals, center = F, scale. = F)
@@ -89,6 +94,7 @@ percent_explained <- pull_deviance(pca_2005$sdev)
            ) %>% 
     ggplot(aes(taxa, `Principal Component Weight` * -1, fill = PC)) +
     geom_col(position  = "dodge") +
+    scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
     scale_fill_gmri(palette = "mixed") +
     labs(x = "") +
     guides(fill = guide_legend(title = NULL)) +
@@ -141,7 +147,7 @@ pc_modes <- bind_rows(pc1, pc2)
     geom_line() +
     scale_color_gmri(palette = "mixed") +
     labs(x = NULL) + 
-    theme(legend.position = c(0.85, 0.1)))
+    theme(legend.position = c(0.85, 0.12)))
 
 ggsave(plot = fig_2b, filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"), device = "png")
 
@@ -150,7 +156,8 @@ ggsave(plot = fig_2b, filename = here::here("R", "new_anom_analyses", "figures",
 ####  3. Figure 3 - Temperature and PCA Modes  ####
 
 # Bring in SST
-sst_long_lagged <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "SST_with_lags.csv", sep = "/"))
+sst_long_lagged <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "SST_with_lags.csv", sep = "/"),
+                            col_types = cols())
 
 
 # Plot
@@ -183,8 +190,7 @@ cpr_full <- cpr_long %>%
               values_from = anomaly) 
 
 cpr_full_vals <- cpr_full %>% 
-  select(calanus_finmarchicus_v_vi, centropages_typicus, oithona_spp, para_pseudocalanus_spp,
-         metridia_lucens, calanus_i_iv, euphausiacea_spp)
+  select(one_of(species_05))
 
 
 #Apply pca modes
@@ -227,7 +233,7 @@ pc_modes <- bind_rows(pc1, pc2)
     geom_line(aes(year, `Principal component value` * -1, color = PC)) +
     scale_color_gmri(palette = "mixed") +
     labs(x = NULL) + 
-    theme(legend.position = c(0.85, 0.1), 
+    theme(legend.position = c(0.85, 0.12), 
           legend.box.background = element_rect(fill = "transparent"))
  )
 
