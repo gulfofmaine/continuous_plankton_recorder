@@ -58,7 +58,10 @@ gap_anoms <- map_dfr(species_05, function(x){
     labs(x = NULL, y = "Abundance Index"))
 
 # Export
-ggsave(plot = fig1, filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"), device = "png")
+ggsave(plot = fig1, 
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"), 
+       device = "png", 
+       height = 8, width = 6, units = "in")
 
 
 ####  1. Figure 2 PCA Modes  ####
@@ -90,10 +93,12 @@ percent_explained <- pull_deviance(pca_2005$sdev)
     mutate(species = factor(taxa, levels = species_05),
            PC = if_else(PC == "PC1", 
                         as.character(percent_explained$PC1),
-                        as.character(percent_explained$PC2))
-           ) %>% 
+                        as.character(percent_explained$PC2)),
+           PC = fct_rev(PC)) %>% 
     ggplot(aes(taxa, `Principal Component Weight` * -1, fill = PC)) +
     geom_col(position  = "dodge") +
+    geom_vline(data = data.frame(vlines = seq(1.5, 6.5, by = 1)),
+               aes(xintercept = vlines), linetype = 2, show.legend = FALSE, alpha = 0.5) +
     scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
     scale_fill_gmri(palette = "mixed") +
     labs(x = "") +
@@ -101,7 +106,10 @@ percent_explained <- pull_deviance(pca_2005$sdev)
     theme(legend.position = c(0.825, 0.925)))
 
 # Export
-ggsave(plot = fig2a, filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"), device = "png")
+ggsave(plot = fig2a, 
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"), 
+       device = "png", 
+       height = 6, width = 8, units = "in")
 
 
 ####  2. Figure 2b PCA Time-series  ####
@@ -149,9 +157,19 @@ pc_modes <- bind_rows(pc1, pc2)
     labs(x = NULL) + 
     theme(legend.position = c(0.85, 0.12)))
 
-ggsave(plot = fig_2b, filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"), device = "png")
+ggsave(plot = fig_2b, 
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"), 
+       device = "png",
+       height = 6, width = 8, units = "in")
 
 
+
+# Stacked figure
+fig_2_stacked <- fig2a / fig_2b + theme(legend.position = "none")
+ggsave(fig_2_stacked,
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"), 
+       device = "png",
+       height = 10, width = 8, units = "in")
 
 ####  3. Figure 3 - Temperature and PCA Modes  ####
 
@@ -177,7 +195,10 @@ sst_long_lagged <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "SST_wi
    facet_wrap(~PC, nrow = 2) +
    labs(y = "Magnitude", x = NULL))
 
-ggsave(plot = fig3, filename = here::here("R", "new_anom_analyses", "figures", "2005_PCAts_wtemps.png"), device = "png")
+ggsave(plot = fig3, 
+       filename = here::here("R", "new_anom_analyses", "figures", "2005_PCAts_wtemps.png"), 
+       device = "png",
+       height = 6, width = 8, units = "in")
 
 ####__####
 ####  Projecting Forward to Recent Years  ####
@@ -238,7 +259,10 @@ pc_modes <- bind_rows(pc1, pc2)
  )
 
 # Export
-ggsave(plot = fig_4a, filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"), device = "png")
+ggsave(plot = fig_4a, 
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"), 
+       device = "png",
+       height = 6, width = 8, units = "in")
 
 ####  2. Figure 4b Full TS w/ SST  ####
 pca_modes_master <- pc_modes %>% 
@@ -261,7 +285,10 @@ pca_modes_master <- pc_modes %>%
     labs(y = "Magnitude", x = NULL))
 
 # Export
-ggsave(plot = fig4b, filename = here::here("R", "new_anom_analyses", "figures", "full_PCAts_wtemps.png"), device = "png")
+ggsave(plot = fig4b, 
+       filename = here::here("R", "new_anom_analyses", "figures", "full_PCAts_wtemps.png"), 
+       device = "png",
+       height = 6, width = 8, units = "in")
 
 
 
