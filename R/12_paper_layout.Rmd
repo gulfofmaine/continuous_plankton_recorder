@@ -460,6 +460,7 @@ buoy_weights <- leading_modes %>%
 
 
 buoy_weights %>% 
+  mutate(PC = fct_rev(PC)) %>% 
   ggplot(aes(reading_depth, `Principal Component Weight`, fill = PC)) +
     geom_col(position  = "dodge") +
     scale_fill_gmri(palette = "mixed") +
