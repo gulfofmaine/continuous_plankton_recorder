@@ -3,7 +3,7 @@
 #### 2/11/2020
 
 ####  Packages  ####
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 library(here)
 library(gmRi)
 library(patchwork)
@@ -18,12 +18,17 @@ cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_comb
                      col_types = cols())
 
 
-#Reference Taxa
-# species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
-#                 "metridia_lucens", "calanus_i_iv", "euphausiacea_spp")
-species_05 <- c("Calanus finmarchicus V-VI", "Centropages typicus", 
-                "Oithona spp.","Para-Pseudocalanus spp.", 
-                "Metridia lucens", "Calanus I-IV", "Euphausiacea spp.")
+# #Reference Taxa
+# species_05 <- c("Calanus finmarchicus V-VI", "Centropages typicus",
+#                 "Oithona spp.","Para-Pseudocalanus spp.",
+#                 "Metridia lucens", "Calanus I-IV", "Euphausiacea spp.")
+# species_05 <- factor(species_05, levels = species_05)
+
+#New levels for taxa plots, ordered by size with calanus together
+species_05 <- c("Calanus I-IV", "Calanus finmarchicus V-VI", "Centropages typicus",
+                "Oithona spp.","Para-Pseudocalanus spp.",
+                "Metridia lucens",  "Euphausiacea spp.")
+species_05 <- factor(species_05, levels = species_05)
   
 
 # Add some label formatting
@@ -65,6 +70,8 @@ ggsave(plot = fig1,
 
 
 ####  1. Figure 2 PCA Modes  ####
+
+
 #2005 paper setup 1961-2003
 cpr_2005 <- cpr_long %>%
   filter(is.na(anomaly) == FALSE,
@@ -73,16 +80,22 @@ cpr_2005 <- cpr_long %>%
   pivot_wider(names_from = taxa, 
               values_from = anomaly) 
 
+# Pull just the anomaly values
 cpr_2005_vals <- cpr_2005 %>% 
   select(one_of(species_05))
+
 
 #Perform PCA
 pca_2005 <- prcomp(cpr_2005_vals, center = F, scale. = F)
 
 
+
+
 # Get the two leading modes, and pull variance explained
 #These are the weights we would use to adjust the values
-leading_modes <- rownames_to_column(as.data.frame(pca_2005$rotation)) %>% dplyr::select(species = rowname, PC1, PC2)
+leading_modes <- rownames_to_column(as.data.frame(pca_2005$rotation), var = "species") %>% 
+  dplyr::select(species, PC1, PC2)
+
 percent_explained <- pull_deviance(pca_2005$sdev)
 
 
@@ -95,7 +108,7 @@ percent_explained <- pull_deviance(pca_2005$sdev)
                         as.character(percent_explained$PC1),
                         as.character(percent_explained$PC2)),
            PC = fct_rev(PC)) %>% 
-    ggplot(aes(taxa, `Principal Component Weight` * -1, fill = PC)) +
+    ggplot(aes(species, `Principal Component Weight` * -1, fill = PC)) +
     geom_col(position  = "dodge") +
     geom_vline(data = data.frame(vlines = seq(1.5, 6.5, by = 1)),
                aes(xintercept = vlines), linetype = 2, show.legend = FALSE, alpha = 0.5) +
@@ -103,7 +116,7 @@ percent_explained <- pull_deviance(pca_2005$sdev)
     scale_fill_gmri(palette = "mixed") +
     labs(x = "") +
     guides(fill = guide_legend(title = NULL)) +
-    theme(legend.position = c(0.825, 0.925)))
+    theme(legend.position = c(0.825, 0.095)))
 
 # Export
 ggsave(plot = fig2a, 
@@ -118,17 +131,20 @@ gap_years <- tibble(year = rep(c(1975, 1976), 2),
                     PC = c(rep("First Mode", 2), c(rep("Second Mode", 2)))
 )
 
-
+  
 pc1 <- cpr_2005_vals %>% 
   #Add a filler column because function expects years to be column 1
-  mutate(filler = NA) %>% select(filler, everything()) %>% 
-      apply_pca_load(pca_load = .,
-                     pca_rotations = pca_2005$rotation,
-                     mode_num = 1) %>% 
+  mutate(filler = NA) %>% 
+  select(filler, everything()) %>% 
+  apply_pca_load(pca_load = .,
+                 pca_rotations = pca_2005$rotation,
+                 mode_num = 1) %>% 
       rowSums() %>% 
       as.data.frame()  %>% 
-      mutate(PC = "First Mode")
-colnames(pc1)[1] <- "Principal component value"
+      mutate(PC = "First Mode",
+             `Principal component value` = `.` * -1) %>% select(2,3)
+
+#colnames(pc1)[1] <- "Principal component value"
 pc1 <- bind_cols(year = cpr_2005$year, pc1)
 pc1 <- full_join(gap_years, pc1) %>% arrange(year)
 
@@ -142,6 +158,7 @@ pc2 <- cpr_2005_vals %>%
   rowSums() %>% 
   as.data.frame()  %>% 
   mutate(PC = "Second Mode")
+
 colnames(pc2)[1] <- "Principal component value"
 pc2 <- bind_cols(year = cpr_2005$year, pc2)
 pc2 <- full_join(gap_years, pc2) %>% arrange(year)
@@ -150,7 +167,7 @@ pc2 <- full_join(gap_years, pc2) %>% arrange(year)
 pc_modes <- bind_rows(pc1, pc2)
 
 
-(fig_2b <- ggplot(pc_modes, aes(year, `Principal component value` * -1, color = PC)) +
+(fig_2b <- ggplot(pc_modes, aes(year, `Principal component value`, color = PC)) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
     geom_line() +
     scale_color_gmri(palette = "mixed") +

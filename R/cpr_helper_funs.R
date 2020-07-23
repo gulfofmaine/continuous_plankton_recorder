@@ -58,7 +58,7 @@ apply_pca_load <- function(pca_load, pca_rotations, mode_num = 1) {
   mode_num <- as.integer(mode_num)
   
   #Copy of the initial values to apply them to
-  pca_adjusted <- pca_load[,2:ncol(pca_load)]
+  pca_adjusted <- pca_load[, 2:ncol(pca_load)]
   
   #Multiply the columns by their PCA weights
   for (i in 1:ncol(rotations_t)) {
