@@ -74,7 +74,8 @@ quarterly_corrplot
 # Save Figure
 ggsave(quarterly_corrplot, 
        filename =  here::here("R", "new_anom_analyses", "figures", "sst_quarterly_corrplot.png"), 
-       device = "png")
+       device = "png", 
+       height = 6, width = 8, units = "in")
 
 
 
@@ -147,4 +148,5 @@ lagged_corrplot
 # Save Figure
 ggsave(lagged_corrplot, 
        filename =  here::here("R", "new_anom_analyses", "figures", "sst_lagged_corrplot.png"), 
-       device = "png")
+       device = "png", 
+       height = 6, width = 8, units = "in")

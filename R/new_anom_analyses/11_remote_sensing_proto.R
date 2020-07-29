@@ -8,11 +8,7 @@
 library(ncdf4)
 library(raster)
 library(gmRi)
-library(broom)
-library(splines)
-library(mgcv)
 library(tidyverse)
-library(patchwork)
 library(sf)
 library(here)
 
@@ -131,7 +127,7 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
   
   # Open connection, get subsetting indices from limits
   my_nc <- nc_open(nc_year)
-  nc_year_label <- str_sub(oisst_paths, -10, -7)
+  nc_year_label <- str_sub(nc_year, -10, -7)
   #my_nc <- nc_open(oisst_paths[2])
   
   # Subset to area and times of interest
@@ -151,6 +147,11 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
   yvals <- my_nc$dim$lat$vals[lat_idx]
   time_dims <- 1:dim(nc_data)[3]
   
+  # Get the dates that correspond in the least streamlined way possible, for naming purposes
+  dates <- as.Date(my_nc$dim$time$vals[time_idx], origin='1800-01-01', tz = "GMT")
+  
+  length(time_dims)
+  
   # Convert Each day to a raster, rotate, and stack
   nc_stack <- map(time_dims, function(time_index){
     single_date <- nc_data[, , time_index]
@@ -166,9 +167,11 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
                           ymn = min(yvals),
                           ymx = max(yvals))
     ras <- flip(ras, 2)
+    return(ras)
   }) %>% 
     stack() %>% 
-    setNames(time_dims)
+    setNames(dates)
+    #setNames(time_dims)
   
   
   # Return the raster stack for the year
@@ -178,7 +181,8 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
   setNames(oisst_years)
 
 # And plot tester
-plot(oisst_ras_list$`1981`$X1981.1, main = "OISST - 1/1/1981", col = rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu")))
+plot(oisst_ras_list$`1982`$X1982.01.01, main = "OISST - 1/1/1982", 
+     col = rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu")))
 
 # # Put in single stack (might be easier to index as a list)
 # oisst_stack <- stack(oisst_ras_list)
@@ -186,64 +190,64 @@ plot(oisst_ras_list$`1981`$X1981.1, main = "OISST - 1/1/1981", col = rev(RColorB
 
 ####____ b. As Table  ####
   
-oisst_list <- map(oisst_paths, function(nc_year){
-  
-  # Open connection, get subsetting indices from limits
-  my_nc <- nc_open(nc_year)
-  #my_nc <- nc_open(oisst_paths[2])
-  
-  # Subset to area and times of interest
-  lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
-  lat_idx  <- which( my_nc$dim$lat$vals > lat_min & my_nc$dim$lat$vals < lat_max)
-  time_idx <- which( 
-    as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") > time_min & 
-      as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") < time_max)
-  
-  # Pull netcdf data you need
-  nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
-  
-  
-  # Get the dates that correspond in the least streamlined way possible
-  dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = '1800-01-01', tz = "GMT")
-  
-  ####  convert Each date to a dataframe
-  data_stack <- map(c(1:length(dates)), function(index){
-    
-    # take the single time slice
-    single_date <- nc_data[ , , index]
-    
-    # Change the dimension names of our matrix to "lon" and "lat",
-    # and the row and column names to the latitude and longitude values.
-    dimnames(single_date) <- list(lon = my_nc$dim$lon$vals[lon_idx],
-                                  lat = my_nc$dim$lat$vals[lat_idx])
-    single_date <- t(single_date)          # transpose
-    single_date <- as.table(single_date)   # convert to table
-    single_date <- as.data.frame(single_date) # dataframe
-    single_date <- setNames(single_date, c("lat", "lon", "sst")) # set names
-    
-    return(single_date)
-    
-  }) 
-  
-  # add the names and bind them
-  data_stack <- data_stack %>% 
-    setNames(dates) %>% 
-    bind_rows(.id = "date")
-  
-  # close connection
-  nc_close(my_nc)
-  
-  #return that table for the year
-  return(data_stack)
-  
-}) %>% setNames(oisst_years)
-
-# Finally, append the years together, readjust longitude
-oisst_full <- bind_rows(oisst_list, .id = "year")
-oisst_full <- mutate(oisst_full, 
-                     lat = as.numeric(as.character(lat)),
-                     lon = as.numeric(as.character(lon)),
-                     lon = lon - 360)
+# oisst_list <- map(oisst_paths, function(nc_year){
+#   
+#   # Open connection, get subsetting indices from limits
+#   my_nc <- nc_open(nc_year)
+#   #my_nc <- nc_open(oisst_paths[2])
+#   
+#   # Subset to area and times of interest
+#   lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
+#   lat_idx  <- which( my_nc$dim$lat$vals > lat_min & my_nc$dim$lat$vals < lat_max)
+#   time_idx <- which( 
+#     as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") > time_min & 
+#       as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") < time_max)
+#   
+#   # Pull netcdf data you need
+#   nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
+#   
+#   
+#   # Get the dates that correspond in the least streamlined way possible
+#   dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = '1800-01-01', tz = "GMT")
+#   
+#   ####  convert Each date to a dataframe
+#   data_stack <- map(c(1:length(dates)), function(index){
+#     
+#     # take the single time slice
+#     single_date <- nc_data[ , , index]
+#     
+#     # Change the dimension names of our matrix to "lon" and "lat",
+#     # and the row and column names to the latitude and longitude values.
+#     dimnames(single_date) <- list(lon = my_nc$dim$lon$vals[lon_idx],
+#                                   lat = my_nc$dim$lat$vals[lat_idx])
+#     single_date <- t(single_date)          # transpose
+#     single_date <- as.table(single_date)   # convert to table
+#     single_date <- as.data.frame(single_date) # dataframe
+#     single_date <- setNames(single_date, c("lat", "lon", "sst")) # set names
+#     
+#     return(single_date)
+#     
+#   }) 
+#   
+#   # add the names and bind them
+#   data_stack <- data_stack %>% 
+#     setNames(dates) %>% 
+#     bind_rows(.id = "date")
+#   
+#   # close connection
+#   nc_close(my_nc)
+#   
+#   #return that table for the year
+#   return(data_stack)
+#   
+# }) %>% setNames(oisst_years)
+# 
+# # Finally, append the years together, readjust longitude
+# oisst_full <- bind_rows(oisst_list, .id = "year")
+# oisst_full <- mutate(oisst_full, 
+#                      lat = as.numeric(as.character(lat)),
+#                      lon = as.numeric(as.character(lon)),
+#                      lon = lon - 360)
 
 
 # #plot an annual average
@@ -334,7 +338,8 @@ modis_ras_list <- map(modis_paths, function(nc_year){
     #ras <- flip(ras, 2)
   }) %>% 
     stack() %>% 
-    setNames(time_dims)  
+    setNames(dates) #%>% 
+    #setNames(time_dims)  
     
   
   
@@ -346,7 +351,8 @@ modis_ras_list <- map(modis_paths, function(nc_year){
 
 
 # And plot
-plot(modis_ras_list$`2003`$X2, main = "MODIS - 2/15/2003", col = rev(RColorBrewer::brewer.pal(n = 8, name = "GnBu")))
+plot(modis_ras_list$`2003`$X2003.02.16, main = "MODIS - 2/16/2003", 
+     col = rev(RColorBrewer::brewer.pal(n = 8, name = "GnBu")))
 
 # # put in a single stack if you want.
 # modis_stack <- stack(modis_ras_list)
@@ -540,55 +546,84 @@ cpr_sat <- cpr_coords %>%
   split(.$year) %>% 
   imap_dfr(function(year_chunk, year_id){
     
-    #make day of year column
+    # For testing
+    # year_id <- "2004"
+    # year_chunk <- filter(cpr_coords, year == year_id)
+    
+    
+    
+    #make day of year column, we'll split on these to only extract once for each date
     year_chunk <- year_chunk %>% 
-      mutate(doy = lubridate::yday(station_date))
+      #mutate(doy = lubridate::yday(station_date)) #Used when date was not included
+      mutate(doy = str_replace_all(station_date, "-", "."))
     
-    # #Prove you can dig into the lists correctly
-    # plot(oisst_ras_list[[year_id]][[1]])
+
     
-    # Extract OISST by day
+    ####  Extract OISST by day, and with lags  ####
     oisst_extract <- year_chunk  %>% 
       split(.$doy) %>% 
       imap_dfr(function(daily_subset, day_id){
         
-        # actual date
+        # For testing
+        #day_id <- "2004.01.21"
+        #daily_subset <- filter(year_chunk, doy == day_id)
+        
+        
+        # Extract the actual date
         layer_id <- str_c("X", day_id)
         daily_subset$oisst <- raster::extract(oisst_ras_list[[year_id]][[layer_id]], daily_subset[,c("lon", "lat")])
         
-        # month lag
-        day_id <- ifelse(day_id == "31", "30", day_id)
-        year_id <- ifelse(daily_subset[1,"month"] == 1, 
-                          as.character(as.numeric(year_id) - 1), 
-                          year_id)
-        layer_id <- str_c("X", day_id)
-        daily_subset$oisst_mlag <- raster::extract(oisst_ras_list[[year_id]][[layer_id]], daily_subset[,c("lon", "lat")])
+        
+        # # Extracting from the month before:
+        # # Build index for month lag, with year adjustment
+        # day_id <-  as.character(daily_subset[1, "day"])
+        # day_id <- ifelse(str_detect(day_id, "31"), str_replace(day_id, "31", "30"), day_id)
+        # month_id <- as.character(daily_subset[1, "month"])
+        # year_id <- ifelse(month_id == 1, 
+        #                   as.character(as.numeric(year_id) - 1), 
+        #                   year_id)
+        # month_id <- ifelse(month_id == "1", "12", 
+        #                    as.character(as.numeric(month_id) -1))
+        # layer_id <- str_c("X", year_id, ".", month_id, ".", day_id)
+        # 
+        # # And extract the month lags
+        # daily_subset$oisst_mlag <- raster::extract(oisst_ras_list[[year_id]][[layer_id]], daily_subset[,c("lon", "lat")])
+        # 
+        
         return(daily_subset)
+        
+        
       })
     
     
-    # Extract MODIS by month
+    #####  Extract MODIS by month  ####
     modis_extract <- oisst_extract %>% 
       split(.$month) %>% 
       imap_dfr(function(monthly_subset, month_id){
         
+        # For Testing
+        # month_id <- "02"
+        # monthly_subset <- filter(oisst_extract, month == month_id) 
+        
         # actual_date
-        layer_id <- str_c("X", month_id)
+        year_id <- as.character(monthly_subset[1, "year"])
+        layer_id <- str_c("X", year_id, ".", str_pad(string = month_id, width = 2, side = "left", pad = "0"), ".16")
         monthly_subset$chla <- raster::extract(modis_ras_list[[year_id]][[layer_id]], monthly_subset[, c("lon", "lat")])
         
-        # month lag
-        month_id <- ifelse(month_id == "1", 
-                           "12", 
-                           as.character(as.numeric(month_id) - 1))
-        year_id <- ifelse(monthly_subset[1,"month"] == 1, 
-                          as.character(as.numeric(as.character(year_id)) - 1), 
-                          year_id)
-        layer_id <- str_c("X", month_id)
-        if(year_id == "2002") {
-          monthly_subset$chla_mlag <- NA
-        } else {
-          monthly_subset$chla_mlag <- raster::extract(modis_ras_list[[year_id]][[layer_id]], monthly_subset[, c("lon", "lat")])
-        }
+        # # month lag
+        # month_id <- ifelse(month_id == "1", 
+        #                    "12", 
+        #                    as.character(as.numeric(month_id) - 1))
+        # year_id <- ifelse(monthly_subset[1,"month"] == 1, 
+        #                   as.character(as.numeric(as.character(year_id)) - 1), 
+        #                   year_id)
+        # layer_id <- str_c("X", year_id, ".", month_id, ".16")
+        # 
+        # if(year_id == "2002") {
+        #   monthly_subset$chla_mlag <- NA
+        # } else {
+        #   monthly_subset$chla_mlag <- raster::extract(modis_ras_list[[year_id]][[layer_id]], monthly_subset[, c("lon", "lat")])
+        # }
         
         return(monthly_subset)
       })
@@ -619,9 +654,9 @@ model_cpr <- cpr_sat %>%
   left_join(cpr, by = c("station_date", "lon", "lat")) 
 
 
-# Save it out
-write_csv(x = model_cpr,
-          path = str_c(ccel_boxpath, "Gulf of Maine CPR", "2020_combined_data", "zooplankton_w_sstchla.csv", sep = "/"))
+# # Save it out
+# write_csv(x = model_cpr,
+#           path = str_c(ccel_boxpath, "Gulf of Maine CPR", "2020_combined_data", "zooplankton_w_sstchla.csv", sep = "/"))
 
 
 
@@ -630,3 +665,65 @@ write_csv(x = model_cpr,
 ####_ 3. Resampling Rasters to Common Grid Size  ####
 
 # Use raster::resample() to convert to largest grid size available (worst resolution)
+
+
+
+# Steps:
+# aggregate oisst as monthly averages
+# Index numbers for each month
+jan <- 1:31
+feb <- 32:60
+mar <- 61:91
+apr <- 92:121
+may <- 122:152
+jun <- 153:182
+jul <- 183:213
+aug <- 214:244
+sep <- 245:274
+oct <- 275:305
+nov <- 306:335
+dec <- 336:366
+plot(mean(oisst_ras_list$`1981`[[jan]]), 
+     col = rev(RColorBrewer::brewer.pal(n = 10, name = "RdBu")), 
+     main = "Jan 1981 Mean SST")
+
+
+
+oisst_months <- imap(oisst_ras_list, function(year_ras, year_lab){
+ 
+   if(year_lab != "1981"){
+     month_stack <- raster::stack(
+      x = list(
+        jan = mean(year_ras[[which(names(year_ras) %in% str_c("X", 1:31))]]),
+        feb = mean(year_ras[[which(names(year_ras) %in% str_c("X", 32:60))]]),
+        mar = mean(year_ras[[which(names(year_ras) %in% str_c("X", 61:91))]]),
+        apr = mean(year_ras[[which(names(year_ras) %in% str_c("X", 92:121))]]),
+        may = mean(year_ras[[which(names(year_ras) %in% str_c("X", 122:152))]]),
+        jun = mean(year_ras[[which(names(year_ras) %in% str_c("X", 153:182))]]),
+        jul = mean(year_ras[[which(names(year_ras) %in% str_c("X", 183:213))]]),
+        aug = mean(year_ras[[which(names(year_ras) %in% str_c("X", 214:244))]]),
+        sep = mean(year_ras[[which(names(year_ras) %in% str_c("X", 245:274))]]),
+        oct = mean(year_ras[[which(names(year_ras) %in% str_c("X", 275:305))]]),
+        nov = mean(year_ras[[which(names(year_ras) %in% str_c("X", 306:335))]]),
+        dec = mean(year_ras[[which(names(year_ras) %in% str_c("X", 336:365))]])
+      )
+     )} else {
+       
+       month_stack <- raster::stack(
+         x = list(
+           sep = mean(year_ras[[which(names(year_ras) %in% str_c("X", 1:30))]]),
+           oct = mean(year_ras[[which(names(year_ras) %in% str_c("X", 31:61))]]),
+           nov = mean(year_ras[[which(names(year_ras) %in% str_c("X", 62:91))]]),
+           dec = mean(year_ras[[which(names(year_ras) %in% str_c("X", 92:122))]])
+         )
+       )
+       
+      
+    }
+  
+  return(month_stack)
+  
+})
+
+ 
+# match the timesteps up, resample modis to similar size

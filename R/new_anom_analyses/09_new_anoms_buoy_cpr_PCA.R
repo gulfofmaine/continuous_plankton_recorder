@@ -35,6 +35,9 @@ buoy_raw <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv
                      col_types = cols(),
                      guess_max = 1e5)
 
+# number of days with complete records
+buoy_raw %>% column_to_rownames(var = "Date") %>% drop_na() %>% nrow()
+
 # Interputed NA Buoy data - source: 10_buoy_daily_interpolations.R
 buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"),
                    col_types = cols())
@@ -78,7 +81,8 @@ timeline_raw <- pca_out %>%
   filter(`Principal Component` != "PC3" & is.na(`Principal Component`) == FALSE) %>% 
   mutate(`Principal Component` = if_else(`Principal Component` == "PC1", 
                                          as.character(percent_explained$PC1), 
-                                         as.character(percent_explained$PC2)))  %>% 
+                                         as.character(percent_explained$PC2)),
+         `Principal Component` = fct_rev(`Principal Component`))  %>% 
   ggplot(aes(x = Date,
              y = `Principal Component Loading`, 
              color = `Principal Component`)) +
@@ -94,7 +98,8 @@ timeline_raw
 # #Export plot
 # ggsave(timeline_raw,
 #        filename =  here::here("R", "new_anom_analyses", "figures", "pca_ts_raw.png"),
-#        device = "png")
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 
 ####__ 2. Loadings on Imputed Data  ####
@@ -124,7 +129,8 @@ pc2_ts_i$"Principal Component" <- "PC2"
 interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>% 
   mutate(`Principal Component` = if_else(`Principal Component` == "PC1", 
                                          as.character(percent_explained$PC1), 
-                                         as.character(percent_explained$PC2)))
+                                         as.character(percent_explained$PC2)),
+         `Principal Component` = fct_rev(`Principal Component`))
 
 
 
@@ -140,10 +146,11 @@ interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>%
 
 
 
-# #Export plot
-ggsave(timeline_interp,
-       filename =  here::here("R", "new_anom_analyses", "figures", "pca_ts_interp.png"),
-       device = "png")
+# # #Export plot
+# ggsave(timeline_interp,
+#        filename =  here::here("R", "new_anom_analyses", "figures", "pca_ts_interp.png"),
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 
 # Save for future use
@@ -321,9 +328,13 @@ interp_quarterly_corrplot
 
 # Save them
 ggsave(plot = obs_quarterly_corrplot, 
-       filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_actual.png"), device = "png")
+       filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_actual.png"), 
+       device = "png", 
+       height = 6, width = 8, units = "in")
 ggsave(plot = interp_quarterly_corrplot, 
-       filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_interpolated.png"), device = "png")
+       filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_interpolated.png"), 
+       device = "png", 
+       height = 6, width = 8, units = "in")
 
 # Possible better way to impute gappy matrix
 # http://menugget.blogspot.com/2012/10/dineof-data-interpolating-empirical.html

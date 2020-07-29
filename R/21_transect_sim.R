@@ -55,7 +55,7 @@ ggplot() +
 # what years went to portland - in 2013 they switched, but super awkwardly
 cpr %>% 
   filter(year == 2013) %>% 
-  ggplot(aes(lon, lat, color = factor(year))) +
+  ggplot(aes(lon, lat, color = factor(month))) +
     geom_point()
 
 # take all portland transects and get a mean/var for the start/end coordinates to set up the end points

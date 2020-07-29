@@ -182,7 +182,7 @@ corr_plot_setup <- function(wide_df) {
   dimnames(p_data) <- dimnames(corr_mat)
   
   #reshape to match correlation df
-  p_data <- reshape2::melt(p_data, na.rm = T) %>% rename(pval = value)
+  p_data <- reshape2::melt(p_data, na.rm = T) %>% dplyr::rename(pval = value)
   
   
   #Put the two together

@@ -46,50 +46,6 @@ This markdown document is set up to consolidate each analysis step I've done. In
 
 **Loading Data**
 
-```{r data import old, eval = FALSE}
-
-# ####  Load Data  ####
-# 
-# ####  Annual/bi-monthly CPR anomalies  ####
-# cpr_bimonthly <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_with_SSTlags.csv", 
-#                                 sep = "/"), col_types = cols())  
-# 
-# #Factor manipulation
-# cpr_bimonthly <- cpr_bimonthly %>% 
-#   mutate(period = case_when(
-#     period == "annual" ~ "Annual",
-#     period == "jf" ~ "January - February",
-#     period == "ma" ~ "March - April",
-#     period == "mj" ~ "May - June",
-#     period == "ja" ~ "July - August",
-#     period == "so" ~ "September - October",
-#     period == "nd" ~ "November - December"),
-# period = factor(period, levels = c("Annual", "January - February", "March - April", 
-#                                    "May - June", "July - August", "September - October", 
-#                                    "November - December")))
-# 
-# 
-# ####  Quarterly CPR Data with SST  ####
-# #with quarterly sst measurements and a one-period lag - souce: 02b_quarterly_cpr_sst_regressions
-# cpr_sst <- read_csv(str_c(cpr_boxpath, "data/processed_data/quarterly_cpr_sst.csv", sep = "/"), 
-#                     col_names = TRUE,
-#                     col_types = cols())
-# 
-# 
-# ####   Buoy Data  ####
-# #Raw - source: 10_buoy_daily_interpolations
-# buoy_raw <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv", sep = "/"),
-#                      col_types = cols(),
-#                      guess_max = 1e5)
-# 
-# buoy_pca_mat <- buoy_raw %>% 
-#   column_to_rownames(var = "Date") %>% 
-#   as.matrix()
-# 
-# #Interpolated NA's - source: 10_buoy_daily_interpolations
-# buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"),
-#                    col_types = cols())
-```
 
 **Note:**
 As of June, 2020 the data used in this document and for the purposes of the paper has been sourced through NOAA/SAHFOS, with abundance anomalies estimated using R.
@@ -161,12 +117,12 @@ Parallel methods are used for each of the following three periods of the continu
 # split into analysis units - using new data
 full_ts <- cpr_sst %>% dplyr::rename(species = taxa)
 pre_split <- full_ts %>% filter(year <= 2003)
-post_split <- full_ts %>% filter(year >= 2003)
+post_split <- full_ts %>% filter(year >= 2001)
 
 #Put the full data sets into a nested list
 analysis_sets <- list("Full Timeseries" = list(data = full_ts),
                       "1961 - 2003"     = list(data = pre_split),
-                      "2004 - 2017"     = list(data = post_split))
+                      "2001 - 2017"     = list(data = post_split))
 
 
 
@@ -241,11 +197,11 @@ analysis_sets$`Full Timeseries`$fig2a
 analysis_sets$`1961 - 2003`$fig2a
 ```
 
-### Last 14 Years
+### Last 17 Years
 
 
 ```{r}
-analysis_sets$`2004 - 2017`$fig2a
+analysis_sets$`2001 - 2017`$fig2a
 ```
 
 
@@ -488,6 +444,7 @@ buoy_weights %>%
 
 
 ![](new_anom_analyses/figures/pca_ts_interp.png)
+
 ## Timelines Stacked
 
 ![](presentations/buoy_plots/buoy_pca_timelines_stacked.png)

@@ -15,11 +15,14 @@ library(ggpmisc)
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
+#ccel_boxpath <- shared.path(group = "Climate Change Ecology Lab", folder = "")
+#cpr_boxpath <- "/Users/akemberling/Box/Adam Kemberling/Box_Projects/continuous_plankton_recorder"
 
 ####  Load Data  ####
 
 # CPR Dataset with quarterly anomalies and SST with a one-period lag
 # souce: 03_new_anoms_quarterly_sst.R
+
 cpr_sst <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "anomalies_w_quarterlysst.csv", sep = "/"),
                     col_types = cols(),
                     guess_max = 1e5)
@@ -48,7 +51,7 @@ cpr_buoys <- cpr_sst %>%
   filter(is.na(buoy_id) == FALSE)
 
 # clean environment so there's no name conflicts
-rm("buoy", "cpr_long")
+rm("buoy")
 
 
 
@@ -92,17 +95,18 @@ quarterly_corrplot <- q1_t | q2_t | q3_t | q4_t
 quarterly_corrplot <- quarterly_corrplot & theme(legend.position = "none")
 quarterly_corrplot
 
-#Export
-ggsave(quarterly_corrplot, 
-       filename =  here::here("R", "new_anom_analyses", "figures", "buoy_quarterly_corrplot.png"), 
-       device = "png")
+# #Export
+# ggsave(quarterly_corrplot, 
+#        filename =  here::here("R", "new_anom_analyses", "figures", "buoy_quarterly_corrplot.png"), 
+#        device = "png",
+#        height = 8, width = 8, units = "in")
 
 
 
 
 ####__####
 
-####  Buoy PCA  ####
+####  Quarterly Buoy PCA - not in paper  ####
 
 buoy_pca_dat <- corr_setup_full %>% drop_na()
 

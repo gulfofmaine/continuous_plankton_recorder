@@ -3,7 +3,7 @@
 #### 2/11/2020
 
 ####  Packages  ####
-suppressPackageStartupMessages(library(tidyverse))
+library(tidyverse)
 library(here)
 library(gmRi)
 library(patchwork)
@@ -58,7 +58,7 @@ gap_anoms <- map_dfr(species_05, function(x){
     ggplot(aes(year, anomaly)) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.4) +
     geom_line(aes(group = taxa), color = gmri_cols("gmri blue")) + 
-    facet_wrap(~taxa, ncol = 1) + 
+    facet_wrap(~taxa, ncol = 2) + 
     scale_y_continuous(breaks = c(-2, 0, 2), limits = c(-2, 2)) +
     labs(x = NULL, y = "Abundance Index"))
 
@@ -66,7 +66,7 @@ gap_anoms <- map_dfr(species_05, function(x){
 ggsave(plot = fig1, 
        filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"), 
        device = "png", 
-       height = 8, width = 6, units = "in")
+       height = 6, width = 8, units = "in")
 
 
 ####  1. Figure 2 PCA Modes  ####
