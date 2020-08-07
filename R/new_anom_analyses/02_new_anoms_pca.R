@@ -17,7 +17,7 @@ cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_comb
                      guess_max = 1e6, 
                      col_types = cols())
 
-#theme_set(theme_minimal())
+theme_set(theme_minimal())
 
 # #Reference Taxa
 # species_05 <- c("Calanus finmarchicus V-VI", "Centropages typicus",
@@ -63,11 +63,11 @@ gap_anoms <- map_dfr(species_05, function(x){
     #scale_y_continuous(breaks = c(-2, 0, 2), limits = c(-2, 2)) +
     labs(x = NULL, y = "Abundance Index"))
 
-# Export
-ggsave(plot = fig1, 
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"), 
-       device = "png", 
-       height = 6, width = 8, units = "in")
+# # Export
+# ggsave(plot = fig1,
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"),
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 
 ####  1. Figure 2 PCA Modes  ####
@@ -115,15 +115,16 @@ percent_explained <- pull_deviance(pca_2005$sdev)
                aes(xintercept = vlines), linetype = 2, show.legend = FALSE, alpha = 0.5) +
     scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
     scale_fill_gmri(palette = "mixed") +
-    labs(x = "") +
+    labs(x = "", y = "Principal Component Weight") +
     guides(fill = guide_legend(title = NULL)) +
-    theme(legend.position = c(0.825, 0.095)))
+    theme(legend.position = c(0.825, 0.095),
+          legend.box.background = element_rect(fill = "white")))
 
-# # Export
-# ggsave(plot = fig2a, 
-#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"), 
-#        device = "png", 
-#        height = 6, width = 8, units = "in")
+# Export
+ggsave(plot = fig2a,
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"),
+       device = "png",
+       height = 6, width = 8, units = "in")
 
 
 ####  2. Figure 2b PCA Time-series  ####
@@ -172,43 +173,47 @@ pc_modes <- bind_rows(pc1, pc2)
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
     geom_line() +
     scale_color_gmri(palette = "mixed") +
-    labs(x = NULL) + 
-    theme(legend.position = c(0.85, 0.12)))
+    labs(x = NULL, y = "Principal Component Loading") + 
+    theme(legend.position = c(0.85, 0.12),
+          legend.box.background = element_rect(fill = "white")))
 
-# ggsave(plot = fig_2b, 
-#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"), 
-#        device = "png",
-#        height = 6, width = 8, units = "in")
+ggsave(plot = fig_2b,
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"),
+       device = "png",
+       height = 6, width = 8, units = "in")
 
 
 
 ####__ 2b. Stacked figure  ####
 fig_2_stacked <- fig2a / fig_2b + theme(legend.position = "none")
 fig_2_stacked
-# ggsave(fig_2_stacked,
-#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"), 
-#        device = "png",
-#        height = 10, width = 8, units = "in")
+ggsave(fig_2_stacked,
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"),
+       device = "png",
+       height = 10, width = 8, units = "in")
 
 ####  3. Figure 3 - Temperature and PCA Modes  ####
 
 # Bring in SST
 sst_long_lagged <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "SST_with_lags.csv", sep = "/"),
                             col_types = cols())
+# matched them up
+cpr_pca_sst <- pc_modes %>% 
+  left_join(sst_long_lagged, by = "year") %>% 
+  filter(period == "annual")
+
+# Pearson correlation with temp anoms
+cpr_pca_sst %>% filter(PC == "First Mode") %>% drop_na(`Principal component value`, temp_anomaly) %$% cor(`Principal component value`, temp_anomaly, method = "pearson")
+cpr_pca_sst %>% filter(PC == "Second Mode") %>% drop_na(`Principal component value`, temp_anomaly) %$% cor(`Principal component value`, temp_anomaly, method = "pearson")
 
 
 # Plot
-(fig3 <- pc_modes %>% 
-   left_join(sst_long_lagged, by = "year") %>% 
-   filter(period == "annual") %>% 
+(fig3 <- cpr_pca_sst %>% 
    ggplot(aes(x = year, y = NULL)) +
    geom_hline(yintercept = 0, color = "darkred", alpha = 0.3, linetype = 2) +
    geom_line(aes(year, `Principal component value` * -1, color = PC)) +
    geom_line(aes(year, temp_anomaly, color = "Temperature Anomaly")) +
-   scale_color_manual(name = NULL, 
-                      values = c(as.character(gmri_cols("orange")),
-                                 as.character(gmri_cols("teal")),
-                                 "gray")) +
+   scale_color_manual(values = c(gmri_cols("orange"), gmri_cols("teal"), "gray")) +
    guides(color = guide_legend(title = NULL)) +
    theme(legend.position = "bottom") +
    facet_wrap(~PC, nrow = 2) +
@@ -218,6 +223,9 @@ sst_long_lagged <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "SST_wi
 #        filename = here::here("R", "new_anom_analyses", "figures", "2005_PCAts_wtemps.png"), 
 #        device = "png",
 #        height = 6, width = 8, units = "in")
+
+
+
 
 ####__####
 ####  Projecting Forward to Recent Years  ####
@@ -279,7 +287,7 @@ pc_modes <- pc_modes %>% mutate(`Principal component value` = ifelse(PC == "Seco
     scale_color_gmri(palette = "mixed") +
     labs(x = NULL) + 
     theme(legend.position = c(0.85, 0.12), 
-          legend.box.background = element_rect(fill = "transparent"))
+          legend.box.background = element_rect(fill = "white"))
  )
 
 # # Export
@@ -292,6 +300,7 @@ pc_modes <- pc_modes %>% mutate(`Principal component value` = ifelse(PC == "Seco
 ####__ b. Stacked figure  ####
 # Stack full timeseries with original loadings
 full_stack <- fig2a / fig_4a + theme(legend.position = "none")
+full_stack
 # ggsave(plot = full_stack,
 #        filename = here::here("R", "new_anom_analyses", "figures", "original_cpr_modes_fullts.png"),
 #        device = "png",

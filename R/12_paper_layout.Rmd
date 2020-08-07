@@ -55,14 +55,22 @@ As of June, 2020 the data used in this document and for the purposes of the pape
 ####  Load Data  ####
 
 ####  Reference Taxa  ####
-species_05 <- c("calanus_i_iv",
-                "calanus_finmarchicus_v_vi", 
-                "centropages_typicus", 
-                "oithona_spp",
-                "para_pseudocalanus_spp", 
-                "metridia_lucens",
-                "euphausiacea_spp")
+# species_05 <- c("calanus_i_iv",
+#                 "calanus_finmarchicus_v_vi", 
+#                 "centropages_typicus", 
+#                 "oithona_spp",
+#                 "para_pseudocalanus_spp", 
+#                 "metridia_lucens",
+#                 "euphausiacea_spp")
+# species_05 <- factor(species_05, levels = species_05)
+
+
+#New levels for taxa plots, ordered by size with calanus together
+species_05 <- c("Calanus I-IV", "Calanus finmarchicus V-VI", "Centropages typicus",
+                "Oithona spp.","Para-Pseudocalanus spp.",
+                "Metridia lucens",  "Euphausiacea spp.")
 species_05 <- factor(species_05, levels = species_05)
+  
 
 
 
@@ -74,8 +82,20 @@ cpr_sst <- read_csv(
   str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "anomalies_w_quarterlysst.csv", sep = "/"),
   col_types = cols(),
   guess_max = 1e5) %>% 
-  filter(taxa %in% species_05) %>% 
   mutate(period = ifelse(period == "annual", "Annual", period))
+
+
+
+# Add some label formatting
+cpr_sst <- cpr_sst %>% 
+  mutate(taxa = stringr::str_to_sentence(taxa),
+         taxa = str_replace_all(taxa, "Para_pseu", "Para-Pseu"),
+         taxa = str_replace_all(taxa, "i_iv", "I-IV"),
+         taxa = str_replace_all(taxa, "v_vi", "V-VI"),
+         taxa = str_replace_all(taxa, "_", " "),
+         taxa = str_replace_all(taxa, "spp", "spp."),
+         taxa = factor(taxa, levels = species_05)) %>% 
+  filter(taxa %in% species_05)
 
 
 
@@ -171,7 +191,7 @@ for (i in 1:length(analysis_sets)) {
       geom_vline(data = data.frame(vlines = seq(1.5, 6.5, by = 1)),
                  aes(xintercept = vlines), linetype = 2, show.legend = FALSE, alpha = 0.5) +
       scale_fill_gmri(palette = "mixed") +
-      labs(x = "") +
+      labs(x = "", y = "Principal Componenet Weight") +
       theme(#legend.position = c(0.825, 0.095),
             axis.text.x = element_text(angle = 45, hjust = 1))
   
@@ -187,21 +207,33 @@ for (i in 1:length(analysis_sets)) {
 ### Full TS
 
 ```{r}
-analysis_sets$`Full Timeseries`$fig2a
+p1 <- analysis_sets$`Full Timeseries`$fig2a
+p1
 ```
 
 
 ### Early Period
 
 ```{r}
-analysis_sets$`1961 - 2003`$fig2a
+p2 <- analysis_sets$`1961 - 2003`$fig2a
+p2
 ```
 
 ### Last 17 Years
 
 
 ```{r}
-analysis_sets$`2001 - 2017`$fig2a
+p3 <- analysis_sets$`2001 - 2017`$fig2a
+p3
+
+# 
+# # save out all three together
+# stacked <- (p1 + theme(axis.text.x = element_blank())) / (p2 + theme(axis.text.x = element_blank())) / p3
+# ggsave(plot = stacked,
+#        filename =  here::here("R", "new_anom_analyses", "figures", "cpr_timeline_comparison.png"),
+#        device = "png",
+#        height = 10, width = 8, units = "in")
+
 ```
 
 
