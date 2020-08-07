@@ -224,11 +224,13 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall", ta
   
   long_plot <- corr_dataframe %>% 
     filter(Var1 %notin% my_taxa,
-           Var2 %in% my_taxa)
+           Var2 %in% my_taxa) %>% 
+    mutate(Var2 = factor(Var2, levels = my_taxa))
   
   tall_plot <- corr_dataframe %>% 
     filter(Var1 %in% my_taxa,
-           Var2 %notin% my_taxa)
+           Var2 %notin% my_taxa) %>% 
+    mutate(Var1 = factor(Var1, levels = my_taxa))
   
   if(plot_style == "tall") {
     plot_option  <- tall_plot

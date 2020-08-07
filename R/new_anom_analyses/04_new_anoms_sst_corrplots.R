@@ -12,6 +12,7 @@ library(ggpmisc)
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
 
+
 ####  Load Data  ####
 # CPR Dataset with quarterly anomalies and SST with a one-period lag
 # souce: 03_new_anoms_quarterly_sst.R
@@ -19,16 +20,37 @@ cpr_sst <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combi
                     col_types = cols(),
                     guess_max = 1e5)
 
-# Reference Taxa
-species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
-                "metridia_lucens", "calanus_i_iv", "euphausiacea_spp")
+# # Reference Taxa
+# species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
+#                 "metridia_lucens", "calanus_i_iv", "euphausiacea_spp")
+
+#New levels for taxa plots, ordered by size with calanus together
+species_05 <- c("Calanus I-IV", "Calanus finmarchicus V-VI", "Centropages typicus",
+                "Oithona spp.","Para-Pseudocalanus spp.",
+                "Metridia lucens",  "Euphausiacea spp.")
+species_05 <- factor(species_05, levels = species_05)
+
 
 # Correlation vars - same but with temp
-corr_vars <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
-               "metridia_lucens", "calanus_i_iv", "euphausiacea_spp", "temp_anomaly")
+corr_vars <- c(species_05, "temp_anomaly")
 
 # Correlogram Color Scale
 col <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
+
+
+# Add some label formatting
+cpr_sst <- cpr_sst %>% 
+  mutate(taxa = stringr::str_to_sentence(taxa),
+         taxa = str_replace_all(taxa, "Para_pseu", "Para-Pseu"),
+         taxa = str_replace_all(taxa, "i_iv", "I-IV"),
+         taxa = str_replace_all(taxa, "v_vi", "V-VI"),
+         taxa = str_replace_all(taxa, "_", " "),
+         taxa = str_replace_all(taxa, "spp", "spp."),
+         taxa = factor(taxa, levels = species_05)) %>% 
+  filter(taxa %in% species_05)
+
+
+
 
 
 ####  Build Correlograms  ####
@@ -42,6 +64,7 @@ period_df_list <- list(
   "Q3"  = pull_period(cpr_long_df = cpr_sst, time_period = "Q3"),
   "Q4"  = pull_period(cpr_long_df = cpr_sst, time_period = "Q4")
 )
+
 
 # Pull individual periods and prep for correlation matrix
 Q1 <- period_df_list[["Q1"]] %>% drop_na()
@@ -67,7 +90,7 @@ q4_t <- cpr_corr_plot(Q4_corrs, period = "Q4", plot_style = "wide", taxa = speci
 quarterly_corrplot <- q1_t | q2_t | q3_t | q4_t
 quarterly_corrplot <- quarterly_corrplot & theme(legend.position = "none")
 quarterly_corrplot <- quarterly_corrplot + 
-  labs(caption = "Correlations between quarterly mean SST and annual abundance anomalies for focal taxa from CPR data that same year.\n Years used in this analysis were from 1982 to 2017.")
+  labs(caption = "No temporal lag")
 quarterly_corrplot
 
 
@@ -141,7 +164,7 @@ q4_t <- cpr_corr_plot(Q4_corrs, period = "Q4", plot_style = "wide", taxa = speci
 lagged_corrplot <- q1_t | q2_t | q3_t | q4_t
 lagged_corrplot <- lagged_corrplot & theme(legend.position = "none")
 lagged_corrplot <- lagged_corrplot + 
-  labs(caption = "Correlations between quarterly mean SST from the previous 3 months, and annual mean abundance anomalies for focal taxa from CPR data.\n Years used in this analysis were from 1982 to 2017.")
+  labs(caption = "CPR correlation with SST of prior 3-month period")
 lagged_corrplot
 
 

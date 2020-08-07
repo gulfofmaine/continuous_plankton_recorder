@@ -17,6 +17,7 @@ cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_comb
                      guess_max = 1e6, 
                      col_types = cols())
 
+#theme_set(theme_minimal())
 
 # #Reference Taxa
 # species_05 <- c("Calanus finmarchicus V-VI", "Centropages typicus",
@@ -59,7 +60,7 @@ gap_anoms <- map_dfr(species_05, function(x){
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.4) +
     geom_line(aes(group = taxa), color = gmri_cols("gmri blue")) + 
     facet_wrap(~taxa, ncol = 2) + 
-    scale_y_continuous(breaks = c(-2, 0, 2), limits = c(-2, 2)) +
+    #scale_y_continuous(breaks = c(-2, 0, 2), limits = c(-2, 2)) +
     labs(x = NULL, y = "Abundance Index"))
 
 # Export
@@ -118,11 +119,11 @@ percent_explained <- pull_deviance(pca_2005$sdev)
     guides(fill = guide_legend(title = NULL)) +
     theme(legend.position = c(0.825, 0.095)))
 
-# Export
-ggsave(plot = fig2a, 
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"), 
-       device = "png", 
-       height = 6, width = 8, units = "in")
+# # Export
+# ggsave(plot = fig2a, 
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"), 
+#        device = "png", 
+#        height = 6, width = 8, units = "in")
 
 
 ####  2. Figure 2b PCA Time-series  ####
@@ -174,19 +175,20 @@ pc_modes <- bind_rows(pc1, pc2)
     labs(x = NULL) + 
     theme(legend.position = c(0.85, 0.12)))
 
-ggsave(plot = fig_2b, 
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"), 
-       device = "png",
-       height = 6, width = 8, units = "in")
+# ggsave(plot = fig_2b, 
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"), 
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 
 
-# Stacked figure
+####__ 2b. Stacked figure  ####
 fig_2_stacked <- fig2a / fig_2b + theme(legend.position = "none")
-ggsave(fig_2_stacked,
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"), 
-       device = "png",
-       height = 10, width = 8, units = "in")
+fig_2_stacked
+# ggsave(fig_2_stacked,
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"), 
+#        device = "png",
+#        height = 10, width = 8, units = "in")
 
 ####  3. Figure 3 - Temperature and PCA Modes  ####
 
@@ -212,10 +214,10 @@ sst_long_lagged <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "SST_wi
    facet_wrap(~PC, nrow = 2) +
    labs(y = "Magnitude", x = NULL))
 
-ggsave(plot = fig3, 
-       filename = here::here("R", "new_anom_analyses", "figures", "2005_PCAts_wtemps.png"), 
-       device = "png",
-       height = 6, width = 8, units = "in")
+# ggsave(plot = fig3, 
+#        filename = here::here("R", "new_anom_analyses", "figures", "2005_PCAts_wtemps.png"), 
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 ####__####
 ####  Projecting Forward to Recent Years  ####
@@ -262,6 +264,11 @@ pc2 <- full_join(gap_years, pc2) %>% arrange(year)
 #bind pca modes
 pc_modes <- bind_rows(pc1, pc2)
 
+# flip the second mode for consistency with the other period
+pc_modes <- pc_modes %>% mutate(`Principal component value` = ifelse(PC == "Second Mode",
+                                                         `Principal component value` * -1,
+                                                         `Principal component value`))
+
 
 ####  1. Figure 4a Full PCA Time-Series  ####
 (fig_4a <- ggplot(pc_modes) +
@@ -275,11 +282,24 @@ pc_modes <- bind_rows(pc1, pc2)
           legend.box.background = element_rect(fill = "transparent"))
  )
 
-# Export
-ggsave(plot = fig_4a, 
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"), 
-       device = "png",
-       height = 6, width = 8, units = "in")
+# # Export
+# ggsave(plot = fig_4a, 
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"), 
+#        device = "png",
+#        height = 6, width = 8, units = "in")
+
+
+####__ b. Stacked figure  ####
+# Stack full timeseries with original loadings
+full_stack <- fig2a / fig_4a + theme(legend.position = "none")
+# ggsave(plot = full_stack,
+#        filename = here::here("R", "new_anom_analyses", "figures", "original_cpr_modes_fullts.png"),
+#        device = "png",
+#        height = 10, width = 8, units = "in")
+
+
+
+
 
 ####  2. Figure 4b Full TS w/ SST  ####
 pca_modes_master <- pc_modes %>% 
@@ -301,11 +321,11 @@ pca_modes_master <- pc_modes %>%
     facet_wrap(~PC, nrow = 2) +
     labs(y = "Magnitude", x = NULL))
 
-# Export
-ggsave(plot = fig4b, 
-       filename = here::here("R", "new_anom_analyses", "figures", "full_PCAts_wtemps.png"), 
-       device = "png",
-       height = 6, width = 8, units = "in")
+# # Export
+# ggsave(plot = fig4b, 
+#        filename = here::here("R", "new_anom_analyses", "figures", "full_PCAts_wtemps.png"), 
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 
 
