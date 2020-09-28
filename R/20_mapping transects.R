@@ -6,20 +6,18 @@
 
 ####  Packages  ####
 library(gmRi)
-library(broom)
-library(splines)
-library(mgcv)
 library(tidyverse)
 library(patchwork)
 library(sf)
+library(raster)
+library(metR)
 library(here)
 
 #CCEL Boxpath
 ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
 
-#### Spline function  ####
-source(here("R", "cpr_helper_funs.R"))
-
+# ggtheme
+theme_set(theme_bw())
 
 ####  Data  ####
 cpr <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
@@ -99,10 +97,10 @@ area_polygons <- st_sf(area = unique(area_bboxes$area), st_sfc(area_polygons), c
 
 
 ####_______________####
-####  Making Maps  ####
+####  CPR Maps  ####
 
 # Cruises by year
-cpr %>% group_by(year) %>% summarise(n_cruises = n_distinct(cruise)) %>% View("cruise counts")
+# cpr %>% group_by(year) %>% summarise(n_cruises = n_distinct(cruise)) %>% View("cruise counts")
 
 ####__Sample Coverage + Study Area  ####
 t_2017 <- cpr %>% filter(year == "2017") 
@@ -163,3 +161,154 @@ t1_summs <- t1 %>%
   bind_rows()
   
 t1_summs %>% filter(station == 13)
+
+
+
+
+####____________________________####
+#### Mapping Buoy Locations  ####
+
+
+
+#Geographic boundaries
+northeast <- ne_states("united states of america") %>%
+  st_as_sf() #%>% filter(region_sub %in% c("New England", "Middle Atlantic", "South Atlantic"))
+canada <- ne_states("canada") %>% st_as_sf()
+
+# Depth contours
+bathy <- raster("~/Documents/Repositories/Points_and_contours/NEShelf_Etopo1_bathy.tiff")
+contours_make <- c(-50, -100, -250)
+bathy_contours <- rasterToContour(bathy, levels = contours_make) %>% st_as_sf()
+bathy_contours$level <- factor(bathy_contours$level, levels = as.character(contours_make))
+
+# Buoy Locations
+buoy_locations <- tribble(
+  ~"Buoy", ~"lat", ~"lon", 
+  "B",     43.18,  -70.42,
+  "E",     43.71,  -69.35,
+  "F",     44.05,  -68.99,
+  "I",     44.10,  -68.10,
+  "N",     42.33,  -65.90,
+  "M",     43.49,  -67.87) %>% 
+  mutate(label_lon = lon + .12, label_lat = lat - .14) %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+
+
+
+####  sf contours  ####
+buoy_map <- ggplot() +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_sf(data = bathy_contours, aes(color = level, fill = level, linetype = level), 
+          #color = "gray80", fill = "gray80",
+          show.legend = FALSE) +
+  geom_sf(data = buoy_locations) +
+  geom_text(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
+  scale_color_grey(start = 0.6) +
+  scale_fill_grey(start = 0.6) +
+  coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme(panel.grid.major = element_line(colour = "transparent"))
+
+buoy_map
+
+# # Save it
+# ggsave(buoy_map, 
+#        filename = here::here("R", "new_anom_analyses", "figures", "buoy_map.png"), device = "png")
+
+
+
+
+
+
+####  metR contours  ####
+
+
+# Convert raster to df
+bathy_df <- as.data.frame(raster::coordinates(bathy))
+bathy_df$depth <- raster::extract(bathy, bathy_df)
+bathy_df$depth <- bathy_df$depth * -1
+contours_make <- c(50, 100, 250)
+
+
+#Now with sf objects
+metR_map <- ggplot() +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_contour(data = bathy_df, aes(x, y, z = depth), 
+               breaks = contours_make, 
+               color = "gray80") +
+  geom_text_contour(data = bathy_df, aes(x, y, z = depth), 
+                    breaks = contours_make, 
+                    color = "gray40",
+                    size = 1.8,
+                    min.size = 10,
+                    stroke = 0.2, 
+                    rotate = FALSE,
+                    check_overlap = TRUE) +
+  geom_sf(data = buoy_locations) +
+  geom_text(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
+  coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme(panel.grid.major = element_line(colour = "transparent"))
+
+metR_map
+
+# # Save this better map
+# ggsave(metR_map, 
+#        filename = here::here("R", "new_anom_analyses", "figures", "buoy_map.png"), device = "png")
+
+
+
+
+####____________________________####
+#### CPR + Buoys  ####
+
+
+# So base plot with the contours
+base_plot <- ggplot() +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_contour(data = bathy_df, aes(x, y, z = depth), 
+               breaks = contours_make, 
+               color = "gray80") +
+  # geom_text_contour(data = bathy_df, aes(x, y, z = depth), 
+  #                   breaks = contours_make, 
+  #                   color = "gray40",
+  #                   size = 1.8,
+  #                   min.size = 10,
+  #                   stroke = 0.2, 
+  #                   rotate = FALSE,
+  #                   check_overlap = TRUE) +
+  # coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme(panel.grid.major = element_line(colour = "transparent"))
+
+base_plot
+
+# Add Cpr Locations
+cpr_sf <- cpr %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
+
+# Flag if they are within the study area somehow
+gom_area <- area_polygons %>% filter(area == "GOM_new") 
+cpr_areas <- cpr_sf %>% st_ (gom_area)
+cpr_sf$indicator <- st_within(cpr_sf, gom_area) %>% lengths > 0
+
+
+# Add cpr to base
+combo_plot <- base_plot +
+  geom_sf(data = cpr_sf, shape = 3, size = 0.5, aes(color = indicator), show.legend = FALSE) +
+  scale_color_manual(values = c("gray80", "gray20")) +
+  geom_sf(data = gom_area, fill = "transparent", size = 1, color = "royalblue") +
+  #geom_sf(data = buoy_locations, shape = 17, size = 2) +
+  #geom_label(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
+  geom_label(data = buoy_locations, aes(lon, lat, label = Buoy), colour = "black") +
+  coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE)
+  
+
+# Show it
+combo_plot
+
+# Save this better map
+ggsave(combo_plot,
+       filename = here::here("R", "new_anom_analyses", "figures", "buoy_cpr_map.png"), device = "png")

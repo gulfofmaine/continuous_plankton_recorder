@@ -450,7 +450,7 @@ lm_table %>% filter(significance == FALSE)
 
 ####__ 5. Imputing NA values  ####
 
-# Number of NA observations to dill in:
+# Number of NA observations to fill in:
 sum(is.na(buoys_pca_dat[,2:47]))
 
 # Filling in patchy DF with average regression parameters

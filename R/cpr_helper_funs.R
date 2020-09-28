@@ -27,14 +27,28 @@ ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
 #' Floor Decade
 #'
 #' @param year_vector Vector of integer years
+#' @param return_class String indicating output type for the vector, factor or numeric
 #'
 #' @return decade_vector returned vector of years rounded down to their decade
 #' @export
 #'
 #' @examples
-floor_decade <- function(year_vector){ 
-  decade_vector <- year_vector - year_vector %% 10
-  decade_vector <- factor(decade_vector)
+floor_decade <- function(year_vector, return_class = "factor"){ 
+  
+  if(class(year_vector) == "numeric") {
+    decade_vector <- year_vector - year_vector %% 10
+  }
+  
+  if(class(year_vector) %in% c("factor", "character")) {
+    year_vector <- as.numeric(as.character(year_vector))
+    decade_vector <- year_vector - year_vector %% 10
+  }
+  
+  if(return_class == "factor") {
+    decade_vector <- factor(decade_vector)
+    
+  }
+  
   return(decade_vector)
 }
 

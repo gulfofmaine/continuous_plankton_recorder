@@ -1,13 +1,11 @@
 ---
-title: "Consolidation of WARMEM Analyses"
+title: "Consolidated WARMEM Analyses"
 author: "Adam A. Kemberling"
 date: "12/16/2019"
 output: 
   html_document:
     includes:
         before_body: stylesheets/gmri_logo_header.html
-        after_body: stylesheets/akemberling_gmri_footer.html
-    css: stylesheets/gmri_rmarkdown.css
     toc: TRUE
     toc_float:
         collapsed: FALSE
@@ -33,6 +31,7 @@ source(here::here("R", "cpr_helper_funs.R"))
 #Set ggplot theme
 theme_set(theme_minimal())
 
+
 ```
 
 
@@ -52,7 +51,11 @@ As of June, 2020 the data used in this document and for the purposes of the pape
 
 
 ```{r data import new data}
+
 ####  Load Data  ####
+
+# Use gmri css
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
 
 ####  Reference Taxa  ####
 # species_05 <- c("calanus_i_iv",
@@ -207,16 +210,16 @@ for (i in 1:length(analysis_sets)) {
 ### Full TS
 
 ```{r}
-p1 <- analysis_sets$`Full Timeseries`$fig2a
-p1
+p2 <- analysis_sets$`Full Timeseries`$fig2a
+p2
 ```
 
 
 ### Early Period
 
 ```{r}
-p2 <- analysis_sets$`1961 - 2003`$fig2a
-p2
+p1 <- analysis_sets$`1961 - 2003`$fig2a
+p1
 ```
 
 ### Last 17 Years
@@ -505,4 +508,9 @@ Principal component loadings can only be applied on days that all sensors have d
 ![](presentations/buoy_plots/quarterly_buoy_pca_correlations_interpolated.png)
 ```
 ![](new_anom_analyses/figures/quarterly_buoy_pca_correlations_interpolated.png)
+
+
+```{r footer}
+gmRi::insert_gmri_footer(footer_file = "akemberling_gmri_footer.html")
+```
 

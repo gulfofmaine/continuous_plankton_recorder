@@ -7,6 +7,7 @@ library(tidyverse)
 library(here)
 library(gmRi)
 library(patchwork)
+library(magrittr)
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
@@ -120,11 +121,11 @@ percent_explained <- pull_deviance(pca_2005$sdev)
     theme(legend.position = c(0.825, 0.095),
           legend.box.background = element_rect(fill = "white")))
 
-# Export
-ggsave(plot = fig2a,
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"),
-       device = "png",
-       height = 6, width = 8, units = "in")
+# # Export
+# ggsave(plot = fig2a,
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"),
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 
 ####  2. Figure 2b PCA Time-series  ####
@@ -177,20 +178,20 @@ pc_modes <- bind_rows(pc1, pc2)
     theme(legend.position = c(0.85, 0.12),
           legend.box.background = element_rect(fill = "white")))
 
-ggsave(plot = fig_2b,
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"),
-       device = "png",
-       height = 6, width = 8, units = "in")
+# ggsave(plot = fig_2b,
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"),
+#        device = "png",
+#        height = 6, width = 8, units = "in")
 
 
 
 ####__ 2b. Stacked figure  ####
 fig_2_stacked <- fig2a / fig_2b + theme(legend.position = "none")
 fig_2_stacked
-ggsave(fig_2_stacked,
-       filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"),
-       device = "png",
-       height = 10, width = 8, units = "in")
+# ggsave(fig_2_stacked,
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"),
+#        device = "png",
+#        height = 10, width = 8, units = "in")
 
 ####  3. Figure 3 - Temperature and PCA Modes  ####
 
@@ -280,21 +281,25 @@ pc_modes <- pc_modes %>% mutate(`Principal component value` = ifelse(PC == "Seco
 
 ####  1. Figure 4a Full PCA Time-Series  ####
 (fig_4a <- ggplot(pc_modes) +
-    geom_rect(xmin = 1990, xmax = 2000, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
-    geom_rect(xmin = 2010, xmax = 2017, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+    # geom_rect(xmin = 1990, xmax = 2000, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+    # geom_rect(xmin = 2010, xmax = 2017, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+    geom_rect(xmin = 1998, xmax = 2003, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+    geom_rect(xmin = 2009, xmax = 2017, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
     geom_line(aes(year, `Principal component value` * -1, color = PC)) +
     scale_color_gmri(palette = "mixed") +
-    labs(x = NULL) + 
+    labs(x = NULL, y = "Principal Component Loading") + 
     theme(legend.position = c(0.85, 0.12), 
           legend.box.background = element_rect(fill = "white"))
  )
 
 # # Export
-# ggsave(plot = fig_4a, 
-#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"), 
+# ggsave(plot = fig_4a,
+#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"),
 #        device = "png",
 #        height = 6, width = 8, units = "in")
+
+
 
 
 ####__ b. Stacked figure  ####
@@ -306,6 +311,30 @@ full_stack
 #        device = "png",
 #        height = 10, width = 8, units = "in")
 
+
+####__ c. Stacked with Temperature  ####
+
+temp_tl <- sst_long_lagged %>% 
+  filter(period == "annual") %>% 
+  ggplot(aes(year, temp_anomaly)) +
+  geom_rect(xmin = 1998, xmax = 2003, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+  geom_rect(xmin = 2009, xmax = 2017, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+  geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
+  geom_line() +
+  scale_x_continuous(limits = c(1961, 2017)) +
+  #scale_y_continuous(limits = c(-2.1, 2.1)) +
+  labs(x = "", 
+       y = expression(paste("Sea Surface Temperature Anomaly ", degree, "C")))
+temp_tl
+
+
+trip_stack <- (fig2a + theme(legend.position = c(0.5, 0.15))) / (fig_4a + theme(legend.position = "none")) / temp_tl
+trip_stack
+
+# ggsave(plot = trip_stack,
+#        filename = here::here("R", "new_anom_analyses", "figures", "original_cpr_modes_fullts_temp.png"),
+#        device = "png",
+#        height = 11, width = 8, units = "in")
 
 
 
