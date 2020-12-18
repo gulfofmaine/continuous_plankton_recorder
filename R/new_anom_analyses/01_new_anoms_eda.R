@@ -7,6 +7,7 @@
 library(tidyverse)
 library(here)
 library(gmRi)
+library(ggpmisc)
 library(patchwork)
 
 ####  Functions  ####
@@ -15,6 +16,14 @@ ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab
 
 
 ####  New Data  ####
+
+# Combined dataset from NOAA/SAHFOS, concentrations in common units: # / meters cubed
+# Source: 17_noaa_sahfos_eda.R
+cpr_abund <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
+                      guess_max = 1e6, col_types = cols())
+
+
+# Anomalies from seasonal splines: source: 19_cpr_splines.R
 cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "detrended_anomalies_noaa_sahfos.csv", sep = "/"), 
                      guess_max = 1e6, 
                      col_types = cols())
@@ -41,12 +50,17 @@ cpr_species <- cpr_all %>% group_by(species) %>% split(.$species)
 
 
 ####  Exploratory Data Analysis  ####
+
+
+
+
+####__1.  Direct Comparison of Anomaly Timeseries  ####
 refs <- cpr_all %>% 
   filter(period == "annual") %>% 
   ggplot(aes(year, anomaly)) +
   geom_hline(yintercept = 0, color = "darkred", alpha = 0.5, linetype = 2) +
   geom_point() +
-  geom_smooth(method = "loess", color = "gray25") +
+  geom_smooth(formula = y~x, method = "loess", color = gmri_cols("orange")) +
   facet_wrap(~species) +
   labs(title = "Reference", x = NULL, y = NULL)
 
@@ -56,7 +70,7 @@ newbies <- cpr_long %>%
   ggplot(aes(year, anomaly)) +
   geom_hline(yintercept = 0, color = "darkred", alpha = 0.5, linetype = 2) +
   geom_point() +
-  geom_smooth(method = "loess", color = "gray25") +
+  geom_smooth(formula = y~x, method = "loess", color = gmri_cols("orange")) +
   facet_wrap(~taxa) +
   labs(title = "New Anomalies", x = NULL, y = NULL)
 
@@ -64,6 +78,9 @@ refs + newbies
 #Looks pretty Good!
 
 
+
+
+####__2. Species Correlation Plots  ####
 #What about correlation plots
 ref_anoms <- cpr_all %>% filter(period == "annual") %>% mutate(source = "MATLAB splines")
 new_anoms <- cpr_long %>% 
@@ -97,7 +114,6 @@ comparison_df %>%
   labs(x = NULL, y = NULL) 
 
 #R-squared plot
-library(ggpmisc)
 source_compare <- function(taxa) {
   ref_df <- comparison_df %>% filter(species == taxa, source == "MATLAB splines") %>% 
     select(species, year, period, anom_matlab = anomaly,-c(datebounds, period_anom_n))
@@ -135,3 +151,76 @@ r2 <- rsquare_list[[4]] + labs(x = "") | rsquare_list[[5]] + labs(x = "", y = ""
 r3 <- rsquare_list[[7]] + labs(x = "") | rsquare_list[[8]] + labs(y = "") | rsquare_list[[9]] + labs(y = "")
 r4 <- rsquare_list[[10]] | plot_spacer() | plot_spacer()
 r1 / r2 / r3 / r4
+
+
+
+
+
+
+
+
+####  Coarse Overalll Metrics of New Data  ####
+
+
+
+####__1. Most Abundant Taxa in GOM  ####
+abund_long <- cpr_abund  %>% pivot_longer(names_to = "taxa", values_to = "cpr_density", cols = `phytoplankton color index`:`radiolaria spp.`)
+
+# overall ranks
+top_ranks <- abund_long %>% 
+  mutate(samp_occurrence = ifelse(cpr_density > 0, 1, 0)) %>% 
+  group_by(taxa) %>%
+  summarise(mean_dens = mean(cpr_density, na.rm = T),
+            perc_occurrence = mean(samp_occurrence, na.rm = T),
+            total_occurrence = sum(samp_occurrence, na.rm = T),
+            total_dens = sum(cpr_density, na.rm = T)) %>% 
+  ungroup()
+
+# Percent Occurrence in CPR
+top_ranks %>% slice_max(n = 15, order_by = perc_occurrence) %>% pull(taxa)
+
+# Avg. density
+top_ranks %>% slice_max(n = 18, order_by = mean_dens) %>% pull(taxa)
+
+# Highest Occurrence
+top_ranks %>% slice_max(n = 15, order_by = total_occurrence)
+
+# Yearly summaries
+abund_summs <- abund_long %>% 
+  mutate(samp_occurrence = ifelse(cpr_density > 0, 1, 0)) %>% 
+  group_by(year, taxa) %>%
+  summarise(n_transects = n_distinct(station),
+            mean_dens = mean(cpr_density, na.rm = T),
+            perc_occurrence = mean(samp_occurrence, na.rm = T),
+            total_occurrence = sum(samp_occurrence, na.rm = T),
+            total_dens = sum(cpr_density, na.rm = T)) %>% 
+  ungroup()
+
+
+# Top Ten density
+abund_summs %>% 
+  group_by(year) %>% 
+  slice_max(n = 5, order_by = mean_dens, .preserve = T) %>% 
+  ungroup() %>% 
+  mutate(taxa = fct_reorder(.f = taxa, .x = mean_dens, .fun = mean, .desc = T)) %>% 
+  ggplot(aes(year, mean_dens, color = taxa)) +
+    geom_line(aes(group = 1)) +
+    geom_point() +
+    facet_wrap(~taxa) + 
+    labs(x = "", y = "Avg. Transect Density", caption = "Top 5 taxa taken from each year. Gaps in timeseries indicate absence from top 5.")
+
+
+
+####__2. Seasonal Peaks  ####
+
+
+
+
+
+####__3. Phytoplankton Color Index  ####
+
+
+
+
+
+

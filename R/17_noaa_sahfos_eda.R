@@ -1,4 +1,11 @@
-####  NOAA  / SAHFOS Allspecies EDA  ####
+####  NOAA  / SAHFOS EDA  ####
+
+# About:
+# This script steps through dataset comparisons between the NOAA and SAHFOS data sources
+# differences in taxon groups are explored and resolved
+# a combined dataset is then exported.
+
+
 
 
 ####  Packages  ####
@@ -12,7 +19,7 @@ library(rnaturalearth)
 source(here::here("R", "cpr_helper_funs.R"))
 
 
-####  Data  ####
+####  Load Data  ####
 
 ####  1. NOAA Consolidated  ####
 #Reduced NOAA dataset obtained from 15_NOAA_CPR_Key.R

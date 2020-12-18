@@ -6,6 +6,7 @@
 library(ggbiplot)
 library(tidyverse)
 library(here)
+library(gmRi)
 #devtools::install_github("vqv/ggbiplot")
 
 
@@ -85,8 +86,8 @@ temp_lags <- lag_key %>% left_join(sst_long, by = c("period", "year")) %>%
 #Add to original 
 sst_long_lagged <- left_join(sst_long, temp_lags, by = c("period", "year"))
 
-#Export to processed folder
-write_csv(sst_long_lagged, str_c(cpr_boxpath, "data", "processed_data", "SST_with_lags.csv", sep = "/"), col_names = TRUE)
+# #Export to processed folder
+# write_csv(sst_long_lagged, str_c(cpr_boxpath, "data", "processed_data", "SST_with_lags.csv", sep = "/"), col_names = TRUE)
 
 
 #Add to zooplankton
@@ -94,8 +95,8 @@ species_periods_long <- cpr_long %>%
   filter(species %in% species_05) %>% 
   left_join(sst_long_lagged, by = c("year", "period"))
 
-#Export to processed folder
-write_csv(species_periods_long, str_c(cpr_boxpath, "data", "processed_data", "cpr_with_SSTlags.csv", sep = "/"), col_names = TRUE)
+# #Export to processed folder
+# write_csv(species_periods_long, str_c(cpr_boxpath, "data", "processed_data", "cpr_with_SSTlags.csv", sep = "/"), col_names = TRUE)
 
 
 #Store combos in a list

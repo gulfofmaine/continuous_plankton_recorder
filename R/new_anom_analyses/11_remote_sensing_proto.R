@@ -19,10 +19,11 @@ library(here)
 
 # Path to gmri OKN datasets
 okn <- gmRi::shared.path(group = "NSF OKN", folder  = "")
+
 # Path to climate change eccology lab
 ccel_boxpath <- gmRi::shared.path(group = "Climate Change Ecology Lab", folder = "Data")
 
-####CPR Data  ####
+####  CPR Data  ####
 
 # 1. CPR combined, un-transformed concentrations
 # Combined dataset from NOAA/SAHFOS, concentrations in common units: # / meters cubed
@@ -37,7 +38,7 @@ cpr <- cpr %>%
          lon = `longitude (degrees)`, `phytoplankton color index`, everything())
 
 
-###Remotely Sensed Data  ####
+###  Remotely Sensed Data  ####
 
  
 #####_ 1. ERSST#### 
@@ -103,16 +104,15 @@ cpr <- cpr %>%
 # OISST
 oisst_path <- list.files(str_c(okn, "oisst/annual_observations/"))
 oisst_paths <- str_c(okn, "oisst/annual_observations/", oisst_path)
-oisst_paths <- oisst_paths[!str_detect(oisst_paths, ".zarr")]
-oisst_paths <- oisst_paths[!str_detect(oisst_paths, "2018")]
-oisst_years <- str_sub(oisst_paths, -10, -7)
-
+oisst_paths <- oisst_paths[!str_detect(oisst_paths, ".zarr")] # Paths  
+oisst_years <- str_sub(oisst_paths, -10, -7)                  # Labels
+oisst_paths <- setNames(oisst_paths, oisst_years)
 
 # # try stack to validate data exists
 # oisst_test <- stack(oisst_paths[2])
 # plot(oisst_test$X1982.01.01)
 
-###  Set limits
+###  Set limits based on cpr extent
 lon_min <- floor(min(cpr$lon)) + 360 # rotation to 0-360
 lon_max <- ceiling(max(cpr$lon)) + 360 # rotation to 0-360
 lat_min <- floor(min(cpr$lat))
@@ -128,7 +128,9 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
   # Open connection, get subsetting indices from limits
   my_nc <- nc_open(nc_year)
   nc_year_label <- str_sub(nc_year, -10, -7)
-  #my_nc <- nc_open(oisst_paths[2])
+  
+  # Tester
+  #my_nc <- nc_open(oisst_paths["2018"]) ; nc_year_label <- "2018"
   
   # Subset to area and times of interest
   lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
@@ -136,6 +138,10 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
   time_idx <- which( 
     as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") > time_min & 
     as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") < time_max)
+  
+  if (length(time_idx) < 1) {
+    message(paste0(nc_year_label, " outside data range."))
+    return("Year outside time extent of data")}
   
   # Pull netcdf data you need
   nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
@@ -148,9 +154,8 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
   time_dims <- 1:dim(nc_data)[3]
   
   # Get the dates that correspond in the least streamlined way possible, for naming purposes
-  dates <- as.Date(my_nc$dim$time$vals[time_idx], origin='1800-01-01', tz = "GMT")
+  dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = '1800-01-01', tz = "GMT")
   
-  length(time_dims)
   
   # Convert Each day to a raster, rotate, and stack
   nc_stack <- map(time_dims, function(time_index){
@@ -173,12 +178,18 @@ oisst_ras_list <- map(oisst_paths, function(nc_year){
     setNames(dates)
     #setNames(time_dims)
   
+  # Progress message
+  message(paste0(nc_year_label, " done"))
   
   # Return the raster stack for the year
   return(nc_stack)
   
-}) %>%  
-  setNames(oisst_years)
+})
+
+# Drop list elements that are outside date range
+#oisst_ras_list <- oisst_ras_list %>%  
+oisst_ras_list <- oisst_ras_list[ which(names(oisst_ras_list) %in% c("1981":"2017")) ]
+ 
 
 # And plot tester
 plot(oisst_ras_list$`1982`$X1982.01.01, main = "OISST - 1/1/1982", 

@@ -280,77 +280,73 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall", ta
 }
 
 
-####__####
-####  Spline Tools  ####
-####__####
-#' Continuous Plankton Recorder Seasonal Spline Tool
+#### Trim Data to Study Area BBox  ####
+
+
+#' @title CPR Area Filter
+#' 
+#' @description Subset the Gulf of Maine CPR survey data using a specific survey area, specified by name. 
+#' Extents for the following areas are available: 
 #'
-#' @param cpr_dat n_obs x 5 matrix containing year, year-day, lat, lon, and abundance from cpr data
-#' @param spline_bins Integer value indicating the desired number of basis functions for the seasonal spline fit, default = 10
-#' @param season_bins Integer value indicating the number of periods you wish there to be in a recurring 365 day cycle
+#' @param study_area Indication of what area to subset with. Includes GOM, GOM_new, CCB, WGOM, EGOM, SS.
 #'
-#' @return  List containing 1. the original dataframe with log transformed abundances, labeled periods, and log transformed anomalies
-#' and 2. the mean, standard deviation, and sample size for each period for each year.
+#' @return 
 #' @export
 #'
 #' @examples
-cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4, study_area = "GOM") {
-  
-  #Check Input dimensions are correct
-  if(ncol(cpr_dat) != 5) {return(print('dat format requires 5 columns: [year, jday, lat, lon, #]'))}
-  
-  
-  
-  #### Trim Data to Study Area BBox  ####
+cpr_area_crop <- function(cpr_dat, study_area = "GOM_new"){
   
   area_bboxes <- tribble( ##### Area BBbox Open  ####
     ~"area",  ~"lon",  ~"lat",
     #Gulf of Maine - Historic
-    "GOM",   -70.000000,	42.200000,
-    "GOM",   -68.600000,	42.200000,
-    "GOM",   -68.600000,	42.400000,
-    "GOM",   -66.600000,	42.400000,
-    "GOM",   -66.600000,	43.400000,
-    "GOM",   -68.600000,	43.400000,
-    "GOM",   -68.600000,	43.200000,
-    "GOM",   -70.000000,	43.200000,
-    "GOM",   -70.000000,	42.200000,
+    "gom",   -70.000000,	42.200000,
+    "gom",   -68.600000,	42.200000,
+    "gom",   -68.600000,	42.400000,
+    "gom",   -66.600000,	42.400000,
+    "gom",   -66.600000,	43.400000,
+    "gom",   -68.600000,	43.400000,
+    "gom",   -68.600000,	43.200000,
+    "gom",   -70.000000,	43.200000,
+    "gom",   -70.000000,	42.200000,
+    
     #Gulf of Maine - Extended North to capture cpr route change
-    "GOM_new",   -70.000000,	42.200000, 
-    "GOM_new",   -66.600000,	42.200000, 
-    "GOM_new",   -66.600000,	43.800000, 
-    "GOM_new",   -70.000000,	43.800000, 
-    "GOM_new",   -70.000000,	42.200000,
+    "gom_new",   -70.000000,	42.200000, 
+    "gom_new",   -66.600000,	42.200000, 
+    "gom_new",   -66.600000,	43.800000, 
+    "gom_new",   -70.000000,	43.800000, 
+    "gom_new",   -70.000000,	42.200000,
     
-    "CCB",   -70.800000,	42.200000,
-    "CCB",   -70.000000,	42.200000,
-    "CCB",   -70.000000,	42.800000,
-    "CCB",   -70.800000,	42.800000,
-    "CCB",   -70.800000,	42.200000,
+    "ccb",   -70.800000,	42.200000,
+    "ccb",   -70.000000,	42.200000,
+    "ccb",   -70.000000,	42.800000,
+    "ccb",   -70.800000,	42.800000,
+    "ccb",   -70.800000,	42.200000,
+    
     #Western Gulf of Maine
-    "WGOM",  -70.000000, 	42.200000,
-    "WGOM",  -68.600000, 	42.200000,
-    "WGOM",  -68.600000, 	43.200000,
-    "WGOM",  -70.000000, 	43.200000,
-    "WGOM",  -70.000000, 	42.200000,
-    #Eastern Gulf of Maine
-    "EGOM",  -68.600000,	42.400000,
-    "EGOM",  -66.600000,	42.400000,
-    "EGOM",  -66.600000,	43.400000,
-    "EGOM",  -68.600000,	43.400000,
-    "EGOM",  -68.600000,	42.400000,
+    "wgom",  -70.000000, 	42.200000,
+    "wgom",  -68.600000, 	42.200000,
+    "wgom",  -68.600000, 	43.200000,
+    "wgom",  -70.000000, 	43.200000,
+    "wgom",  -70.000000, 	42.200000,
     
-    "SS",    -66.600000,	42.600000,
-    "SS",    -65.400000,	42.600000,
-    "SS",    -65.400000,	43.400000,
-    "SS",    -66.600000,	43.400000,
-    "SS",    -66.600000,	42.600000,
+    #Eastern Gulf of Maine
+    "egom",  -68.600000,	42.400000,
+    "egom",  -66.600000,	42.400000,
+    "egom",  -66.600000,	43.400000,
+    "egom",  -68.600000,	43.400000,
+    "egom",  -68.600000,	42.400000,
+    
+    "ss",    -66.600000,	42.600000,
+    "ss",    -65.400000,	42.600000,
+    "ss",    -65.400000,	43.400000,
+    "ss",    -66.600000,	43.400000,
+    "ss",    -66.600000,	42.600000,
   ) %>% arrange(area) ##### Area BBbox Close  ####
   
   
 
   #Filter to the correct area
-  study_area_bbox <- filter(area_bboxes, area == study_area)
+  study_area_bbox <- filter(area_bboxes, area == tolower(study_area))
   
   
   #subset data that fits
@@ -360,17 +356,40 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
     filter(
       between(lon, min(study_area_bbox$lon), max(study_area_bbox$lon)),
       between(lat, min(study_area_bbox$lat), max(study_area_bbox$lat)))
+  
+  # Return the cpr data
+  return(cpr_dat)
+}
+  
 
+####  Spline Tools  ####
   
   
+  
+#' Continuous Plankton Recorder Seasonal Spline Tool
+#'
+#' @param cpr_dat Takes output of cpr_area_crop. A data.frame containing atleast the following columns: year, julian day, lat, lon, and abundance.
+#' @param spline_bins Integer value indicating the desired number of basis functions for the seasonal spline fit, default = 10
+#' @param season_bins Integer value indicating the number of periods you wish there to be in a recurring 365 day cycle. 
+#' These are used as labels, not in GAM fitting.
+#'
+#' @return  List containing 1. the original dataframe with log transformed abundances, labeled periods, and log transformed anomalies
+#' and 2. the mean, standard deviation, and sample size for each period for each year.
+#' @export
+#'
+#' @examples
+cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4) {
   ####  Fit Seasonal Trend using all data  ####
   
+    
+  #Check Input dimensions are correct
+  if(ncol(cpr_dat) != 5) {return(print('dat format requires 5 columns: [year, jday, lat, lon, #]'))}
+    
   #Transform abundance to log abundance
   cpr_dat <- cpr_dat %>% 
     mutate(
       abundance = as.numeric(abundance),
       log_abund = log(abundance),
-      #log_abund = log10(abundance),
       log_abund = ifelse(is.infinite(log_abund), 0, log_abund)
     )
   
@@ -395,7 +414,7 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
   
   ####  Calculate Seasonal Averages  ####
   #Get Period Split Points from number of season_bins
-  bin_splits <- c(seq(0,365, by = ceiling(365 / (season_bins))), 365)
+  bin_splits <- c(seq(0, 365, by = ceiling(365 / (season_bins))), 365)
   
   #Set period number in data based on desired number of splits
   period <- data.frame(
@@ -428,7 +447,8 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
       period_anom_mu = mean(anomaly, na.rm = T),
       period_anom_sd = mean(anomaly, na.rm = T),
       period_anom_std = mean(rel_anomaly, na.rm = T),
-      period_anom_n = n() ) %>% 
+      period_anom_n = n(),
+      .groups = "keep") %>% 
     ungroup() %>% 
     mutate(period = as.character(period))
   
@@ -439,7 +459,8 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
       period_anom_mu = mean(anomaly, na.rm = T),
       period_anom_sd = mean(anomaly, na.rm = T),
       period_anom_std = mean(rel_anomaly, na.rm = T),
-      period_anom_n = n() ) %>% 
+      period_anom_n = n(),
+      .groups = "keep") %>% 
     mutate(period = "annual",
            datebounds = "1-365")
   
@@ -455,4 +476,4 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
   return(ts_out)
   
   
-} ####  End Spline Function  #### 
+} 

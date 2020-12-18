@@ -22,7 +22,8 @@ noaa_zoo_abundances <- read_csv("/Users/akemberling/Box/Climate Change Ecology L
 ####  1. Remove unused Taxa  ####
 #These names are not found at all in our data
 no_records <- noaa_zoo_abundances %>% 
-  pivot_longer(names_to = "taxon_stage", values_to = "abundance", cols = 11:ncol(noaa_zoo_abundances)) %>% 
+  pivot_longer(names_to = "taxon_stage", values_to = "abundance", 
+               cols = 11:ncol(noaa_zoo_abundances)) %>% 
   group_by(taxon_stage) %>% 
   summarise(presence = ifelse(sum(abundance, na.rm = T) > 0, "present", "absent")) %>% 
   ungroup() %>% 
@@ -35,12 +36,15 @@ noaa_inuse <- noaa_zoo_abundances %>% select(-one_of(no_records))
 
 
 ####  2. Make Column Key  ####
-#column names to allocate into list
+# The column Key lets us make changes to more easily, more robust to future changes
+# Easier to look up what columns went into the aggregation this way
+# though its a lot of vertical text here
+
+# The following column names need to be allocated into list
 sort(names(noaa_inuse)[11:ncol(noaa_inuse)])
 
-# Key that we can make changes to more easily, more robust to future changes
-# Easier to look up what columns went into the aggregation this way
-new_taxa_key <- list(
+# Column naming key:
+new_taxa_key <- list( #####  Start Key  ####
   `acartia danae`                       = c("acartia danae_copepodite ii-vi"),
   
   `acartia longiremis`                  = c("acartia longiremis_copepodite ii-vi", 
@@ -276,25 +280,36 @@ new_taxa_key <- list(
   
   `unidentified plankton and fragments` = c("unidentified plankton and fragments_unstaged")
 )
-
+####  End Key  ####
 
 
 
 ####  3. Use  Key to Consolidate  ####
 
 # Pull the station information
-noaa_zoo_stations <- noaa_zoo_abundances[,1:10]
+station_metadata <- noaa_zoo_abundances[,1:10]
 
 # Consolidate in use taxa using key
 noaa_zoo_refined <- imap(new_taxa_key, function(x, y) {
   
+  # So for names that have exact matches the transfer is easy
   if(length(x) == 1) {
     taxa_new <- data.frame(y = select(noaa_zoo_abundances, one_of(x)))
-    taxa_new[taxa_new == -9999] <- 0
+    
+    # NOTE -9999 was repllaced with 0 for the publication I worked on with Andy
+    #taxa_new[taxa_new == -9999] <- 0
+    
+    # In hindsight it makes more sense to set them as the lowest value on scale or NA
+    # taxa_new[taxa_new == -9999] <- 33.5
+    taxa_new[taxa_new == -9999] <- NA
+    
     colnames(taxa_new)[1] <- y
   } 
   
-  #need some way to  sum the columns by row element, not collapse to sum the column
+  
+  
+  # For cases where you are consolidating it is a little different:
+  # need some way to sum the columns by row element, not collapse to sum the column
   if(length(x) > 1) {
     
     mult_columns_df <- as.data.frame(matrix(nrow = nrow(noaa_zoo_abundances), ncol = length(x) + 1))
@@ -303,8 +318,10 @@ noaa_zoo_refined <- imap(new_taxa_key, function(x, y) {
       mult_columns_df[,i] <- select(noaa_zoo_abundances, one_of(x[i]))
     }
     
-    #Fix any instances where -9999 was used to denote observed but not counted
-    mult_columns_df[mult_columns_df == -9999] <- 0
+    # Fix any instances where -9999 was used to denote observed but not counted
+    # mult_columns_df[mult_columns_df == -9999] <- 0
+    # mult_columns_df[mult_columns_df == -9999] <- 33.5
+    mult_columns_df[mult_columns_df == -9999] <- NA
     
     
     for (i in 1:nrow(mult_columns_df)) {
@@ -322,10 +339,10 @@ noaa_zoo_refined <- imap(new_taxa_key, function(x, y) {
 
 
 #Join with the new columns
-noaa_zoo_2 <- bind_cols(noaa_zoo_stations, noaa_zoo_refined)
+noaa_zoo_2 <- bind_cols(station_metadata, noaa_zoo_refined)
 
 #remove unnecesary objects for use when sourcing
-rm(noaa_zoo_stations, no_records, noaa_inuse, noaa_zoo_refined)
+rm(station_metadata, no_records, noaa_inuse, noaa_zoo_refined)
 
 
 

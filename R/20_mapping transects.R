@@ -6,12 +6,12 @@
 
 ####  Packages  ####
 library(gmRi)
-library(tidyverse)
 library(patchwork)
 library(sf)
 library(raster)
 library(metR)
 library(here)
+library(tidyverse)
 
 #CCEL Boxpath
 ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
@@ -121,6 +121,13 @@ ggplot() +
   theme(legend.position = c(0.7, 0.15),
         legend.background = element_blank()) #+ labs(caption = "Sampling Conducted in 2017 - 4 Transects")
 
+# plotting all areas
+ggplot() +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_sf(data = area_polygons, aes(fill = area), alpha = 0.3) +
+  coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
+  facet_wrap(~area)
 
 
 ###__Yearly Coverage  ####
