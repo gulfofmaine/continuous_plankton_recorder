@@ -25,12 +25,20 @@ source(here::here("R", "cpr_helper_funs.R"))
 #Reduced NOAA dataset obtained from 15_NOAA_CPR_Key.R
 source("R/15_NOAA_CPR_Cleanup.R")
 
+# Loading targets
+library(targets)
+tar_load(noaa_taxa_resolved)
+
 
 ####  2. SAHFOS Consolidated  ####
 
 #SAHFOS data is converted to number per meters cubed and combined across subsampling methods in:
 # 16_SAHFOS_CPR_Cleanup.R
 source("R/16_SAHFOS_CPR_Cleanup.R")
+
+# Loading targets
+library(targets)
+tar_load(sahfos_zoo_100m)
 
 
 ####__####

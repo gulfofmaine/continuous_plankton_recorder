@@ -25,8 +25,11 @@ mab_cpr <- read_xlsx( path = str_c(cpr_boxpath, "data","mid_atlantic_survey", "M
 mab_cpr <- clean_names(mab_cpr)
 
 # Header Notes:
-# Note 1- Values of -9999 for abundace indicate that a taxa was observed in the sample but not counted during quantitative analysis
-# Note 2- Date for both the Gulf of Maine and Mid Atlantic cpr routes are included. All data north of 41 degrees are from the GOM route.
+# Note 1- Values of -9999 for abundace indicate that a taxa was observed in the sample but not 
+# counted during quantitative analysis
+
+# Note 2- Date for both the Gulf of Maine and Mid Atlantic cpr routes are included. 
+# All data north of 41 degrees are from the GOM route.
 # Note 3- Values of NaN for phytoplankton color index indicate no data.
 
 
@@ -70,12 +73,12 @@ mab_inuse %>% count(abundance_per_100_cubic_meters) # display the values used
 mab_inuse %>% count(abundance_per_100_cubic_meters) %>% arrange(desc(abundance_per_100_cubic_meters))
 
 
-
-#are they consistently certain taxa
+# are they consistently certain taxa?
 mab_inuse %>% 
   mutate(pres_not_counted = ifelse(abundance_per_100_cubic_meters == -9999, 1, 0)) %>% 
   group_by(taxonomic_name) %>% 
-  summarise(n_9999 = sum(pres_not_counted)) %>% arrange(desc(n_9999))# %>% ggplot(aes(x = n_9999)) + geom_histogram()
+  summarise(n_9999 = sum(pres_not_counted)) %>% 
+  arrange(desc(n_9999))
 
 
 
@@ -220,11 +223,13 @@ top_ranks <- long_full %>%
             total_dens = sum(abundance_per_100_cubic_meters, na.rm = T), .groups = "keep") %>% 
   ungroup()
 
+
+
 # Percent Occurrence in CPR - NO zeros apparently
-top_ranks %>% arrange(desc(perc_occurrence)) %>% pull(taxonomic_name) %>% head(10)
+top_ranks %>% slice_max(n = 10, order_by = perc_occurrence) %>% select(taxonomic_name, perc_occurrence) 
 
 # Avg. density
-top_ranks %>% slice_max(n = 10, order_by = mean_dens) %>% pull(taxonomic_name)
+top_ranks %>% slice_max(n = 10, order_by = mean_dens) %>% select(taxonomic_name, mean_dens)
 
 # Highest Occurrence
 top_ranks %>% slice_max(n = 10, order_by = total_occurrence) %>% pull(taxonomic_name)

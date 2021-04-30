@@ -60,9 +60,9 @@ cpr_reshape <- function(x) {
 cpr_species <- map(cpr_species, cpr_reshape)
 
 
-# Bind to one df
-cpr_all <- bind_rows(cpr_species, .id = "species")
-write_csv(cpr_all, str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/"), col_names = TRUE)
+# # Bind to one df
+# cpr_all <- bind_rows(cpr_species, .id = "species")
+# write_csv(cpr_all, str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/"), col_names = TRUE)
 
 # Remove originals
 rm(calanus, calanus_1to4, centropages, chaetognatha, euphausiacea, metridia, oithona, para_pseudocalanus, paraeucheata, temora)

@@ -140,6 +140,10 @@ calanus <- mab_edit %>%
   mutate(log_abund = log(abundance),
          log_abund = ifelse(is.infinite(log_abund), 0, log_abund))
 
+calanus %>% 
+  group_by(life_stage) %>% 
+  summarise(mean_abund = mean(abundance))
+
 
 ####__ 1. GAM on observed abund  ####
 # Fit gam
@@ -194,5 +198,66 @@ ggplot(pred_2020) +
   labs(x = "", y = "Abundance / 100 cubic meters") +
   scale_color_gmri() +
   theme(legend.position = "bottom")
+
+
+
+
+
+
+####  All Taxa Fits  ####
+
+#### Split data by taxa
+distinct_taxa <- sort(unique(mab_edit$taxonomic_name))
+distinct_taxa <- setNames(distinct_taxa, distinct_taxa)
+taxa_list <- map(distinct_taxa, function(taxa){filter(mab_edit, taxonomic_name == taxa)})
+
+
+
+#### Get seasonal variation overall
+seasonal_fits <- map(taxa_list, function(taxa){
+  
+  seasonal_gam  <- gam(abundance ~ s(jday, bs = "cc", k = 10),
+                       data = taxa)
+  taxa$gam_pred <- predict(seasonal_gam, taxa, type = "response")
+  taxa$anom     <- taxa$abundance - taxa$gam_pred
+  list_out      <- list("data" = taxa, "model" = seasonal_gam)
+  return(list_out)
+})
+
+
+
+
+#### Plot the intra-annual variation, but color points by stage
+names(seasonal_fits$`Calanus finmarchicus`$data)
+
+
+#re-group to early and late stage copepodites
+early_stage <- c("te i", "e ii", " iii", "e iv", "i-iv")
+late_stage  <- c("te v", "e vi", "v-vi")
+
+
+# Pull predictions
+cal_predictions <- data.frame(samp_date = full_dates,
+                              jday = lubridate::yday(full_dates))
+
+
+# Apply Model
+cal_predictions$pred_abund <- predict(
+  object = seasonal_fits$`Calanus finmarchicus`$model,
+  newdata = cal_predictions)
+
+
+# Plot the early-late stages
+seasonal_fits$`Calanus finmarchicus`$data %>% 
+  mutate(
+    group_stages = case_when(
+      str_sub(life_stage, -4, -1) %in% early_stage ~ "Early Stages i-iv",
+      str_sub(life_stage, -4, -1) %in% late_stage ~ "Late Stages v-vi",
+      TRUE ~ "unstaged"
+    )) %>% 
+  ggplot(aes(samp_date, abundance, color = group_stages)) +
+  geom_point() +
+  geom_line(data = cal_predictions, aes(samp_date, pred_abund), color = "gray50") +
+  scale_y_log10()
 
   

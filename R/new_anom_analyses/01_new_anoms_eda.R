@@ -19,15 +19,19 @@ ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab
 
 # Combined dataset from NOAA/SAHFOS, concentrations in common units: # / meters cubed
 # Source: 17_noaa_sahfos_eda.R
-cpr_abund <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
+cpr_abund <- read_csv(str_c(ccel_boxpath, "Data/Gulf of Maine CPR/2020_combined_data/zooplankton_combined.csv"), 
                       guess_max = 1e6, col_types = cols())
 
 
 # Anomalies from seasonal splines: source: 19_cpr_splines.R
-cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "detrended_anomalies_noaa_sahfos.csv", sep = "/"), 
+cpr_wide <- read_csv(str_c(ccel_boxpath, "Data/Gulf of Maine CPR/2020_combined_data/detrended_anomalies_noaa_sahfos.csv"), 
                      guess_max = 1e6, 
                      col_types = cols())
-cpr_long <- cpr_wide %>% pivot_longer(names_to = "taxa", values_to = "anomaly", cols = 5:ncol(.))
+
+# Long form
+cpr_long <- cpr_wide %>% 
+  pivot_longer(names_to = "taxa", values_to = "anomaly", cols = 5:ncol(.))
+
 
 #Reference Taxa
 species_05 <- c("calanus_i_iv", 
@@ -113,7 +117,8 @@ comparison_df %>%
   theme(legend.position = c(0.8,0.15)) +
   labs(x = NULL, y = NULL) 
 
-#R-squared plot
+####
+#R-squared compaarison  plot
 source_compare <- function(taxa) {
   ref_df <- comparison_df %>% filter(species == taxa, source == "MATLAB splines") %>% 
     select(species, year, period, anom_matlab = anomaly,-c(datebounds, period_anom_n))
@@ -134,11 +139,11 @@ source_compare <- function(taxa) {
                  aes(x = anom_r, y = anom_matlab, label = ..rr.label..),
                  label.y = 0.1,
                  label.x = 0.9,
-                 parse = TRUE)
-    
-}
+                 parse = TRUE)}
 
+####
 
+# test with calanus
 source_compare("calanus1to4")
 
 
@@ -177,13 +182,13 @@ top_ranks <- abund_long %>%
   ungroup()
 
 # Percent Occurrence in CPR
-top_ranks %>% slice_max(n = 15, order_by = perc_occurrence) %>% pull(taxa)
+top_ranks %>% slice_max(n = 10, order_by = perc_occurrence) %>% select(taxa, perc_occurrence)
 
 # Avg. density
-top_ranks %>% slice_max(n = 18, order_by = mean_dens) %>% pull(taxa)
+top_ranks %>% slice_max(n = 10, order_by = mean_dens) %>% select(taxa, mean_dens)
 
 # Highest Occurrence
-top_ranks %>% slice_max(n = 15, order_by = total_occurrence)
+top_ranks %>% slice_max(n = 15, order_by = total_occurrence) %>% select(taxa, total_occurrence)
 
 # Yearly summaries
 abund_summs <- abund_long %>% 
@@ -197,6 +202,10 @@ abund_summs <- abund_long %>%
   ungroup()
 
 
+
+
+
+
 # Top Ten density
 abund_summs %>% 
   group_by(year) %>% 
@@ -204,8 +213,8 @@ abund_summs %>%
   ungroup() %>% 
   mutate(taxa = fct_reorder(.f = taxa, .x = mean_dens, .fun = mean, .desc = T)) %>% 
   ggplot(aes(year, mean_dens, color = taxa)) +
-    geom_line(aes(group = 1)) +
-    geom_point() +
+    geom_line(aes(group = 1), show.legend = F) +
+    geom_point(show.legend = F) +
     facet_wrap(~taxa) + 
     labs(x = "", y = "Avg. Transect Density", caption = "Top 5 taxa taken from each year. Gaps in timeseries indicate absence from top 5.")
 

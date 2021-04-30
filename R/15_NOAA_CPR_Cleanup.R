@@ -7,13 +7,28 @@
 # This allows for more detailed information, if used consistently (it isn't)
 # In order to pair with SAHFOS data you need to reduce to SAHFOS resolution
 
+
+
 ####  Packages  ####
+#library(targets)
 library(tidyverse)
+
+
 
 
 ####  Data  ####
 noaa_zoo_abundances <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/noaa_zoo_abundances_2019.csv",
-                                col_types = cols(), guess_max = 1e5)
+                                col_types = cols(), 
+                                guess_max = 1e5)
+
+# compare to target
+# library(targets)
+# tar_load(gom_noaa_zoo) # the same
+# noaa_zoo_abundances <- gom_noaa_zoo
+
+
+
+
 
 
 ####  Cleaner NOAA Consolidation  ####
@@ -24,6 +39,7 @@ noaa_zoo_abundances <- read_csv("/Users/akemberling/Box/Climate Change Ecology L
 no_records <- noaa_zoo_abundances %>% 
   pivot_longer(names_to = "taxon_stage", values_to = "abundance", 
                cols = 11:ncol(noaa_zoo_abundances)) %>% 
+  mutate(abundance = as.numeric(abundance)) %>% 
   group_by(taxon_stage) %>% 
   summarise(presence = ifelse(sum(abundance, na.rm = T) > 0, "present", "absent")) %>% 
   ungroup() %>% 
@@ -284,19 +300,37 @@ new_taxa_key <- list( #####  Start Key  ####
 
 
 
+
+
+
+
+
 ####  3. Use  Key to Consolidate  ####
 
 # Pull the station information
 station_metadata <- noaa_zoo_abundances[,1:10]
 
+
+# make sure abundance columns are numeric
+first_taxa <- names(noaa_zoo_abundances)[11]
+last_taxa  <- names(noaa_zoo_abundances)[ncol(noaa_zoo_abundances)]
+noaa_zoo_abundances <- noaa_zoo_abundances %>% 
+  mutate(across(c(11:ncol(noaa_zoo_abundances)), as.numeric))
+
+
+
 # Consolidate in use taxa using key
 noaa_zoo_refined <- imap(new_taxa_key, function(x, y) {
+  
+  # testing
+  # x <- new_taxa_key[[2]]
+  # y <- names(new_taxa_key[2])
   
   # So for names that have exact matches the transfer is easy
   if(length(x) == 1) {
     taxa_new <- data.frame(y = select(noaa_zoo_abundances, one_of(x)))
     
-    # NOTE -9999 was repllaced with 0 for the publication I worked on with Andy
+    # NOTE -9999 was replaced with 0 for the publication I worked on with Andy
     #taxa_new[taxa_new == -9999] <- 0
     
     # In hindsight it makes more sense to set them as the lowest value on scale or NA
@@ -312,7 +346,9 @@ noaa_zoo_refined <- imap(new_taxa_key, function(x, y) {
   # need some way to sum the columns by row element, not collapse to sum the column
   if(length(x) > 1) {
     
-    mult_columns_df <- as.data.frame(matrix(nrow = nrow(noaa_zoo_abundances), ncol = length(x) + 1))
+    mult_columns_df <- as.data.frame(
+      matrix(nrow = nrow(noaa_zoo_abundances), 
+             ncol = length(x) + 1))
     
     for (i in 1:length(x)) {
       mult_columns_df[,i] <- select(noaa_zoo_abundances, one_of(x[i]))
@@ -334,15 +370,25 @@ noaa_zoo_refined <- imap(new_taxa_key, function(x, y) {
   
   return(taxa_new)
   
-}) %>% bind_cols()
+})
+
+# bind columns
+noaa_zoo_refined <-  bind_cols(noaa_zoo_refined)
 
 
-
-#Join with the new columns
+# Join up withe the metadata
 noaa_zoo_2 <- bind_cols(station_metadata, noaa_zoo_refined)
 
-#remove unnecesary objects for use when sourcing
+#remove unnecessary objects for use when sourcing
 rm(station_metadata, no_records, noaa_inuse, noaa_zoo_refined)
+
+
+
+
+
+
+
+
 
 
 

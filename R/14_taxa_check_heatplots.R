@@ -13,21 +13,24 @@ library(rnaturalearth)
 source(here::here("R", "cpr_helper_funs.R"))
 
 ####____________________________####
-noaa_phyto_key        <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/noaa_phyto_key_2019.csv")
-noaa_phyto_abundances <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/noaa_phyto_abundances_2019.csv")
+# simplify path to all
+gom_cpr_path <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/")
 
-noaa_zoo_key          <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/noaa_zoo_key_2019.csv")
-noaa_zoo_abundances   <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/noaa_zoo_abundances_2019.csv")
+noaa_phyto_key        <- read_csv(str_c(gom_cpr_path, "2019_data_processing/noaa_phyto_key_2019.csv"))
+noaa_phyto_abundances <- read_csv(str_c(gom_cpr_path, "2019_data_processing/noaa_phyto_abundances_2019.csv"))
 
-mc1_phyto <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc1_phyto_2019.csv")
-mc1_eye   <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc1_eyecount_2019.csv")
-mc1_trav  <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc1_traverse_2019.csv")
-mc1_taxa  <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc1_taxa_key_2019.csv")
+noaa_zoo_key          <- read_csv(str_c(gom_cpr_path, "2019_data_processing/noaa_zoo_key_2019.csv"))
+noaa_zoo_abundances   <- read_csv(str_c(gom_cpr_path, "2019_data_processing/noaa_zoo_abundances_2019.csv"))
 
-mc2_phyto <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc2_phyto_2019.csv")
-mc2_eye   <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc2_eyecount_2019.csv")
-mc2_trav  <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc2_traverse_2019.csv")
-mc2_taxa  <- read_csv("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gulf of Maine CPR/2019_data_processing/mc2_taxa_key_2019.csv")
+mc1_phyto <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc1_phyto_2019.csv"))
+mc1_eye   <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc1_eyecount_2019.csv"))
+mc1_trav  <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc1_traverse_2019.csv"))
+mc1_taxa  <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc1_taxa_key_2019.csv"))
+
+mc2_phyto <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc2_phyto_2019.csv"))
+mc2_eye   <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc2_eyecount_2019.csv"))
+mc2_trav  <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc2_traverse_2019.csv"))
+mc2_taxa  <- read_csv(str_c(gom_cpr_path, "2019_data_processing/mc2_taxa_key_2019.csv"))
 
 
 ####  Heatmaps for in-use Taxa Diagnostics  ####
@@ -165,7 +168,7 @@ mc1_heat_plots <- taxon_splits %>% imap(function (df_test, taxa_name) {
 })
 
 #Plotting
-mc1_heat_plots[1:10]
+# mc1_heat_plots[1:10]
 
 ####  3. SAHFOS MC2  ####
 
@@ -335,12 +338,12 @@ sahfos_eyecount_plots$Calanus
 
 ####  Category Counting System Check  ####
 
-#SAHFOS
+#SAHFOS - these match the documentation
 sahfos_eye %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = 11:ncol(sahfos_eye)) %>% count(abundance)
 sahfos_trav %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = 11:ncol(sahfos_trav)) %>% count(abundance)
 sahfos_phyto %>% pivot_longer(names_to = "taxon", values_to = "abundance", cols = 12:ncol(sahfos_phyto)) %>% count(abundance)
 
-#NOAA
+#NOAA - these are a mess
 noaa_zoo_abundances %>% 
   pivot_longer(names_to = "taxon", values_to = "abundance", cols = 11:ncol(noaa_zoo_abundances)) %>% 
   count(abundance)
