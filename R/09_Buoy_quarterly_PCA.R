@@ -35,9 +35,11 @@ buoy <- read.csv(str_c(cpr_boxpath, "data/processed_data/buoy_anomalies.csv", se
     reading_depth, levels = c("1 meter", "20 meters", "50 meters", "100 meters", "150 meters", "180 meters")
   ))
 
+
+####__####
 ####  Data Reshaping  ####
 
-# Pair cpr data with quarterly measurements
+# Pair cpr data with quarterly Buoy Measurements
 cpr_buoys <- cpr_long %>%
   filter(period != "Annual") %>% 
   left_join(buoy, by = c("year", "period")) %>% 
@@ -46,7 +48,7 @@ cpr_buoys <- cpr_long %>%
 # clean environment so there's no name conflicts
 rm("buoy", "cpr_long")
 
-
+####__ Reshape####
 # Reshape data so we have a column for each buoy-depth-measurement
 corr_df <- cpr_buoys %>% 
   mutate(buoy_id = str_replace_all(buoy_id, "Buoy_", ""),
@@ -59,12 +61,36 @@ corr_df <- cpr_buoys %>%
 # Final datasets for PCA, and for correlation tables by quarter
 corr_setup_full <- corr_df %>% 
   pivot_wider(names_from = taxa, values_from = pop_anom) %>% 
-  pivot_wider(names_from = c(buoy, depth), values_from = c(t, s))
+  pivot_wider(names_from = c(buoy, depth), values_from = c(t, s)) 
 
+####__ Set Focal Taxa  ####
+
+# Rename columns we care about for plot
+corr_setup_full <- corr_setup_full %>% 
+  rename(
+    "calanus 1-4" = "calanus1to4",
+    "para-pseudocalanus" = "para_pseudocalanus"
+  )
+
+#Taxa we care about - need to match name changes
+my_taxa <- c("calanus", "calanus 1-4", "centropages", "chaetognatha",
+             "euphausiacea", "metridia", "oithona", "para-pseudocalanus",
+             "paraeucheata", "temora")
+
+#Taxa levels - for plotting
+taxa_levels <- c(
+  "calanus 1-4", "calanus",      # calanus
+  "oithona", "temora", "metridia", "para-pseudocalanus","paraeucheata", "centropages",  #smaller copepods
+  "euphausiacea", "chaetognatha") # big zooplankton)
+
+
+
+###__ Prep Quarters  ####
 Q1 <- corr_setup_full %>% filter(period == "Q1") %>% drop_na()
 Q2 <- corr_setup_full %>% filter(period == "Q2") %>% drop_na()
 Q3 <- corr_setup_full %>% filter(period == "Q3") %>% drop_na()
 Q4 <- corr_setup_full %>% filter(period == "Q4") %>% drop_na()
+
 
 
 ####__####
@@ -117,19 +143,15 @@ corr_plot_setup <- function(wide_df) {
 cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall"){
   
   #Filter Var1 and Var2 to reshape plot
-  
-  #Taxa
-  my_taxa <- c("calanus", "calanus1to4", "centropages", "chaetognatha",
-               "euphausiacea", "metridia", "oithona", "para_pseudocalanus",
-               "paraeucheata", "temora")
-  
   long_plot <- corr_dataframe %>% 
     filter(Var1 %notin% my_taxa,
-           Var2 %in% my_taxa)
+           Var2 %in% my_taxa) %>% 
+    mutate(Var2 = factor(Var2, levels = taxa_levels))
   
   tall_plot <- corr_dataframe %>% 
     filter(Var1 %in% my_taxa,
-           Var2 %notin% my_taxa)
+           Var2 %notin% my_taxa) %>% 
+    mutate(Var1 = factor(Var1, levels = taxa_levels))
   
   if(plot_style == "tall") {
     plot_option  <- tall_plot
@@ -173,7 +195,7 @@ Q4_corrs <- corr_plot_setup(Q4)
 
 ####__####
 
-####  Corrplots  ####
+####  Quarterly CPR-Buoy Corrplots  ####
 q1_t <- cpr_corr_plot(Q1_corrs, period = "Q1", plot_style = "tall")
 q2_t <- cpr_corr_plot(Q2_corrs, period = "Q2", plot_style = "tall") + theme(axis.text.y = element_blank())
 q3_t <- cpr_corr_plot(Q3_corrs, period = "Q3", plot_style = "tall") + theme(axis.text.y = element_blank())
@@ -191,8 +213,9 @@ ggsave(quarterly_corrplot,
 
 ####__####
 
-####  PCA  ####
+####  Buoy Sensor & CPR PCA  ####
 
+# All the CPR Data and the Buoy Data, no missing records, no interpolated buoy measures
 buoy_pca_dat <- corr_setup_full %>% drop_na()
 
 #Perform PCA
@@ -209,5 +232,8 @@ ggbiplot(pca_buoys,
          groups = buoy_pca_dat$decade, 
          obs.scale = T, 
          var.scale = T)
+
+
+
 
 

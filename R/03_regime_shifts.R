@@ -11,6 +11,7 @@ library(cpm)
 library(bcp)
 library(zoo)
 library(tidyverse)
+library(gmRi)
 library(here)
 
 ####  Functions  ####
@@ -38,7 +39,7 @@ annual_anoms <- cpr_long %>%
 
 ####__#####################################
 ####  1. Temporal Changes In Response  ####
-anniual_anoms %>% 
+annual_anoms %>% 
   ggplot(aes(year, anomaly)) +
     geom_point(color = gmri_cols("dark gray")) +
     geom_smooth(method = "loess", color = gmri_cols("gmri blue")) +

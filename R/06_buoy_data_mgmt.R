@@ -8,17 +8,21 @@ library(here)
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
 
-####  Buoy Data  ####
-#Buoy data is generated using:
+
+####____________________________####
+####  Import Buoy Data  ####
+#Buoy data is generated using two scripts acquired from Matt Dzaugis:
 # 1. R/buoy_data/UpdateBuoy_functions.Rmd
 # 2. R/buoy_data/Update_Buoy.Rmd
 
 #load(file = str_c(cpr_boxpath, "/data/processed_data/Buoy.RData"))
 load(file = str_c(cpr_boxpath, "/data/processed_data/Buoys_Md_2019.RData"))
 
+###__ 1. Collapse List Structure  ####
+
 #Check Reference Tree to see list structure
 lobstr::ref(Buoys)
-
+ 
 #Buoys is a nested list with environmental data for each buoy at each depth
 buoy_b <- Buoys$Buoy_B
 
@@ -84,7 +88,7 @@ rm(Buoys, buoy_b)
 
 
 
-#####  Estimate  Aggreagate Values  ####
+#####__ 2. Estimate  Aggreagate Values  ####
 yearly_means <- buoys %>% 
   mutate(year = lubridate::year(Date),
          year = factor(year)) %>% 
@@ -137,7 +141,7 @@ buoy_dataset <- full_join(yearly_means, quarterly_means) %>%
   full_join(bi_monthly_means)
 
 
-####  Stratification index  ####
+###__ 3. Stratification index  ####
 # Brunt-Vaisala frequency N = sqrt(-g/potential density * delta density/delta depth)
 # the ocean stratification is quantified by the measured value of delta density/denta depth
 # If the water is more stratified, the frequency is higher. If less stratified, frequency is lower
@@ -153,7 +157,7 @@ strat_set <- buoys_collapsed %>%
   bind_rows()
 
 
-#####  Estimate Aggregate Stratification Values  ####
+#####__ 4. Aggregate Stratification Values  ####
 yearly_strat <- strat_set %>% 
   mutate(year = lubridate::year(Date),
          year = factor(year)) %>% 
@@ -200,12 +204,16 @@ bi_monthly_strat <- strat_set %>%
 strat_aggregates <- full_join(yearly_strat, quarterly_strat) %>% 
   full_join(bi_monthly_strat)
 
-####  Combine with physical measurements  ####
+####__ 5.   Combine with physical measurements  ####
 buoys_out <- full_join(buoy_dataset, strat_aggregates)
 
 
-
+####____________________________####
 ####  Export Out  ####
 write_csv(buoys_out, 
           path = str_c(cpr_boxpath, "data/processed_data/buoys_aggregated.csv", sep = "/"), 
           col_names = TRUE)
+
+
+
+

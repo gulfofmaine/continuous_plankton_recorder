@@ -28,9 +28,11 @@ sahfos_phyto <- bind_rows(mc1_phyto, mc2_phyto)
 rm(mc1_eye, mc1_phyto, mc1_taxa, mc1_trav)
 rm(mc2_eye, mc2_phyto, mc2_taxa, mc2_trav)
 
+
+
 ####__####
 
-####  1. Meters Cubed Conversion    ####
+####  1. (100) Meters Cubed Conversion    ####
 
 
 #Conversions - 
@@ -46,16 +48,7 @@ sahfos_eye %>% count(`calanus finmarchicus`)
 
 
 # #Question: are the counts already converted to the number expected for a full transect?
-# ggplot() +
-#   geom_point(data = mc1_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
-#   geom_point(data = mc1_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
-#   geom_point(data = mc2_trav, aes(factor(year), `calanus i-iv`, color = "traverse")) +
-#   geom_point(data = mc2_eye, aes(factor(year), `calanus finmarchicus`, color = "eyecount")) +
-#   labs(x = NULL, y = "C. finmarchicus", title = "Calanus Check")
-
-#Appears that way, would not expect to see >1000 on 1.25 square cm
-# Conclusion all three (eye, phyto, traverse) are in numbers per transect
-
+# #ANSWER: Conclusion all three (eye, phyto, traverse) are in numbers per transect
 
 # B. transect to water volume
 
@@ -66,9 +59,13 @@ sahfos_eye %>% count(`calanus finmarchicus`)
 # volume in square meters per 10cm silk = 2.987091 meters^3
 
 
+
+
+
 ####  Conversion Rate  ####
-#Original calculation to get to # per meters cubed
-conversion_rate <- 1/2.987091
+
+# Original calculation to get to # per meters cubed
+conversion_rate <- 1 / 2.987091
 
 #Multiply by 100 to get to 100 cubic meters
 conversion_rate <- conversion_rate * 100
@@ -88,14 +85,14 @@ sahfos_m3 <-  map(sahfos_abundances, function(x){
 ####__####
 ####  2. Combine Traverse and eyecount  ####
 strav_m3 <- sahfos_m3$traverse
-seye_m3 <- sahfos_m3$eye
+seye_m3  <- sahfos_m3$eye
 
-#Dataframe comparisons
+# Dataframe comparisons
 
-#All have the same number of rows, but columns are present in some but not others
-map(sahfos_m3, dim)
-janitor::compare_df_cols(strav_m3, seye_m3)
-janitor::compare_df_cols_same(strav_m3, seye_m3)
+# #All have the same number of rows, but columns are present in some but not others
+# map(sahfos_m3, dim)
+# janitor::compare_df_cols(strav_m3, seye_m3)
+# janitor::compare_df_cols_same(strav_m3, seye_m3)
 
 #Idea, create a dataframe with names found in both, make the values the added contribution from one or both the subsample types
 unique_names     <- sort(unique(c(names(strav_m3), names(seye_m3))))
@@ -164,8 +161,10 @@ taxa_fill <- function(empty_frame = new_df,  df_1 = strav_m3, df_2 = seye_m3) {
   
 }
 
+
+
 ####  Combined Traverse and Eyecounts 
-# 1:1 sum of traverse and eyecount abunndances in # per cubic meter
+# 1:1 sum of traverse and eyecount abunndances in # per 100 cubic meters
 sahfos_zoo <- taxa_fill(empty_frame = new_df, df_1 = strav_m3, df_2 = seye_m3)
 sahfos_zoo <- bind_cols(sahfos_trav %>% select(1:10), sahfos_zoo)
 
@@ -173,12 +172,14 @@ sahfos_zoo <- bind_cols(sahfos_trav %>% select(1:10), sahfos_zoo)
 # Visual Check
 sahfos_zoo %>% 
   group_by(year) %>% 
-  dplyr::summarise(`calanus_v-vi` = sum(`calanus finmarchicus`, na.rm = T),
-                   `calanus_i-iv` = sum(`calanus i-iv`, na.rm = T)) %>% 
+  dplyr::summarise(
+    `calanus_v-vi` = sum(`calanus finmarchicus`, na.rm = T),
+    `calanus_i-iv` = sum(`calanus i-iv`, na.rm = T)) %>% 
   ggplot() +
   geom_point(aes(year, `calanus_v-vi`, color = "calanus_v-vi")) +
   geom_point(aes(year, `calanus_i-iv`, color = "calanus_i-iv")) +
-  scale_y_continuous(labels = scales::comma_format())
+  scale_y_continuous(labels = scales::comma_format()) +
+  labs(y = "Abundance per 100 m3")
 
 
 #remove unnecesary objects for use when sourcing

@@ -65,8 +65,9 @@ cpr_species <- map(cpr_species, cpr_reshape)
 # Bind to one df
 cpr_all <- bind_rows(cpr_species, .id = "species")
 
-#Export out
-write_csv(cpr_all, str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long_quarters.csv", sep = "/"), col_names = TRUE)
+# #Export out
+# write_csv(cpr_all, str_c(cpr_boxpath, "data/processed_data/cpr_allspecies_long_quarters.csv"), 
+#           col_names = TRUE)
 
 # Remove originals
 rm(calanus, calanus_1to4, centropages, chaetognatha, euphausiacea, metridia, oithona, para_pseudocalanus, paraeucheata, temora, cpr_species)

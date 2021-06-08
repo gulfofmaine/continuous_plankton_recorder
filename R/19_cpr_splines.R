@@ -14,11 +14,14 @@ library(here)
 #CCEL Boxpath
 ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
 
-#### Spline function  ####
+#### Functions  ####
 source(here("R", "cpr_helper_funs.R"))
 
 
 ####  Data  ####
+
+# Combined dataset from NOAA/SAHFOS, 
+# concentrations in common units: # / meters cubed
 cpr <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
                 guess_max = 1e6, col_types = cols())
 
@@ -44,7 +47,7 @@ cal_test <- cpr %>%
 
 #Annual Spline - 10 knots
 ggplot(cal_test, aes(jday, abundance)) +
-  geom_point(alpha = 0.2) +
+  geom_point(alpha = 0.1) +
   geom_smooth(formula = y ~ s(x, bs = "cc", k = 10), 
               method = "gam")
 
@@ -52,7 +55,7 @@ ggplot(cal_test, aes(jday, abundance)) +
 ggplot(cal_test, aes(jday,abundance)) +
   geom_point(alpha = 0.1) +
   geom_smooth(formula = y ~ s(x, bs = "cc", k = 4), 
-              method = "gam")#Working with the data
+              method = "gam") #Working with the data
 
 
 ####  Test Splines  ####
@@ -199,7 +202,9 @@ cpr_dat <- cpr %>%
          jday = lubridate::yday(cal_date),
          abundance = `calanus i-iv`,
          log_abundance = log(abundance),
-         `longitude (degrees)` = ifelse(`longitude (degrees)` > 0, `longitude (degrees)` * -1, `longitude (degrees)`)) %>%
+         `longitude (degrees)` = ifelse(`longitude (degrees)` > 0, 
+                                        `longitude (degrees)` * -1, 
+                                        `longitude (degrees)`)) %>%
   select(year, jday, lat = `latitude (degrees)`, lon = `longitude (degrees)`, abundance)
 
 
@@ -229,7 +234,8 @@ cpr_dat %>% st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
 taxa_cols <- names(cpr)[12:ncol(cpr)]
 names(taxa_cols) <- taxa_cols
 
-#Make a list with details on each taxa
+# Make a list with details on each taxa
+# Crop to study area at the end
 taxa_list <- map(taxa_cols, function(x){
   taxa_name <- sym(x)
   taxa_subset <- cpr %>% 
@@ -237,7 +243,8 @@ taxa_list <- map(taxa_cols, function(x){
       cal_date = as.POSIXct(str_c(year, month, day, sep = "/"), format = "%Y/%m/%d"),
       jday = lubridate::yday(cal_date)
       ) %>% 
-    select(year, jday, lat =`latitude (degrees)`, lon = `longitude (degrees)`, abundance = !!taxa_name)
+    select(year, jday, lat =`latitude (degrees)`, lon = `longitude (degrees)`, abundance = !!taxa_name) %>% 
+    cpr_area_crop(., study_area = "gom_new")
     
 })
 
@@ -246,8 +253,7 @@ taxa_list <- map(taxa_cols, function(x){
 ####  2. Calanus Test  ####
 calanus_anoms <- cpr_spline_fun(cpr_dat = taxa_list$`calanus i-iv`, 
                                 spline_bins = 10, 
-                                season_bins = 4, 
-                                study_area = "GOM")
+                                season_bins = 4)
 
 
 
@@ -296,11 +302,11 @@ fullts_taxa <- taxa_list[names(taxa_list) %in% keepers$taxa]
 
 
 ####  4. Calculate Detrended Abundances for All  ####
+fullts_taxa$`calanus i-iv`
 anomaly_list <- map(.x = fullts_taxa,
                     .f = cpr_spline_fun, 
                     spline_bins = 10, 
-                    season_bins = 4, 
-                    study_area = "GOM_new")
+                    season_bins = 4)
 
 
 

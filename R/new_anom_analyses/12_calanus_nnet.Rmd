@@ -1,0 +1,528 @@
+---
+title: "Remote Sensed Zooplankton Model"
+author: "Adam A. Kemberling"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+    code_folding: show
+    includes:
+        before_body: stylesheets/gmri_logo_header.html
+        after_body: stylesheets/akemberling_gmri_footer.html
+    css: stylesheets/gmri_rmarkdown.css
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+
+####  Packages  ####
+library(here)
+library(vegan)
+library(knitr)
+library(tidyverse)
+library(tidymodels)
+library(gmRi)
+library(keras)
+
+####  Conda setup  ####
+reticulate::use_condaenv("rkeras2020")
+
+# Path to climate change eccology lab
+ccel_boxpath <- gmRi::shared.path(group = "Climate Change Ecology Lab", folder = "Data")
+
+```
+
+# Data
+
+CPR station data from 2003-2016 was paired with sea surface temperature and chl-a concentration data from OISST and MODIS respectively. Satellite readings for the same-day (or nearest) as well as the month prior were included for each location. Zooplankton concentrations are un-adjusted and correspond to the categorical counting system bins used in the CPR survey.
+
+For this model the time step has been condensed to 1-month intervals rather than individual stations. Currently the  point location values are also averaged with the transet data.
+
+
+**Things to Add:**
+Want some measure of what time of year it is that is circular in nature. This could be a metric like the slope of day length or some sine/cosine relationship to day of year.
+
+Want the remote sensed information to be included with a finer spatial resolution than the point locations. So the grid over the entire region at the time the points were sampled.
+
+
+
+```{r}
+cpr_sat <- read_csv(str_c(ccel_boxpath, "Gulf of Maine CPR", "2020_combined_data", "zooplankton_w_sstchla.csv", sep = "/"),
+                    guess_max = 1e6,
+                    col_types = cols()) 
+
+#re-order
+cpr_sat <- cpr_sat %>% 
+  select(`Data Source`, area, cruise, station, lon, lat, station_date, 
+         year, month, day, hour,minute, oisst, oisst_mlag, chla, chla_mlag, everything())
+
+# Get monthly averages/sums for each region : mean = cpue, sum = total (biased by sampling)
+cpr_month <- cpr_sat %>% 
+  group_by(year, month, area) %>% 
+  summarise(across(.cols = c(oisst:`radiolaria spp.`), .fns = mean, na.rm = T)) %>% 
+  ungroup() %>% 
+  mutate(month = factor(month))
+
+```
+
+## Community Metrics
+
+As a starting point I've highlighted three metrics for describing the community that we'd like to predict:
+
+ * Diversity Index (Shannon)
+ * Evenness (Pielou)
+ * Fraction of Dispausing Copepods
+ 
+Additional metrics that we want to include here are:
+
+ * Size spectrum slope   
+
+```{r}
+# Pull out taxa for some community metrics: diversity/richness/relative calanus
+cpr_zoo <- cpr_month %>% select(`acartia danae`:`fish eggs`)
+cpr_meta <- cpr_month %>% select(year:`phytoplankton color index`)
+
+# There are columns that contain NA values because they were present in only NOAA/SAHFOS
+# Pull those out
+cpr_zoo <- cpr_zoo %>% select_if(~ !any(is.na(.)))
+
+# Also remove any columns with only zeros
+cpr_zoo <- cpr_zoo[,colSums(cpr_zoo) > 0]
+
+
+# Get diversity and evenness
+cpr_meta$shan     <- diversity(cpr_zoo)                # Shannon diversity
+cpr_meta$evenness <- pielou <- cpr_meta$shan / log(specnumber(cpr_zoo)) # Pielou Evenness
+
+# Fraction calanus
+cpr_meta <- cpr_zoo %>% 
+  transmute(total_zoo_conc = rowSums(select(., everything())),
+            cal5_conc = `calanus finmarchicus v-vi`,
+            cal_ratio = cal5_conc/total_zoo_conc) %>% 
+  bind_cols(cpr_meta, .)
+  
+
+
+# Presence Absence Matrix - if needed (more helpful for community analyses like anosim)
+cpr_pres <- ifelse(cpr_zoo > 0, 1, 0)
+```
+
+
+## Exploratory Analysis {.tabset}
+
+### OISST
+
+```{r}
+# OISST for all of these
+var <- sym("oisst")
+
+# OISST and shannon index
+ggplot(cpr_meta, aes(!!var, shan, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST Evenness
+ggplot(cpr_meta, aes(!!var, evenness, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST cal ratio
+ggplot(cpr_meta, aes(!!var, cal_ratio, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+```
+
+### Lagged OISST
+
+```{r}
+# OISST for all of these
+var <- sym("oisst_mlag")
+
+# OISST and shannon index
+ggplot(cpr_meta, aes(!!var, shan, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST Evenness
+ggplot(cpr_meta, aes(!!var, evenness, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST cal ratio
+ggplot(cpr_meta, aes(!!var, cal_ratio, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+```
+
+### MODIS Chl-a
+
+```{r}
+# OISST for all of these
+var <- sym("chla")
+
+# OISST and shannon index
+ggplot(cpr_meta, aes(!!var, shan, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST Evenness
+ggplot(cpr_meta, aes(!!var, evenness, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST cal ratio
+ggplot(cpr_meta, aes(!!var, cal_ratio, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+```
+
+### Lagged MODIS Chl-a
+
+```{r}
+# OISST for all of these
+var <- sym("chla_mlag")
+
+# OISST and shannon index
+ggplot(cpr_meta, aes(!!var, shan, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST Evenness
+ggplot(cpr_meta, aes(!!var, evenness, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+
+# OISST cal ratio
+ggplot(cpr_meta, aes(!!var, cal_ratio, color = area)) +
+  geom_point() +
+  facet_wrap(~month, nrow = 4)
+```
+
+## Train/Test Split
+
+Random 80/20 split of the data for training and testing.
+
+```{r}
+
+# Combine the community metadata to the individual concentrations
+cpr_joined <- bind_cols(cpr_meta, cpr_zoo)
+cpr_joined <- janitor:::clean_names(cpr_joined)
+cpr_joined <- as.data.frame(cpr_joined)
+
+
+# Lock in a random seed for reproducibility
+set.seed(123)
+
+# Make a splitting index - 80/20
+cpr_split <- initial_split(cpr_joined, prop = (4/5))
+
+# Get training and testing split
+cpr_train <- training(cpr_split)
+cpr_test  <- testing(cpr_split)
+
+
+```
+
+## Model Formula
+
+
+
+```{r}
+####__Model Recipe ####
+
+# There is no readon to add all this space other than its easier to read.
+model_recipe <-  recipe(
+  
+  #--Dependent Variables--
+  #Salinity Measurements at Buoy E 
+  shan + evenness + cal_ratio ~ 
+    
+  #--Predictors--
+    
+    # Sat Measurements
+    oisst + oisst_mlag + chla + chla_mlag +
+    
+    # # CPR concentrations (# / meters cubed)
+    phytoplankton_color_index + 
+    # acartia_longiremis         + acartia_spp              + amphipoda_spp              + appendicularia_spp       +
+    # bivalvia_spp               + calanus_i_iv             + calanus_finmarchicus_v_vi  + calanus_hyperboreus      +
+    # candacia_spp               + centropages_hamatus      + centropages_typicus        + centropages_spp          +
+    # chaetognatha_eyecount      + clausocalanus_spp        + copepoda_spp               + cumacea_spp              +
+    # decapoda_spp               + echinoderm_larvae        + euchaeta_marina            + euchaeta_spp             +
+    # euchirella_rostrata        + euphausiacea_nauplii     + euphausiacea_spp           + evadne_spp               +
+    # gammaridea_spp             + gastropoda_spp           + harpacticoida_spp          + hyperiidea_spp           +
+    # metridia_longa             + metridia_lucens          + metridia_i_iv              + nannocalanus_minor       +
+    # oithona_spp                + oncaea_spp               + ostracoda_spp              + paedoclione_doliiformis  +
+    # para_pseudocalanus_spp     + paracalanus_spp          + paraeuchaeta_norvegica     + penilia_avirostris       +
+    # pleuromamma_spp            + podon_spp                + polychaeta_larva           + pseudocalanus_spp        +
+    # rhincalanus_nasutus        + temora_longicornis       + thalia_democratica         + thecosomata_spp          +
+    # tintinnidae_spp +          
+
+    # Categorical Variables
+    month +  area,
+  
+  #--Data--
+  data = cpr_joined)
+
+# model summary
+summary(model_recipe) %>% kable()
+```
+
+
+## Feature Engineering
+
+```{r}
+####__Recipe Steps  ####
+pca_cols <- names(cpr_joined)[14:62]
+
+# Super Standard Recipe
+recipe_steps <- model_recipe %>% 
+  
+  # 1. Dealing with NA values
+  #step_meanimpute(all_numeric(), -all_outcomes()) %>% 
+  step_naomit(everything()) %>% 
+  
+  # 2. Re-scale numeric values to range 0-1
+  step_center(all_numeric(), -all_outcomes()) %>% 
+  step_scale(all_numeric(), -all_outcomes()) %>% 
+  
+  # 3. Convert Factor Variables into one-hot dummy variables
+  step_dummy(all_nominal(), one_hot = T)
+
+  # # 3. PCA of zooplankton
+  # step_pca(one_of(pca_cols), threshold = ) %>% 
+  # step_pca(all_numeric(), num_comp = 3) %>% 
+
+  
+
+recipe_steps
+```
+
+
+## Finalize Prep
+
+
+Once that is done you then prep the testing and training data according to the recipe. This does all the steps you laid out, and removes anything not included specifically in the model outline:
+
+```{r}
+####__Prep Recipe
+prepped_recipe <- prep(recipe_steps, training = cpr_train)
+prepped_recipe
+```
+
+
+## Process Training and Testing Data
+
+The final thing to do before  moving on to the model is to actual use the recipe to prep the data. Up  until this point we've basically been writing down the steps to take, now is when they actually get performed and you end up with you processed data.
+
+
+
+```{r}
+
+####__Bake Recipe
+train_preprocessed <- bake(prepped_recipe, cpr_train)
+test_preprocessed  <- bake(prepped_recipe, cpr_test) 
+
+# Fill in NaN values created by step_dummy
+is.nan.data.frame <- function(x){do.call(cbind, lapply(x, is.nan))}
+
+train_preprocessed[is.nan(train_preprocessed)] <- 0
+test_preprocessed[is.nan(test_preprocessed)]   <- 0
+
+
+
+# Now look at the training data
+train_preprocessed %>% head() %>% kable()
+```
+
+
+# Keras Setup
+
+
+```{r, eval = TRUE}
+####__ Training and Validation Matrices  ####
+
+# Identify the label columns to keep/remove from labels/features matrices
+label_cols <- c("shan", "evenness", "cal_ratio")
+
+# Training Data Matrix Setup
+train_labels    <- train_preprocessed %>% select(all_of(label_cols)) %>% as.matrix()
+train_features  <- train_preprocessed %>% select(-all_of(label_cols)) %>% as.matrix()
+
+# Test Data matrix Setup
+test_labels   <- test_preprocessed %>% select(all_of(label_cols)) %>% as.matrix()
+test_features <- test_preprocessed %>% select(-all_of(label_cols)) %>% as.matrix()
+```
+
+
+## Configure Network Structure
+
+The keras model can then be defined as follows:
+
+
+```{r}
+####__ Define Model Structure  ####
+
+# Input layer, number of inputs (shape) = number of columns in feature data
+inputs <- layer_input(shape = dim(train_features)[2])
+
+# Two hidden layers with decreasing number of nodes
+hidden_units_1 <- floor(dim(train_features)[2] / 4)
+#hidden_units_2 <- floor(dim(train_features)[2] / 4)
+hidden_units_2 <- 8
+
+hidden <- inputs %>%
+  layer_dense(units = hidden_units_1) %>%  # Half as many nodes)
+  layer_dense(units = hidden_units_2)
+
+# Output Nodes for labels
+shan_output <- hidden %>% layer_dense(units = 1, name = c("shan"))
+even_output <- hidden %>% layer_dense(units = 1, name = c("evenness"))
+cal_output  <- hidden %>% layer_dense(units = 1, name = c("cal_ratio"))
+
+
+#### Create model  ####
+model <- keras_model(inputs = inputs, 
+                     outputs = c(shan_output,
+                                 even_output,
+                                 cal_output))
+```
+
+
+## Compiling the Model
+
+```{r}
+
+##### Compile the model ####
+model %>% compile(optimizer = "adam", 
+                  loss = "mse", 
+                  metrics = "mse", 
+                  loss_weights = list(
+                    shan      = 1,
+                    evenness  = 1,
+                    cal_ratio = 1))
+
+# Model summary
+model %>% summary()
+```
+
+
+## Train the Model
+
+The Keras + tensorflow model is now ready to be trained:
+
+```{r}
+####  Train Model  ####
+history <- model %>% 
+  fit(train_features, 
+      y = list(shan      = train_labels[, 1],
+               evenness  = train_labels[, 2],
+               cal_ratio = train_labels[, 3]),
+      epochs = 200, 
+      verbose = 0)
+
+plot(history)
+```
+
+
+
+## Evaluate
+
+Evaluate performance using test data.
+
+```{r}
+eval <- evaluate(model, 
+                 test_features, 
+                 y = list(shan      = test_labels[, 1],
+                          evenness  = test_labels[, 2],
+                          cal_ratio = test_labels[, 3]),
+                 verbose = 0)
+
+cbind(eval)
+```
+
+
+
+# Results
+
+```{r}
+# Get predictions for testing data
+test_predictions <- model %>% predict(test_features)
+
+# Build results dataframe
+results <- data.frame(
+  "real_shan" = test_labels[,1],
+  "real_even" = test_labels[,2],
+  "real_cal"  = test_labels[,3],
+  "test_shan" = test_predictions[[1]][,1],
+  "test_even" = test_predictions[[2]][,1],
+  "test_cal"  = test_predictions[[3]][,1]
+  )
+
+# Add additional data from before the one-hots
+predictors <- summary(model_recipe) %>% filter(role == "predictor") %>% pull(variable)
+nominal_preds <- summary(model_recipe) %>% filter(type == "nominal") %>% pull(variable)
+test_meta <- cpr_test %>% 
+  select(one_of(predictors)) %>% 
+  drop_na() %>% 
+  select(one_of(nominal_preds))
+
+# Reshape for ggplot
+results_reshape <- bind_cols(results, test_meta) %>% 
+  pivot_longer( names_to = "measurement source", values_to = "measure", 
+               cols = c(real_shan, real_even, real_cal, test_shan, test_even, test_cal)) %>% 
+  mutate(
+    metric = case_when(
+      str_detect(`measurement source`, "shan") ~ "shannon_diversity",
+      str_detect(`measurement source`, "even") ~ "pielou_evenness",
+      str_detect(`measurement source`, "cal") ~ "fraction_calanus"),
+    source = case_when(
+      str_detect(`measurement source`, "test") ~ "predicted",
+      str_detect(`measurement source`, "real") ~ "actual"
+    )
+  )
+
+# Plot differences across groups
+ggplot(results_reshape, aes(area, measure, color = source)) +
+  geom_boxplot(position = "dodge") +
+  facet_grid(species ~ island) +
+  labs(x = NULL, y = "Community Measure") +
+  theme(legend.position = "bottom") +
+  facet_wrap(~metric, nrow = 3, scales = "free")
+
+
+# Plot the 1:1 predicted ~ observed, definitely a way easier way if I don't use ggplot
+r_split <- results %>% 
+  mutate(samp_id = row_number()) %>% 
+  pivot_longer(names_to = "source", values_to = "measure", cols = real_shan:test_cal)  %>% 
+  mutate(type = ifelse(str_detect(source, "real"), "observed", "predicted"),
+         metric = case_when(
+           str_detect(source, "shan") ~ "shannon index",
+           str_detect(source, "even") ~ "pielou evenness",
+           str_detect(source, "cal")  ~ "calanus ratio"
+         )) %>% 
+  split(.$type) %>% 
+  imap(function(x,y){
+    if(y == "observed") {
+      x_out <- x %>% rename("observed measure" = measure) %>% select(-c(source, type))
+    } else {
+      x_out <- x %>% rename("predicted measure" = measure) %>% select(-c(source, type))
+    }
+  }) 
+
+#  
+full_join(r_split$observed, r_split$predicted) %>% 
+  ggplot(aes(`observed measure`, `predicted measure`)) +
+    geom_abline(slope = 1, intercept = 0, color = "gray50") +
+    geom_point() +
+    facet_wrap(~metric, scales = "free", nrow = 3)
+
+
+
+```
+

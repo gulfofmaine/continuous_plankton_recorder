@@ -35,8 +35,7 @@ buoys_aggregated <- read.csv(str_c(cpr_boxpath, "data/processed_data/buoy_anomal
 
 
 #Daily Reads
-buoys <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoys_daily.csv", sep = "/"),
-                  col_types = cols())
+buoys <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoys_daily.csv", sep = "/"), col_types = cols())
 buoys <- buoys %>% 
   mutate(
     #Create julian days for quarter assignment
@@ -65,9 +64,11 @@ daily_anoms <- buoys %>%
          sal_anom  = (sal - avg_sal) / sal_sd) %>% 
   ungroup()
 
-####__####
+####________________________________####
 
-####  Manual PCA  ####
+####  Dealing with Gappy Matrix  ####
+
+###1.  Manual PCA  Attempt ####
 
 ####  Need a Matrix with and without NA values
 buoys_aggregated %>% filter(is.na(temp_anom == TRUE))
@@ -97,7 +98,7 @@ with_na <- buoys_aggregated %>%
   as.matrix()
 
 
-####  Matrix Algebra Testing  ####
+###__ Matrix Algebra Testing  ####
 
 #Here  is our tester
 with_na
@@ -119,7 +120,7 @@ var(without_na)
 cor(with_na)     
 cor(without_na)
 
-####  Computation of eigenvalues  ####
+###__ Computation of eigenvalues  ####
 
 #The eigen() function computes the eigenvalues and eigenvectors simultaneously. 
 #Therefore it’s typically best to save the results in a variable and access the appropriate vector.
@@ -137,9 +138,8 @@ e_full$vectors
 #The squared eigenvecctors all sum to 1
 colSums(e_full$vectors ^ 2) 
 
-####__####
 
-####  PCA from covariance matrix  ####
+#### 2.  PCA from covariance matrix  ####
 x_anoms <- without_na
 S <- var(x_anoms)
 E <- eigen(S)
@@ -171,7 +171,7 @@ dimnames(prcomp_pc) <- list(colnames(x_anoms), paste0("PC", seq_len(ncol(prcomp_
 prcomp_pc
 pca_full$rotation
 
-# ####  Singular Vector Decomposition  ####
+##### 3. Singular Vector Decomposition  ####
 # #Is svd done on the covariance matrix or the raw values?
 # prcomp_pc #Match this
 # 
@@ -219,9 +219,9 @@ pca_full$rotation
 # 
 # A == round(svd.matrix, 0)
 
-####__#### 
+####________________________________####
 
-####  Daily Scale PCA  ####
+####  Daily Scale Buoy PCA  ####
 buoys_pca_dat <- daily_anoms %>% 
   select(-avg_temp, -avg_sal, -temp_sd, -sal_sd, -density, - temp, -sal) %>% 
   rename(temp = temp_anom, sal = sal_anom) %>% 
@@ -243,12 +243,15 @@ buoys_pca_mat <- buoys_pca_dat %>%
 
 #Every Day has a record, the measurements are the mean value for that sensor that day
 
-#Export the non-interpolated Buoy Data
-write_csv(buoys_pca_dat, 
-          path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv", sep = "/"), 
-          col_names = TRUE)
+# # Export the non-interpolated Buoy Data
+# write_csv(buoys_pca_dat, 
+#           path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv", sep = "/"), 
+#           col_names = TRUE)
 
-####  PCA using prcomp  ####
+
+
+
+####__ PCA using prcomp  ####
 
 #PCA
 daily_pca <- prcomp(na.omit(buoys_pca_mat), center = FALSE, scale. = FALSE)
@@ -283,9 +286,9 @@ ggplot(filter(pca_out, `Principal Component` != "PC3" & is.na(`Principal Compone
   theme_minimal()
 
 
-####__####
+####________________________________####
 
-####  Regression Interpolations  ####
+####  Buoy-Gap Interpolations  ####
 
 #First of all where are our gaps
 pca_gaps <- pca_out %>% filter(is.na(`Principal Component Loading`))
@@ -313,35 +316,44 @@ E_daily <- eigen(S_daily)
 
 #Should be able to get the principal components vectors this way... 
 U_daily <- t(E_daily$vectors) * buoys_pca_mat[1,] #Day 1 PC loadings
-#Need to combine them somehow
 
+#Need to combine them somehow
 
 
 #Set up objects we want to populate
 
 Y <- buoys_pca_mat #Y values
 X <- buoys_pca_mat #X values 
+
 #Covariance Matrix
 cov_matrix <- matrix(nrow = ncol(buoys_pca_mat), ncol = ncol(buoys_pca_mat), data = NA)
+
 #or
 dim(S_daily)
 
+
+
+
+####___________________________________________________________####
 ####  List structure to fill with linear models of everything  ####
 
 #Base level, for lm object
 lm_list <- list("response_var" = list("lm_object" = list()))
+
 #One for each response var
 lm_list <- rep(lm_list, ncol(buoys_pca_mat))
 names(lm_list) <- colnames(buoys_pca_mat)
+
 #Down another level, for independent var
 lm_list_2 <- rep(list("x_var" = lm_list), ncol(buoys_pca_mat))
 names(lm_list_2) <- colnames(buoys_pca_mat)
+
 #Can now index down for organization sake
 lm_list_2$temp_001m_B$temp_001m_B$lm_object
 
 
 
-#Function for pulling p value from lm object
+#####__ 1.  Function for pulling p value from lm object  ####
 lmp <- function (modelobject) {
   if (class(modelobject) != "lm") stop("Not an object of class 'lm' ")
   f <- summary(modelobject)$fstatistic
@@ -349,7 +361,9 @@ lmp <- function (modelobject) {
   attributes(p) <- NULL
   return(p) }
 
-#Lm Loopz
+
+
+####__ 2. Loops for Linear Models  ####
 for (j in 1:ncol(buoys_pca_mat)) {
   for (k in 1:ncol(buoys_pca_mat)) {
    
@@ -376,18 +390,22 @@ for (j in 1:ncol(buoys_pca_mat)) {
 
 #Coefficients can be pulled this way
 lm_list_2$temp_001m_B$temp_020m_B$lm_object$coefficients
+
 #pvalues are here
 lm_list_2$temp_001m_B$temp_020m_B$pval
+
 #Significance
 lm_list_2$temp_001m_B$temp_020m_B$significant
 
+
+####__ 3.  Putting Values into matrices  ####
 
 #Do we want to put them into matrices?
 base_mat <- matrix(data = NA, nrow = 46, ncol = 46)
 colnames(base_mat) <- colnames(buoys_pca_mat)
 rownames(base_mat) <- colnames(buoys_pca_mat)
 
-#Use base mat structure
+#Use base mat structure 
 significance_mat <- base_mat
 slope_mat        <- base_mat
 intercept_mat    <- base_mat
@@ -405,19 +423,53 @@ for (j in 1:ncol(buoys_pca_mat)) {
 }
 
 
+####__ 4. Assess Matrices  ####
+
+# % of relationships with significance
+mean(significance_mat)
+
+# make it a table so its less confusing
+lm_table <- map(lm_list_2, function(pred_buoy_lms){
+  map(pred_buoy_lms, function(lm_obj){
+    data.frame(significance = lm_obj$significant,
+               slope        = lm_obj$slope,
+               intercept    = lm_obj$intercept)
+  }) %>% 
+    bind_rows(.id = "predictor_sensor")
+}) %>% 
+  bind_rows(.id = "response_sensor") 
+rownames(lm_table) <- c()
+
+# Which ones weren't significant, excluding exact matches
+lm_table <- lm_table %>% filter(predictor_sensor != response_sensor) 
+lm_table %>% filter(significance == FALSE)
+
+
+
+
+
+####__ 5. Imputing NA values  ####
+
+# Number of NA observations to fill in:
+sum(is.na(buoys_pca_dat[,2:47]))
+
 # Filling in patchy DF with average regression parameters
 buoy_interpolated <- buoys_pca_dat[,2:47]
+
 
 #Loop 3
 for (row_j in 1:nrow(buoy_interpolated)) {
   for (col_k in 1:ncol(buoy_interpolated)) {
     if(is.na(buoy_interpolated[row_j, col_k]) == TRUE) {
+      
       #Mean Slope - significant regressions only
-      m <- mean(slope_mat[which(significance_mat[,col_k] == TRUE), col_k])
+      m <- mean(slope_mat[which(significance_mat[, col_k] == TRUE), col_k])
+      
       #Mean Intercept - significant regressions only
-      b <- mean(intercept_mat[which(significance_mat[,col_k] == TRUE), col_k])
+      b <- mean(intercept_mat[which(significance_mat[, col_k] == TRUE), col_k])
+      
       #Mean X - all avaliable data from that day's measurements
-      x <- mean(t(buoy_interpolated[row_j,]), na.rm = T)
+      x <- mean(t(buoy_interpolated[row_j, ]), na.rm = T)
       
       #New Interpolated Value
       buoy_interpolated[row_j, col_k] <- m*x + b
@@ -441,19 +493,114 @@ plot_list <- map(var_list, function(x){
     geom_line(data = buoys_pca_dat, aes(Date, !!col_name, color = "Raw"), alpha = 0.8) +
     labs(x = NULL, y = paste0(col_name))
 
-})
+}) %>% setNames(var_list)
 
-#Export the interpolated Buoy Data
-write_csv(buoy_interpolated, 
-          path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"), 
-          col_names = TRUE)
+# # Export the interpolated Buoy Data
+# write_csv(buoy_interpolated, 
+#           path = str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"), 
+#           col_names = TRUE)
 
 
 
-####  Applying PCA weights to interpolated DF  ####
-#Applying PCA weights to the interpolated Data:
 
-#Raw
 
-#With Interpolations
+####___________________________________________________________####
 
+####  Visualizing Data gaps  ####
+
+daily_anoms %>% 
+  ggplot(aes(Date, temp_anom)) +
+    geom_line() +
+    facet_grid(buoy_id ~ reading_depth)
+
+# Maybe a heatmap, column for each day, color of cell corresponds to sensor status
+daily_long <- daily_anoms %>% 
+  split(.$buoy_id) %>% 
+  map_dfr(function(buoy){
+    buoy %>% select(buoy_id, reading_depth, Date, temp_anom, sal_anom) %>% 
+      pivot_longer(names_to = "measure", values_to = "val", cols = c(temp_anom, sal_anom))})
+
+yvec <- distinct(daily_anoms, buoy_id, reading_depth)    
+x_vec <- seq.Date(from = min(daily_anoms$Date), to = max(daily_anoms$Date), by = 1)
+
+date_df <- data.frame(Date = x_vec)
+daily_long_full <- full_join(date_df, daily_long, by = "Date")
+
+
+daily_mat <- daily_long_full %>% 
+  pivot_wider(names_from = c(buoy_id, reading_depth, measure), values_from = val, values_fill = NA) %>% 
+  column_to_rownames(var = "Date") %>% 
+  t() 
+
+# Do we want NA's or zeros
+bin_mat <- ifelse(is.na(daily_mat), 0, 1)
+image(t(bin_mat))
+
+# Reshape as a dataframe to use geom_tile, easier to format
+matrix_df <- daily_long %>% 
+  mutate(buoy_id  = str_sub(buoy_id, 6,6),
+         reading_depth = str_remove_all(reading_depth, pattern = " meters| meter"),
+         reading_depth = str_pad(reading_depth, width = 3, side = "left", pad = "0"),
+         measure = str_remove_all(measure, "emp_anom|al_anom"),
+         measure = str_to_upper(measure),
+         ID = str_c(buoy_id, reading_depth, measure)) %>% 
+  select(Date, ID, val) 
+
+# Expand out the dates and ID's to get NA gaps for missing records
+bin_df <- matrix_df %>% 
+  expand(Date, ID) %>% 
+  left_join(matrix_df) %>% 
+  mutate(`Buoy Status` = ifelse(is.na(val), "Offline", "Online"),
+         buoy = str_sub(ID, 1, 1),
+         depth = str_sub(ID, 2, 4),
+         sensor = str_sub(ID, -1, -1))
+
+# Flag dates with no NA values
+bin_df <- bin_df %>% 
+  split(.$Date) %>% 
+  map_dfr(function(buoy){
+    any_na <- any(is.na(buoy$val))
+    if(any_na == TRUE) {
+      buoy_out <- mutate(buoy, `Array Status` = "Incomplete")
+    } else {
+      buoy_out <- mutate(buoy, `Array Status` = "Complete")
+    }
+    return(buoy_out)
+  })
+
+#with facets
+ggplot(bin_df, aes(Date, ID, fill = `Buoy Status`)) +
+  geom_tile(aes(alpha = `Array Status`)) +
+  facet_grid(buoy ~ ., scales = "free", switch = "y") +
+  gmRi::scale_fill_gmri(palette = "mixed") +
+  scale_alpha_discrete(range = c(range = c(1, 0.7))) +
+  labs(x = "", y = "Buoy") +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        strip.text.y.left = element_text(angle = 0),
+        panel.spacing = unit(0, "lines"))
+
+
+# What about plotting the percent total online?
+daily_perc <- bin_df %>% 
+  split(.$Date) %>% 
+  map_dfr(function(buoy){
+    n_sensors <- nrow(buoy)
+    n_online <- sum(!is.na(buoy$val))
+    Date <-  unique(buoy$Date)
+    percent_online <- (n_online / n_sensors) * 100
+    return(data.frame(Date, n_online, percent_online))
+  })
+
+# Plot
+daily_perc <- daily_perc %>% 
+  mutate(`PCA Ready` = ifelse(percent_online == 100, "Yes", "Missing Data")) 
+
+daily_perc %>% 
+  ggplot(aes(Date, percent_online)) +
+    geom_line(alpha = 0.4) +
+    geom_point(data = filter(daily_perc, percent_online == 100), 
+               aes(Date, percent_online, color = `PCA Ready`)) +
+    #geom_smooth() +
+    labs(x = "", y = "% Sensors Online")
+    

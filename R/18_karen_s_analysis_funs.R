@@ -1,6 +1,7 @@
 ####  Looking at matlab data from Karen Stamieszkin  ####
 
 ####  Packages  ####
+library(tidyverse)
 library(R.matlab)
 
 ####  Data  ####
@@ -15,6 +16,7 @@ karen_dat <- readMat("/Users/akemberling/Box/Climate Change Ecology Lab/Data/Gul
 karen_dat$header
 
 ####  2. copTmb  ####
+
 #Copepod temperature mass regression coefficients (lengths are in micrometers um)
 karen_dat$copTmb[[1]] #What species
 karen_dat$copTmb[[2]] #Coefficients for stage 5 from karen_dat$stagerng
@@ -88,7 +90,7 @@ for (i in 1:nrow(karen_species)) {
   karen_species$max_stage[i] <- karen_dat$stagerng[2,i]
 }
 
-karen_species
+karen_species <- karen_species %>% arrange(species)
 
 ####  6. T  ####
 
@@ -201,3 +203,25 @@ new_lengths <- imap(new_concentrations, function(x,y){
 
 # And Voila
 new_lengths$`Calanus finmarchicus`
+
+
+
+
+####  Re-Package everything to use with full CPR dataset
+coefficient_table <- regression_coeff %>% map(function(x){
+  x %>% 
+    bind_rows() %>% 
+    rowid_to_column(var = "copepodite_stage")}) %>% 
+  bind_rows(.id = "taxa_stage") %>% 
+  arrange(taxa_stage)
+
+
+coefficient_table
+
+
+# Export Table:
+source(here::here("R", "cpr_helper_funs.R"))
+
+write_csv(x = coefficient_table, 
+          path = str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "karen_s_coefficients.csv", sep = "/"), 
+          col_names = T)
