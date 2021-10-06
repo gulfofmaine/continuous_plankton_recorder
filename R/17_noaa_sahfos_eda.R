@@ -25,9 +25,9 @@ source(here::here("R", "cpr_helper_funs.R"))
 #Reduced NOAA dataset obtained from 15_NOAA_CPR_Key.R
 source("R/15_NOAA_CPR_Cleanup.R")
 
-# Loading targets
-library(targets)
-tar_load(noaa_taxa_resolved)
+# Loading targets for comparison
+# library(targets)
+# tar_load(noaa_taxa_resolved)
 
 
 ####  2. SAHFOS Consolidated  ####
@@ -36,9 +36,8 @@ tar_load(noaa_taxa_resolved)
 # 16_SAHFOS_CPR_Cleanup.R
 source("R/16_SAHFOS_CPR_Cleanup.R")
 
-# Loading targets
-library(targets)
-tar_load(sahfos_zoo_100m)
+# # Loading targets for comparison
+# tar_load(sahfos_zoo_100m)
 
 
 ####__####

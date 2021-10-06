@@ -1,11 +1,12 @@
 ####  NOAAA CPR TAXA Key  ####
 # Purpose: reduce the number of taxa and their different development stages found in NOAA CPR data
 # down to a reduced number that reflects the distinctions mades by SAHFOS and also reflects which 
-# taxa-stage namings were actually used in practice by the NOAA identification group
+# taxa-stage naming conventions were actually used in practice by the NOAA identification group
 
 # NOAA dataset contains more complex/convoluted taxa-stage combinations
 # This allows for more detailed information, if used consistently (it isn't)
 # In order to pair with SAHFOS data you need to reduce to SAHFOS resolution
+# Units are # / 100 meters cubed
 
 
 

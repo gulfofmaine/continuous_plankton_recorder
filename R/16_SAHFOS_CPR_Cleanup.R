@@ -1,6 +1,7 @@
 ####  SAHFOS CPR TAXA Key  ####
 # Purpose: reduce the number of taxa and their different development stages to match new NOAA CPR data
-# Then convert  counts to meters cubed, and  combine traverse and eyecount data
+# Converts  counts per transect to 100 meters cubed to match NOAA data, 
+# Then combines traverse and eyecount data for one zooplankton set
 
 
 ####  Packages  ####
@@ -56,7 +57,7 @@ sahfos_eye %>% count(`calanus finmarchicus`)
 # CPR aperture dimensions = 1.27 cm square entrance
 # aperture area in square meters = 0.00016129
 # 1852 meters in nautical mile * 10
-# volume in square meters per 10cm silk = 2.987091 meters^3
+# volume in cubic meters per 10cm silk = 2.987091 meters^3
 
 
 
@@ -64,10 +65,10 @@ sahfos_eye %>% count(`calanus finmarchicus`)
 
 ####  Conversion Rate  ####
 
-# Original calculation to get to # per meters cubed
+# Original calculation to get to # per meters cubed from #/transect
 conversion_rate <- 1 / 2.987091
 
-#Multiply by 100 to get to 100 cubic meters
+# Multiply that by 100 to get to 100 cubic meters
 conversion_rate <- conversion_rate * 100
 
 #Listed by source
@@ -76,7 +77,8 @@ sahfos_abundances <- list("traverse" = sahfos_trav   %>% select(11:ncol(sahfos_t
                           "phyto"    = sahfos_phyto  %>% select(11:ncol(sahfos_phyto)))
 
 
-sahfos_m3 <-  map(sahfos_abundances, function(x){
+# Function to convert 
+sahfos_100m3 <-  map(sahfos_abundances, function(x){
   x_meters_cubed <- x * conversion_rate
   return(x_meters_cubed)
 })
@@ -84,25 +86,25 @@ sahfos_m3 <-  map(sahfos_abundances, function(x){
 
 ####__####
 ####  2. Combine Traverse and eyecount  ####
-strav_m3 <- sahfos_m3$traverse
-seye_m3  <- sahfos_m3$eye
+strav_100m3 <- sahfos_100m3$traverse
+seye_100m3  <- sahfos_100m3$eye
 
 # Dataframe comparisons
 
 # #All have the same number of rows, but columns are present in some but not others
-# map(sahfos_m3, dim)
-# janitor::compare_df_cols(strav_m3, seye_m3)
-# janitor::compare_df_cols_same(strav_m3, seye_m3)
+# map(sahfos_100m3, dim)
+# janitor::compare_df_cols(strav_100m3, seye_100m3)
+# janitor::compare_df_cols_same(strav_100m3, seye_100m3)
 
 #Idea, create a dataframe with names found in both, make the values the added contribution from one or both the subsample types
-unique_names     <- sort(unique(c(names(strav_m3), names(seye_m3))))
-new_df           <- data.frame(matrix(0, nrow = nrow(strav_m3), ncol = length(unique_names)))
+unique_names     <- sort(unique(c(names(strav_100m3), names(seye_100m3))))
+new_df           <- data.frame(matrix(0, nrow = nrow(strav_100m3), ncol = length(unique_names)))
 colnames(new_df) <- unique_names
 
 
 #Function to add columns as they appear in either set. 
 #Overwrites NA's with zeros
-taxa_fill <- function(empty_frame = new_df,  df_1 = strav_m3, df_2 = seye_m3) {
+taxa_fill <- function(empty_frame = new_df,  df_1 = strav_100m3, df_2 = seye_100m3) {
   
   #Taxon Names We want for the output
   taxa_names <- colnames(empty_frame)
@@ -165,7 +167,7 @@ taxa_fill <- function(empty_frame = new_df,  df_1 = strav_m3, df_2 = seye_m3) {
 
 ####  Combined Traverse and Eyecounts 
 # 1:1 sum of traverse and eyecount abunndances in # per 100 cubic meters
-sahfos_zoo <- taxa_fill(empty_frame = new_df, df_1 = strav_m3, df_2 = seye_m3)
+sahfos_zoo <- taxa_fill(empty_frame = new_df, df_1 = strav_100m3, df_2 = seye_100m3)
 sahfos_zoo <- bind_cols(sahfos_trav %>% select(1:10), sahfos_zoo)
 
 
@@ -183,4 +185,4 @@ sahfos_zoo %>%
 
 
 #remove unnecesary objects for use when sourcing
-rm(new_df, sahfos_abundances, sahfos_eye, sahfos_m3, sahfos_phyto, sahfos_trav, seye_m3, strav_m3)
+rm(new_df, sahfos_abundances, sahfos_eye, sahfos_100m3, sahfos_phyto, sahfos_trav, seye_100m3, strav_100m3)

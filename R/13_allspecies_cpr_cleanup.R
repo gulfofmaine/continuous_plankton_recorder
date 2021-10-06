@@ -1,22 +1,41 @@
 ####  NOAA/SAHFOS CPR Data Wrangle  ####
 ####  12/19/2019
 
-####  Packages  ####
+##~~~~~~~~~~~~~~~~~~
+##  ~ Packages  ----
+##~~~~~~~~~~~~~~~~~~
 library(tidyverse)
 library(here)
 library(patchwork)
 library(gmRi)
+library(ARTofR)
 
-####  Functions  ####
+
+##~~~~~~~~~~~~~~~~~~~
+##  ~ Functions  ----
+##~~~~~~~~~~~~~~~~~~~
 source(here::here("R", "cpr_helper_funs.R"))
 
-####____________________________####
 
-####   NOAA Data  ####
-#NOTE: Observed in sample but not quantified during standard analysis is given as a value of -9999. Use care to filter these values when performing analysis.
 
-####__####
-####  NOAA Phyto  ####
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                                                                            ~~
+##                                  NOAA DATA                               ----
+##                                                                            ~~
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# NOTE: Observed in sample but not quantified during standard analysis is given as a value of -9999. 
+# Use care to filter these values when performing analysis.
+
+
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                              NOAA Phytoplankton                          ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 noaa_phyto <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/NOAA_1961-2013/Gulf of Maine CPR (Feb 14, 2014 update).xlsx"),
                                 skip = 2,
                                 sheet = 1)
@@ -37,46 +56,52 @@ for (i in 1:(ncol(noaa_phyto)-10)) {
   phyto_group_stage_names[i] <- str_remove_all(phyto_group_stage_names[i], "\\.")         #Drop third period
   phyto_group_stage_names[i] <- str_replace_all(phyto_group_stage_names[i], " _", "_")    #Drop space before _
 }
-head(phyto_group_stage_names)
 
 #Replace old names with correct names
 names(noaa_phyto_abundances)[11:ncol(noaa_phyto_abundances)] <- phyto_group_stage_names
 names(noaa_phyto_abundances) <- str_replace_all(names(noaa_phyto_abundances), "'", "")
 head(names(noaa_phyto_abundances), 12)
 
-#Fix header, and make taxon key
-noaa_phyto_header <- noaa_phyto[1, 10:ncol(noaa_phyto)]
-names(noaa_phyto_header) <- c("code_type", phyto_group_stage_names)
-head(noaa_phyto_header, 10)
 
-#Reshape Taxon Key
-noaa_phyto_key <- noaa_phyto_header %>% 
-  pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% arrange(`Taxon Name`)
 
 ####  Repair MARMAP Key  ####
-#MARMAP code key: https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html
-noaa_phyto_key <- noaa_phyto_key %>% pivot_wider(names_from = code_type, values_from = `Accepted ID`, )
-noaa_phyto_key <- noaa_phyto_key %>% rename_all(tolower)
+# Prepare header, and make taxon key
+# MARMAP code key: https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html
 
 
-#Check duplicate columns to compare values
-noaa_p_duplicates <- noaa_phyto_key %>% filter(.copy == 2) %>% pull(`taxon name`)
-noaa_phyto_key %>% filter(`taxon name` %in% noaa_p_duplicates)
+# Pull columns referencing taxa
+noaa_phyto_header <- noaa_phyto[1, 10:ncol(noaa_phyto)]
 
-#Reference the NEFSC key to find mismatches
-noaa_phyto_key[noaa_phyto_key$`taxon name` %in% noaa_p_duplicates,]
+# Swap in the formatted names
+names(noaa_phyto_header) <- c("code_type", phyto_group_stage_names)
 
-#Repair taxon names using NEFSC marmap key
-which(noaa_phyto[1,] == 9101) #Index for Trichodesmium
-which(noaa_phyto[1,] == 9169) #Index for Ceratium ranipes
+
+# Make Taxon Key for marmap values
+noaa_phyto_key <- noaa_phyto_header %>% 
+  pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% 
+  arrange(`Taxon Name`)
+
+
+# Check for duplicates before reshaping:
+noaa_phyto_dups <- noaa_phyto_key %>% 
+  pivot_wider(names_from = code_type, values_from = `Accepted ID`, values_fn = length) %>% 
+  filter(`Marmap Code:` > 1)
+
+
+# Address duplicate marmap codes through manually looking them up:
+# which(noaa_phyto[1,] == 9101) # Actual index for Trichodesmium
+# which(noaa_phyto[1,] == 9169) # Actual index for Ceratium ranipes
 colnames(noaa_phyto_abundances)[which(noaa_phyto[1,] == 9101)] <- "Trichodesmium"
 colnames(noaa_phyto_abundances)[which(noaa_phyto[1,] == 9169)] <- "Ceratium ranipes"
 
-#Repair key using NEFSC marmap key
-noaa_phyto_key <- noaa_phyto_key %>% mutate(
-  `taxon name` = ifelse(`marmap code:` == 9169, "Ceratium ranipes", `taxon name`),
-  `taxon name` = ifelse(`marmap code:` == 9101, "Trichodesmium", `taxon name`)
-) %>% select(-.copy)
+
+# Replace accepted ID with marmap code once duplicates have been resolved
+noaa_phyto_key <- noaa_phyto_key %>% 
+  mutate(
+    `Taxon Name` = ifelse( `Accepted ID` == 9101, "Trichodesmium", `Taxon Name`),
+    `Taxon Name` = ifelse( `Accepted ID` == 9169, "Ceratium ranipes", `Taxon Name`)) %>% 
+  pivot_wider(names_from = code_type, values_from = `Accepted ID`) %>% 
+  rename_all(tolower)
 
 
 ####  Prep for Export  ####
@@ -84,21 +109,23 @@ noaa_phyto_abundances <- noaa_phyto_abundances %>%
   rename_all(tolower)  %>% 
   mutate(cruise = str_replace_all(cruise, "'", ""))
 
-rm(noaa_phyto, noaa_phyto_header, phyto_group_stage_names, noaa_p_duplicates)
+rm(noaa_phyto, noaa_phyto_header, phyto_group_stage_names, noaa_phyto_dups)
 
 
 
-####  End NOAA Phyto  ####
-####__####
-
-
-
+#.........................End NOAA Phyto.........................
 
 
 
 
 
-#### NOAA  Zooplankton  ####
+
+
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                              NOAA Zooplankton                            ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 noaa_zoo <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/NOAA_1961-2013/Gulf of Maine CPR (Feb 14, 2014 update).xlsx"),
                               skip = 2,
                               sheet = 2)
@@ -124,41 +151,50 @@ head(group_stage_names)
 #Replace old names with correct names
 names(noaa_zoo_abundances)[11:ncol(noaa_zoo_abundances)] <- group_stage_names
 names(noaa_zoo_abundances) <- str_replace_all(names(noaa_zoo_abundances), "'", "")
-head(names(noaa_zoo_abundances), 12)
 
 #Fix header, and make taxon key
 noaa_zoo_header <- noaa_zoo[2:3, 10:ncol(noaa_zoo)]
 names(noaa_zoo_header) <- c("code_type", group_stage_names)
-head(names(noaa_zoo_header), 10)
 
-#Reshape Taxon Key
-noaa_zoo_key <- noaa_zoo_header %>% pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% arrange(`Taxon Name`)
+#Reshape Taxon Key to show taxa and stage with marmap codes
+noaa_zoo_key <- noaa_zoo_header %>% 
+  pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% 
+  arrange(`Taxon Name`)
+
+# Check duplicates, should all be unique
+key_dups <- noaa_zoo_key %>% 
+  pivot_wider(names_from = code_type, values_from = `Accepted ID`, values_fn = length) %>% 
+  filter(`Marmap Taxonomic Code:` > 1 | `Marmap Stage Code:` > 1 ) %>% 
+  pull(`Taxon Name`)
 
 
-####  Repair MARMAP Key  ####
-noaa_zoo_key <- noaa_zoo_key %>% pivot_wider(names_from = code_type, values_from = `Accepted ID`, )
-noaa_zoo_key <- noaa_zoo_key %>% rename_all(tolower)
 
+# What duplicate Marmap numbers are representing currently, should be unique to taxa
+noaa_zoo_key %>% filter(`Taxon Name` %in% key_dups) %>% distinct()
 
-#Check duplicate columns to compare values
-noaa_z_duplicates <- noaa_zoo_key %>% filter(.copy == 2) %>% pull(`taxon name`)
-noaa_zoo_key %>% filter(`taxon name` %in% noaa_z_duplicates)
+#### Replace taxon names using NEFSC marmap key
 
-#Repair taxon names using NEFSC marmap key
-which(noaa_zoo[2,] == 3300) #Index for Heteropoda
-which(noaa_zoo[2,] == 4039) #Index for something...or nothing...
+# # Which we need to change, manually checked*
 colnames(noaa_zoo_abundances)[which(noaa_zoo[2,] == 3300)] <- "Heteropoda"
 colnames(noaa_zoo_abundances)[which(noaa_zoo[2,] == 4039)] <- "No record"
 
 #Drop column that has no taxa match for the marmap code 
 noaa_zoo_abundances[,"No record"] <- NULL
 
-#Repair key using NEFSC marmap key
-noaa_zoo_key <- noaa_zoo_key %>% mutate(
-  `taxon name` = ifelse(`marmap taxonomic code:` == 3300, "Heteropoda", `taxon name`),
-  `taxon name` = ifelse(`marmap taxonomic code:` == 4039, "No record", `taxon name`)) %>% 
-  select(-.copy) %>% 
+
+####  Repair MARMAP Key  ####
+
+# Make changes to key as well so there is no duplication of codes
+noaa_zoo_key <- noaa_zoo_key %>% 
+  mutate(
+    `Taxon Name` = ifelse(`Accepted ID` == 3300, "Heteropoda", `Taxon Name`),
+    `Taxon Name` = ifelse(`Accepted ID` == 4039, "No record", `Taxon Name`)) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = code_type, values_from = `Accepted ID`) %>% 
+  rename_all(tolower)%>% 
   filter(`taxon name` != "No record")
+
+
 
 #Seperate taxa and stage
 noaa_zoo_key <- noaa_zoo_key %>% mutate(
@@ -173,23 +209,39 @@ noaa_zoo_abundances <- noaa_zoo_abundances %>%
   rename_all(tolower) %>% 
   mutate(cruise = str_replace_all(cruise, "'", ""))
 
-rm(noaa_zoo, noaa_zoo_header, group_stage_names, noaa_z_duplicates)
+rm(noaa_zoo, noaa_zoo_header, group_stage_names, key_dups)
 
 
 
-####  End NOAA Zooplankton  ####
-####____________________________####
 
-####  SAHFOS Data  ####
-####__####
-####  MC Part 1  ####
+#..........................End NOAA Zoo..........................
 
-#MC part 1
+
+
+
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                                                                            ~~
+##                                SAHFOS DATA                               ----
+##                                                                            ~~
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                                  MC Part 1                               ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Load the three sheets
 mc1_phyto   <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part1.xlsx"), sheet = 1)
 mc1_eye     <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part1.xlsx"), sheet = 2)
 mc1_trav    <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part1.xlsx"), sheet = 3)
 
-# Combining Taxon Keys for phytoplankton, eye, and trav groups
+# Combine the Taxon Keys for phytoplankton, eye, and trav groups
 mc1_t_phyto <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part1.xlsx"), skip = 1, sheet = 5) %>% 
   mutate(taxa_class = "phyto") %>% 
   mutate(note = NA)
@@ -205,6 +257,7 @@ mc1_taxa <- bind_rows(mc1_t_phyto, mc1_t_trav, mc1_t_eye) %>%
   arrange(taxa_class, `Taxon Name`) %>% 
   select(taxa_class, `Taxon Name`, `Accepted ID`, note)
 rm(mc1_t_phyto, mc1_t_trav, mc1_t_eye)
+
 #Combined key
 head(mc1_taxa)
 
@@ -263,10 +316,14 @@ mc1_taxa  <- mc1_taxa  %>% rename_all(tolower)  #Taxonomic Key
 
 
 
-####  End MC Part 1  ####
-####__####
+#..........................End MC Part 1.........................
 
-####  MC Part 2  ####
+
+
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##                                  MC Part 2                               ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 mc2_phyto   <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part 2.xlsx"), sheet = 1)
 mc2_eye   <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part 2.xlsx"), sheet = 2)
 mc2_trav   <- readxl::read_xlsx(str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part 2.xlsx"), sheet = 3)
@@ -309,7 +366,7 @@ mc2_eye   <- mc2_eye   %>% rename_all(tolower)  #Eye sheet
 mc2_trav  <- mc2_trav  %>% rename_all(tolower)  #Tav sheet
 mc2_taxa  <- mc2_taxa  %>% rename_all(tolower)  #Taxonomic Key
 
-####  End MC Part 2  ####
+#..........................End MC Part 2.........................
 
 
 
@@ -324,7 +381,9 @@ mc2_taxa  <- mc2_taxa  %>% rename_all(tolower)  #Taxonomic Key
 
 
 
-####  Data Export  ####
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~ Export Prepared Files  ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 noaa_out  <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/2019_data_processing/")
 mc1_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/2019_data_processing/")
 mc2_out   <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/2019_data_processing/")
