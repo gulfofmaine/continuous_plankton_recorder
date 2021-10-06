@@ -1,5 +1,5 @@
 ---
-title: "CPR Data Dictionary Directory"
+title: "CPR Data Provenance"
 author: "Adam A. Kemberling"
 date: "`r Sys.Date()`"
 output: github_document
@@ -242,3 +242,5 @@ Once data from these two sources have been converted to common units of measurem
 
 ---
 # Mid-Atlantic Transect
+
+The Mid-Atlantic transect is currently not processed to the extent of the Gulf of Maine data.
