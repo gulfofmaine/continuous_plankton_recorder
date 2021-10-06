@@ -843,6 +843,9 @@ consolidate_noaa_taxa <- function(noaa_gom_abundances){
   #Join the new columns back to the station_metadata
   noaa_gom_prepared <- bind_cols(cpr_metadata, noaa_gom_refined)
   
+  # format station column to bind later with sahfos
+  noaa_gom_prepared$station <- as.character(noaa_gom_prepared$station)
+  
   return(noaa_gom_prepared)
   
 }
@@ -850,6 +853,83 @@ consolidate_noaa_taxa <- function(noaa_gom_abundances){
 
 
 # Original Source: 17_noaa_sahfos_eda.R
-# join_cpr_sources <- function(sahfos_gom_abundances){
-# 
-# }
+# match sahfos column names to the noaa taxa groups
+match_sahfos_to_noaa <- function(sahfos_zoo){
+  
+  #Renaming of sahfos data to match the refined noaa list
+  sahfos_zoo_2 <- sahfos_zoo %>% 
+    rename(
+      `acartia spp.`              = `acartia spp. (unidentified)`,
+      `amphipoda spp.`            = `amphipoda (unidentified)`,
+      `appendicularia spp.`       =  appendicularia,
+      `bivalvia spp.`             = `bivalvia larvae`,
+      `calanus finmarchicus v-vi` = `calanus finmarchicus`,
+      `calanus i-iv`              = `calanus i-iv`,
+      `calanus spp.`              = `calanus v-vi unidentified`, 
+      `centropages spp.`          = `centropages spp. (unidentified)`,
+      `cumacea spp.`              =  cumacea,
+      `doliolidae spp.`           =  doliolidae,
+      `euchaeta spp.`             = `euchaetidae (unidentified)`,
+      `euphausiacea spp.`         = `euphausiacea total`,
+      `foraminifera spp.`         = `foraminifera (total)`,
+      `gammaridea spp.`           =  gammaridea,
+      `gastropoda spp.`           = `gastropoda (unidentified)`,
+      `gymnosomoata spp.`         = `gymnosomata (unidentified)`,
+      `harpacticoida spp.`        = `harpacticoida total traverse`,
+      `hyperiidea spp.`           = `hyperiidea (total)`,
+      `ischnocalanus spp.`        =  ischnocalanus,
+      `lepas spp.`                = `lepas nauplii`,
+      `metridia spp.`             = `metridia spp. (v-vi) (unidentified)`,
+      `monstrilloida spp.`        =  monstrilloida,
+      `ostracoda spp.`            =  ostracoda,
+      `pleuromamma spp.`          = `pleuromamma spp. (unidentified)`,
+      `polychaeta larva`          = `polychaete larvae (unidentified)`,
+      `salpidae spp.`             = `salpidae (total)`,
+      `siphonostomatoida spp.`    =  siphonostomatoida,
+      `thecosomata spp.`          = `thecosomata (north atlantic)`,
+      `tintinnidae spp.`          = `tintinnida total` ) 
+  
+  #This section is for when multiple columns need to be reduced to a single aggregate
+  sahfos_zoo_renamed <- sahfos_zoo_2 %>% 
+    mutate(
+      `candacia spp.`                     = `candacia i-iv` + `candacia spp. (unidentified)`, 
+      `candacia i-iv`                     =  NULL,
+      `candacia spp. (unidentified)`      =  NULL,
+      `copepoda spp.`                     = `copepod eggs` + `copepod nauplii`,
+      `copepod eggs`                      =  NULL,
+      `copepod nauplii`                   =  NULL,
+      `decapoda spp.`                     = `decapod megalopa` + `decapod zoea` + `decapoda larvae (total)`,
+      `decapod megalopa`                  =  NULL, 
+      `decapod zoea`                      =  NULL,
+      `decapoda larvae (total)`           =  NULL,
+      `fish eggs`                         = `fish eggs (total)` + `fish eggs with oil globules` + `fish eggs without oil globules`,
+      `fish eggs (total)`                 =  NULL,
+      `fish eggs with oil globules`       =  NULL,
+      `fish eggs without oil globules`    =  NULL,
+      `pseudocalanus spp.`                = `pseudocalanus spp. adult atlantic` + `pseudocalanus spp. adult total`,
+      `pseudocalanus spp. adult atlantic` =  NULL, 
+      `pseudocalanus spp. adult total`    =  NULL,
+      `radiolaria spp.`                   = `radiolaria non-acantharian` + `radiolaria total`,
+      `radiolaria non-acantharian`        =  NULL,
+      `radiolaria total`                  =  NULL,
+      sample_id                           =  NULL)
+  
+  return(sahfos_zoo_renamed)
+  
+  
+  
+}
+
+
+
+
+#Bind the two data sources
+join_gom_zoo_sources <- function(noaa_zoo_refined, sahfos_zoo_renamed){
+  
+  combined_set <- bind_rows(
+    list("NOAA"   = noaa_zoo_refined, 
+         "SAHFOS" = sahfos_zoo_renamed), 
+    .id = "Data Source")
+  
+  return(combined_set)
+}

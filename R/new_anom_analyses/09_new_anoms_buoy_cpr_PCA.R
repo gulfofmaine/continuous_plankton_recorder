@@ -181,16 +181,11 @@ t1_data <- pca_out %>%
 timeline_raw <- t1_data %>% 
   ggplot(aes(x = Date,
              y = `Principal Component Loading`, 
-             color = `Principal Component`)
-             #alpha = `Principal Component`)
-         ) +
+             color = `Principal Component`)) +
     geom_line() +
-    #geom_line(color = gmri_cols("teal")) +
     geom_hline(yintercept = 0, color = "black", linetype = 2, alpha = 0.6) +
     ylim(-11, 11) +
     scale_color_gmri(palette = "mixed") +
-    #scale_color_manual(values = c(gmri_cols("gmri blue"), "lightblue3")) +
-    #scale_alpha_discrete(range = c(1, 0.4)) +
     labs(x = NULL) +
     theme_minimal()
 timeline_raw
@@ -242,11 +237,8 @@ interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>%
                #alpha = `Principal Component`
                )) +
     geom_line() +
-    #geom_line(color = gmri_cols("teal")) +
     geom_hline(yintercept = 0, color = "black", linetype = 2, alpha = 0.6) +
     scale_color_gmri(palette = "mixed") +
-    #scale_color_manual(values = c(gmri_cols("gmri blue"), "lightblue3")) +
-    #scale_alpha_discrete(range = c(1, 0.4)) +
     ylim(-11, 11) +
     labs(x = NULL) +
     theme_minimal())

@@ -9,7 +9,9 @@ library(gmRi)
 library(readxl)
 library(janitor)
 library(tidyverse)
-
+library(sf)
+library(rnaturalearth)
+new_england <- ne_states("united states of america") %>% st_as_sf(crs = 4326) 
 
 
 
@@ -88,10 +90,18 @@ mab_inuse[mab_inuse$abundance_per_100_cubic_meters == -9999, "abundance_per_100_
 
 
 # Map them
-mab_inuse %>% 
+# Polygons for mapping
+mab_sf <- mab_cpr %>% 
+  mutate(longitude = longitude * -1) %>% 
   distinct(latitude, longitude) %>% 
-  ggplot(aes(longitude, latitude)) + 
-    geom_point()
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
+
+# map
+mab_sf %>% 
+  ggplot() +
+  geom_sf(data = new_england) +
+  geom_sf(data = mab_sf, alpha = 0.4, shape = 3) +
+  coord_sf(xlim = c(-76, -65), ylim = c(36, 44))
 
 
 

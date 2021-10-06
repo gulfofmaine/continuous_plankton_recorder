@@ -1,0 +1,246 @@
+---
+title: "CPR Data Provenance"
+author: "Adam A. Kemberling"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(gt)
+library(gmRi)
+```
+
+`r gmRi::use_gmri_style_rmd()`
+
+# CPR Data Provenance
+
+The data for the continuous plankton recorder survey (CPR) has been collected and maintained by multiple government and non-government organizations. The methods for data collection and sampling processes have remained consistent, however the data processing/storage has revealed some differences across research entities.
+
+This documentation seeks to document the different data available to us here, and the data contained within each starting point. Once the starting points are clear, the data processing steps will be detailed to provide clarity on how these different resources can be used together.
+
+All final processing code has been moved to the {targets} pipeline, with all processing steps written as functions in:    
+> **R/support/gom_cpr_pipeline_support.R**
+
+
+# Starting Points:
+
+There are two transects of the CPR survey that we have access to the data for. The Gulf of Maine and the Mid-Atlantic transects.
+
+
+
+## Gulf of Maine Transect
+
+Data for the Guf of Maine transect was transferred to us from two sources. The Sir Alister Hardy Foundation, and the Northeast Fisheries Science Center.
+
+The formatting of the original data files from each source is as follows:
+
+### Single Taxa Files:
+
+**Root File Location**
+
+CPR data on individual taxa were delivered through email and placed on box in the following directory on box. All derived data from these starting files are under this directory. This is not a permanent home, but is the location the `cpr_boxpath` refers to in the code:
+
+> **Box/Adam Kemberling/Box_Projects/continuous_plankton_recorder**
+
+When initially engaging with the CPR data, requests for CPR data on specific taxa were requested and received. These came in two groups that contain both annual averages and some within-year averages (bi-monthly or quarterly).
+
+```{r}
+
+# Quarterly: 00_cprdata_first_look.R
+annual_taxa <- tribble(
+  ~"File Name",                         ~"Description",
+  #|                                    |
+  "Calanus_finmarchicus.txt",      "Late stage C. Finmarchicus densities",
+  "Calanus_I-IV.txt",              "Early-stage C. finmarchicus densities",
+  "Centropages_typicus.txt",       "Centropages typicus densities",
+  "Chaetognatha_eyecount.txt",     "Chaetognatha spp. densities",
+  "Euphausiacea_Total.txt",        "Euphausiacea densities",
+  "Metridia_lucens.txt",           "Metridia lucens densities",
+  "Oithona_spp..txt",              "Oithona spp. densities",
+  "Para-Pseudocalanus_spp..txt",   "Paracalanus & Pseudocalanus densities",
+  "Paraeuchaeta_norvegica.txt",    "Paraeuchaeta norvegica densities",
+  "Temora_longicornis.txt",        "Temora longicornis densities"
+) %>% 
+  mutate(`Temporal Frequency` = "Bi-monthly periods",
+         Folder = "CPRtimeseries_textX6")
+
+
+
+
+# Quarterly: 00b_cprdata_first_look.R
+quarterly_taxa <- tribble(
+  ~"File Name",                         ~"Description",
+  #|                                    |
+  "GOMx.Calanus_finmarchicus.txt",      "Late stage C. Finmarchicus densities",
+  "GOMx.Calanus_I-IV.txt",              "Early-stage C. finmarchicus densities",
+  "GOMx.Centropages_typicus.txt",       "Centropages typicus densities",
+  "GOMx.Chaetognatha_eyecount.txt",     "Chaetognatha spp. densities",
+  "GOMx.Euphausiacea_Total.txt",        "Euphausiacea densities",
+  "GOMx.Metridia_lucens.txt",           "Metridia lucens densities",
+  "GOMx.Oithona_spp..txt",              "Oithona spp. densities",
+  "GOMx.Para-Pseudocalanus_spp..txt",   "Paracalanus & Pseudocalanus densities",
+  "GOMx.Paraeuchaeta_norvegica.txt",    "Paraeuchaeta norvegica densities",
+  "GOMx.Temora_longicornis.txt",        "Temora longicornis densities"
+) %>% 
+  mutate(`Temporal Frequency` = "Quarterly periods",
+         Folder = "CPRtimeseries_textX")
+
+# Show table
+bind_rows(annual_taxa, quarterly_taxa) %>% 
+  select(Folder, `File Name`, Description, `Temporal Frequency`) %>% 
+  arrange(Folder, `File Name`) %>% 
+  gt::gt()
+```
+ 
+These collections are each processed into two additional files, one for the yearly densities and the second for quarterly densities. These two intermediate/processed files are:
+
+```{r}
+tribble(
+  ~"Folder",        ~"File Name",                       ~"Description", 
+  #                 |                                   |        ,
+  "processed_data", "cpr_allspecies_long.csv",          "reshaping of bi-monthly single species taxa",
+  "processed_data", "cpr_allspecies_long_quarters.csv", "reshaping of quarterly single species taxa"
+)%>% gt()
+```
+
+
+# Starting Points for All Taxa
+
+For questions relating to the full zooplankton community we also requested and received data on all taxa collected as part of the CPR survey as well as the phytoplankton color index (PCI). These were sourced from the two different management entities, NEFSC and SAHFOS, which were responsible for data collection and management for different periods of time.
+
+These files were placed within the Climate Change Ecology Lab directory on Box, referenced as `ccel_boxpath` in the code:
+
+> **Box/Climate Change Ecology Lab**
+
+
+## NOAA/NEFSC  Starting Points
+
+Data obtained from NOAA/NEFSC spans the period of: **1961-2013**, and was delivered in the following excel file, that is divided into **2** sheets:
+
+> **Data/NOAA_1961-2013/Gulf of Maine CPR (Feb 14, 2014 update).xlsx**
+
+Of the two sheets, one contains data on phytoplankton and the other contains records on zooplankton.
+
+Each excel sheet has a non-standard layout with two or more additional rows in the header explaining the identification and development stage of certain taxa. In the R script `13_allspecies_cpr_cleanup.R` these headers are stripped, and the different taxa and their stages are appended as the new column names.
+
+Taxonomic codes are also checked against MARMAP codes to ensure accuracy https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html
+
+Through email correspondence it was communicated that the units were abundance / 100 meters cubed. 
+
+```{r}
+tribble(
+  ~"Sheet Number",  ~"Description",  ~"Units",
+  #                  |               |        
+  
+  "Sheet 1",  
+  "Phytoplankton taxa densities by silk transect",
+  "# / 100m3",
+  
+  "Sheet 2", 
+  "Zooplankton taxa densities by silk transect",
+  "# / 100m3"
+) %>% gt()
+```
+
+
+At the end of the reshaping of these NOAA sheets, a pair of files are exported for both the phytoplankton and the zooplankton sets:
+
+```{r, eval = FALSE, eccho = TRUE}
+# NOAA phytoplankton
+write_csv(noaa_phyto_abundances, str_c(noaa_out, "noaa_phyto_abundances_2019.csv"), col_names = TRUE)
+write_csv(noaa_phyto_key, str_c(noaa_out, "noaa_phyto_key_2019.csv"), col_names = TRUE)
+
+# NOAA zooplankton
+write_csv(noaa_zoo_abundances, str_c(noaa_out, "noaa_zoo_abundances_2019.csv"), col_names = TRUE)
+write_csv(noaa_zoo_key, str_c(noaa_out, "noaa_zoo_key_2019.csv"), col_names = TRUE)
+```
+
+
+
+## SAHFOS Starting Points
+
+Data obtained from SAHFOS spans the period of:  **2013-2017**, and was delivered in the following files:
+
+> **Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part1.xlsx**   
+> **Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part 2.xlsx**   
+
+Each of these files contain three sheets containing the different counting scales of the CPR survey, the phytoplankton, the traverse, and the eyecount scales. These three scales are based on the size of organisms counted, and have different amounts of the transect used when counting, which are then scaled to the entire silk transect.
+
+These three measurement increments correspond with the following sub-sampling protocols to save time when counting very small organisms:
+
+ 1. **Phyto** - 1/8000th of transect counted   
+ 2. **Traverse** -  1/40th of transect counted   
+ 3. **Eyecount** -  full transect counted   
+
+```{r}
+tribble(
+ ~"Sheet Number",  ~"Description",  ~"Units",
+  #                  |               |        
+  
+  "Sheet 1",  
+  "Phytoplankton taxa densities by silk transect",
+  "?",
+  
+  "Sheet 2", 
+  "Zooplankton taxa densities by silk transect",
+  "?",
+ 
+  "Sheet 3", 
+  "Eyecount taxa densities by silk transect",
+  "?"
+) %>% gt()
+```
+
+At the end of the reshaping of these SAHFOS sheets, a file for each measurement scale and a single taxon key are exported for both the MC1 and MC2 excel sheet sets:
+
+```{r, eval = FALSE, eccho = TRUE}
+# mc1 export
+write_csv(mc1_phyto, str_c(mc1_out, "mc1_phyto_2019.csv"),    col_names = TRUE)
+write_csv(mc1_trav,  str_c(mc1_out, "mc1_traverse_2019.csv"), col_names = TRUE)
+write_csv(mc1_eye,   str_c(mc1_out, "mc1_eyecount_2019.csv"), col_names = TRUE)
+write_csv(mc1_taxa,  str_c(mc1_out, "mc1_taxa_key_2019.csv"), col_names = TRUE)
+
+# mc2 export
+write_csv(mc2_phyto, str_c(mc2_out, "mc2_phyto_2019.csv"),    col_names = TRUE)
+write_csv(mc2_trav,  str_c(mc2_out, "mc2_traverse_2019.csv"), col_names = TRUE)
+write_csv(mc2_eye,   str_c(mc2_out, "mc2_eyecount_2019.csv"), col_names = TRUE)
+write_csv(mc2_taxa,  str_c(mc2_out, "mc2_taxa_key_2019.csv"), col_names = TRUE)
+```
+
+
+## Combining NOAA/SAHFOS
+
+The steps taken to join files that began as the NOAA starting points and the counterparts that relate to the SAHFOS starting points involves finding parsimony among the different column names that are a combination of **Taxa** and **Development Stage**.
+
+Across the two sources different groupings have been used that sometimes overlap and include some or all of another group. Example: Calanus 1-3 & Calanus 1-4 or Calanus 4-6...
+
+Before these tables can be appended together these groupings need to be sorted out. This is done using the following two scripts which were later written as independent function steps for the targets pipeline:   
+> **15_NOAA_CPR_Cleanup.R**   
+> **16_SAHFOS_CPR_Cleanup.R**  
+
+For the SAHFOS data, it was determined that the abundances recorded are in #/transect and not #/100$m^3$ as recorded in the NOAA data. These values are converted in this step to the **common unit of density in 100 cubic meters of water**.
+
+To convert from the volume of water covered by a silk transect, the following constants are used:
+
+```{r}
+tribble(
+  ~"Constant", ~"Value",
+  "Distance Traveled by CPR Device for Transect", "10 Nautical Miles",
+  "CPR Opening Aperture Size", "1.27 square cm",
+  "CPR Aperture Size (square meters)", "0.0016129",
+  "Meters in 10 Nautical Miles", "18520",
+  "Volume Sampled in 10 Nautical Mile Transect", "2.987091 cubic meters",
+  "Transect to 100m3 Equation", "(1 / 2.987091) * 100"
+) %>%  gt()
+```
+
+
+Once data from these two sources have been converted to common units of measurement and common taxonomic groupings they are able to be appended for one consistent timeseries. 
+
+
+---
+# Mid-Atlantic Transect
+
+The Mid-Atlantic transect is currently not processed to the extent of the Gulf of Maine data.

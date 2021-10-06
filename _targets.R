@@ -11,7 +11,7 @@ library(here)
 library(raster)
 library(tidyverse)
 source(here::here("R", "cpr_helper_funs.R"))
-source(here("R", "support/cpr_pipeline_support.R"))
+source(here("R", "support/gom_cpr_pipeline_support.R"))
 
 options(tidyverse.quiet = T)
 
@@ -106,14 +106,18 @@ list(
                               sahfos_eye = sahfos_eye_100m, 
                               sahfos_meta = sahfos_meta)),
   
-  
   #### Resolving Taxa Differences ####
   tar_target(noaa_taxa_resolved,
-             consolidate_noaa_taxa(noaa_gom_abundances = gom_noaa_zoo))
+             consolidate_noaa_taxa(noaa_gom_abundances = gom_noaa_zoo)),
+  
+  # match the column names to the noaa columns
+  tar_target(sahfos_zoo_renamed,
+             match_sahfos_to_noaa(sahfos_zoo_100m)),
   
   
   ####  Joining Different Sources  ####
-  
+  tar_target(gom_combined_zooplankton,
+             join_gom_zoo_sources(noaa_taxa_resolved, sahfos_zoo_renamed))
   
   
   
