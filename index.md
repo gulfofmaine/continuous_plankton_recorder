@@ -5,7 +5,12 @@ This is a landing pad for the Rmarkdown presentation and the cluster analysis rm
 This index.md file is used as a shortcut to the following html presentations and pages.
 
 
-The following links direct you to the xaringan slideshow:
+For details on the data provenance of the CPR data analyses use this link:
+[CPR Data Provenance](https://adamkemberling.github.io/continuous_plankton_recorder/R/data_dictionaries/CPR_Data_Provenance.html)
+
+
+
+The following links direct you to the xaringan slideshow walking through patterns in correlations:
 
 [Presentation Code link](/R/presentations/cpr_paper_story.html)
 

@@ -1,8 +1,14 @@
 ---
 title: "CPR Data Provenance"
-author: "Adam A. Kemberling"
+description: |
+  Starting points and data transformations (in english) for CPR analyses.
+author:
+  - name: Adamkemberling 
+    url: github.com/adamkemberling
+    affiliation: Gulf of Maine Research Institute
+    affiliation_url: gmri.org
 date: "`r Sys.Date()`"
-output: github_document
+output: distill::distill_article
 ---
 
 ```{r setup, include=FALSE}
