@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>3 All Taxa Starting Points | Continuous Plankton Recorder Data Provenance</title>
+  <meta name="description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="3 All Taxa Starting Points | Continuous Plankton Recorder Data Provenance" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="github-repo" content="gulfofmaine/sdm_workflow" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="3 All Taxa Starting Points | Continuous Plankton Recorder Data Provenance" />
+  
+  <meta name="twitter:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  
+
+<meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
+
+
+<meta name="date" content="2021-10-18" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="Single_Taxon.html"/>
+<link rel="next" href="mid-atlantic-transect-1.html"/>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/vis-4.20.1/vis.css" rel="stylesheet" />
+<script src="libs/vis-4.20.1/vis.min.js"></script>
+<script src="libs/visNetwork-binding-2.0.9/visNetwork.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> About the Project</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#cpr-data-provenance"><i class="fa fa-check"></i><b>1.1</b> CPR Data Provenance</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#cpr-data-starting-points"><i class="fa fa-check"></i><b>1.2</b> CPR Data: Starting Points</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#cpr-survey-transects"><i class="fa fa-check"></i><b>1.3</b> CPR Survey Transects</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#gulf-of-maine-transect"><i class="fa fa-check"></i><b>1.3.1</b> Gulf of Maine Transect</a></li>
+<li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#mid-atlantic-transect"><i class="fa fa-check"></i><b>1.3.2</b> Mid-Atlantic Transect</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="Single_Taxon.html"><a href="Single_Taxon.html"><i class="fa fa-check"></i><b>2</b> Single Taxon Starting Points</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="Single_Taxon.html"><a href="Single_Taxon.html#box-file-locations"><i class="fa fa-check"></i><b>2.1</b> Box File Locations</a></li>
+<li class="chapter" data-level="2.2" data-path="Single_Taxon.html"><a href="Single_Taxon.html#original-file-structure"><i class="fa fa-check"></i><b>2.2</b> Original File Structure</a></li>
+<li class="chapter" data-level="2.3" data-path="Single_Taxon.html"><a href="Single_Taxon.html#consolidated-taxa-files"><i class="fa fa-check"></i><b>2.3</b> Consolidated Taxa Files</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="All_Taxa.html"><a href="All_Taxa.html"><i class="fa fa-check"></i><b>3</b> All Taxa Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#box-file-locations-1"><i class="fa fa-check"></i><b>3.1</b> Box File Locations</a></li>
+<li class="chapter" data-level="3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#noaanefsc-starting-points"><i class="fa fa-check"></i><b>3.2</b> NOAA/NEFSC Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="All_Taxa.html"><a href="All_Taxa.html#noaa-abundances-and-taxa-keys"><i class="fa fa-check"></i><b>3.2.1</b> NOAA Abundances and Taxa Keys</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-starting-points"><i class="fa fa-check"></i><b>3.3</b> SAHFOS Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-taxa-keys"><i class="fa fa-check"></i><b>3.3.1</b> SAHFOS Taxa Keys</a></li>
+<li class="chapter" data-level="3.3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-abundances"><i class="fa fa-check"></i><b>3.3.2</b> SAHFOS Abundances</a></li>
+<li class="chapter" data-level="3.3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-unit-differences"><i class="fa fa-check"></i><b>3.3.3</b> Resolving Unit Differences</a></li>
+<li class="chapter" data-level="3.3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-taxon-group-differences"><i class="fa fa-check"></i><b>3.3.4</b> Resolving Taxon Group differences</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#appending-data-sources"><i class="fa fa-check"></i><b>3.4</b> Appending Data Sources</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="mid-atlantic-transect-1.html"><a href="mid-atlantic-transect-1.html"><i class="fa fa-check"></i><b>4</b> Mid-Atlantic Transect</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Continuous Plankton Recorder Data Provenance</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="All_Taxa" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> All Taxa Starting Points</h1>
+<div id="box-file-locations-1" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Box File Locations</h2>
+<p>For questions relating to the full zooplankton community we also requested and received data on all taxa collected as part of the CPR survey as well as the phytoplankton color index (PCI). These were sourced from the two different management entities, NEFSC and SAHFOS, which were responsible for data collection and management for different periods of time.</p>
+<p>These files were placed within the Climate Change Ecology Lab directory on Box, referenced as <code>ccel_boxpath</code> in the code:</p>
+<blockquote>
+<p><strong>Box/Climate Change Ecology Lab</strong></p>
+</blockquote>
+<p>The discrete steps in the CPR data processing pipeline for these files are detailed using the {targets} package. The following diagram details the data at each step in the pipeline from the three individual files to the combined zooplankton dataset.</p>
+<!--- Adding a border around html output --->
+<!--
+<style>
+    canvas {
+        border: groove;
+    }
+</style>
+--->
+<pre><code>There were 12 warnings (use warnings() to see them)</code></pre>
+<div id="htmlwidget-863dda880ca0d6d49923" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-863dda880ca0d6d49923">{"x":{"nodes":{"name":["sahfos_trav_100m","sahfos_mc1_taxa","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_mc2_taxa","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","gom_noaa_zoo_key","sahfos_meta","sahfos_trav","gom_noaa_phyto_key","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","gom_noaa_zoo","gom_noaa_phyto"],"type":["stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem"],"status":["none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none"],"seconds":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"bytes":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"branches":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"id":["sahfos_trav_100m","sahfos_mc1_taxa","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_mc2_taxa","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","gom_noaa_zoo_key","sahfos_meta","sahfos_trav","gom_noaa_phyto_key","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","gom_noaa_zoo","gom_noaa_phyto"],"label":["sahfos_trav_100m","sahfos_mc1_taxa","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_mc2_taxa","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","gom_noaa_zoo_key","sahfos_meta","sahfos_trav","gom_noaa_phyto_key","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","gom_noaa_zoo","gom_noaa_phyto"],"level":[4,1,7,6,2,2,1,3,2,4,2,5,4,2,0,4,3,0,3,2,2,1,0],"color":["#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac"],"shape":["dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot"]},"edges":{"from":["sahfos_trav","noaa_taxa_resolved","sahfos_zoo_renamed","sahfos_zoo_100m","sahfos_mc1_taxa","sahfos_mc2_taxa","gom_sahfos_eye_mc1","gom_sahfos_eye_mc2","sahfos_mc1_taxa","sahfos_eye","sahfos_mc2_taxa","sahfos_eye_100m","sahfos_meta","sahfos_trav_100m","sahfos_phyto","gom_noaa_zoo","sahfos_trav","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","sahfos_mc1_taxa","sahfos_mc2_taxa"],"to":["sahfos_trav_100m","gom_combined_zooplankton","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_eye","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_zoo_100m","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","sahfos_meta","sahfos_trav","sahfos_trav","sahfos_phyto","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2"],"arrows":["to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"smooth":{"type":"cubicBezier","forceDirection":"horizontal"}},"physics":{"stabilization":false},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"right","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Stem"],"shape":["dot"],"color":["#899DA4"]},"nodesToDataframe":true}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="noaanefsc-starting-points" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> NOAA/NEFSC Starting Points</h2>
+<p>Data obtained from NOAA/NEFSC spans the period of: <strong>1961-2013</strong>, and was delivered in the following excel file:</p>
+<blockquote>
+<p><strong>Data/NOAA_1961-2013/Gulf of Maine CPR (Feb 14, 2014 update).xlsx</strong></p>
+</blockquote>
+<p>That excel file is divided into <strong>2</strong> sheets. One contains data on phytoplankton and the other contains records on zooplankton.</p>
+<p>Each excel sheet has two or more additional rows in the header explaining the identification and development stage of certain taxa. In the R script <code>13_allspecies_cpr_cleanup.R</code> these headers are stripped, and the different taxa and their stages are appended as the new column names.</p>
+<p>Taxonomic codes are also checked against MARMAP codes to ensure accuracy <a href="https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html" class="uri">https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html</a></p>
+<p>Through email correspondence it was communicated that the units were abundance / 100 meters cubed.</p>
+<div id="gimawuzdjb" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#gimawuzdjb .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#gimawuzdjb .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#gimawuzdjb .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#gimawuzdjb .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#gimawuzdjb .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#gimawuzdjb .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#gimawuzdjb .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#gimawuzdjb .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#gimawuzdjb .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#gimawuzdjb .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#gimawuzdjb .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#gimawuzdjb .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#gimawuzdjb .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#gimawuzdjb .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gimawuzdjb .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gimawuzdjb .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#gimawuzdjb .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#gimawuzdjb .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#gimawuzdjb .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#gimawuzdjb .gt_left {
+  text-align: left;
+}
+
+#gimawuzdjb .gt_center {
+  text-align: center;
+}
+
+#gimawuzdjb .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#gimawuzdjb .gt_font_normal {
+  font-weight: normal;
+}
+
+#gimawuzdjb .gt_font_bold {
+  font-weight: bold;
+}
+
+#gimawuzdjb .gt_font_italic {
+  font-style: italic;
+}
+
+#gimawuzdjb .gt_super {
+  font-size: 65%;
+}
+
+#gimawuzdjb .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 65%;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Sheet Number</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Description</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Units</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">Sheet 1</td>
+<td class="gt_row gt_left">Phytoplankton taxa densities by silk transect</td>
+<td class="gt_row gt_left"># / 100m3</td></tr>
+    <tr><td class="gt_row gt_left">Sheet 2</td>
+<td class="gt_row gt_left">Zooplankton taxa densities by silk transect</td>
+<td class="gt_row gt_left"># / 100m3</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+<div id="noaa-abundances-and-taxa-keys" class="section level3" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> NOAA Abundances and Taxa Keys</h3>
+<p>At the end of the reshaping of these NOAA excel sheets, we are left with 4 different tables:</p>
+<blockquote>
+<p>gom_noaa_zoo<br />
+gom_noaa_phyto<br />
+gom_noaa_zoo_key<br />
+gom_noaa_phyto_key</p>
+</blockquote>
+<p>The “keys” detail the taxonomic codes in the header, and their associated MARMAP codes. The other targets detail the abundances in a wide form, with columns displaying the abundance for each stage at each CPR station.</p>
+</div>
+</div>
+<div id="sahfos-starting-points" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> SAHFOS Starting Points</h2>
+<p>Data obtained from SAHFOS spans the period of: <strong>2013-2017</strong>, and was delivered in the following files:</p>
+<blockquote>
+<p><strong>Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part1.xlsx</strong><br />
+<strong>Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part 2.xlsx</strong></p>
+</blockquote>
+<p>Each of these files contain <strong>three</strong> sheets containing the different counting scales of the CPR survey, the phytoplankton, the traverse, and the “eye-count” scales. These three scales are based on the size of organisms counted. At each scale different subsets of the silk transect are used when counting the individually identified taxa. Counts from the subsets are then scaled to the entire silk transect and given a number on a categorical counting scale. These represent discrete jumps in abundance per transect.</p>
+<p>These three measurement increments correspond with the following sub-sampling protocols to save time when counting very small organisms:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Phyto</strong> - 1/8000th of transect counted<br />
+</li>
+<li><strong>Traverse</strong> - 1/40th of transect counted<br />
+</li>
+<li><strong>Eyecount</strong> - full transect counted</li>
+</ol>
+<div id="dcujdjzbse" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#dcujdjzbse .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#dcujdjzbse .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#dcujdjzbse .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#dcujdjzbse .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#dcujdjzbse .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#dcujdjzbse .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#dcujdjzbse .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#dcujdjzbse .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#dcujdjzbse .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#dcujdjzbse .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#dcujdjzbse .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#dcujdjzbse .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#dcujdjzbse .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#dcujdjzbse .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dcujdjzbse .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dcujdjzbse .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#dcujdjzbse .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#dcujdjzbse .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dcujdjzbse .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#dcujdjzbse .gt_left {
+  text-align: left;
+}
+
+#dcujdjzbse .gt_center {
+  text-align: center;
+}
+
+#dcujdjzbse .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#dcujdjzbse .gt_font_normal {
+  font-weight: normal;
+}
+
+#dcujdjzbse .gt_font_bold {
+  font-weight: bold;
+}
+
+#dcujdjzbse .gt_font_italic {
+  font-style: italic;
+}
+
+#dcujdjzbse .gt_super {
+  font-size: 65%;
+}
+
+#dcujdjzbse .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 65%;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Sheet Number</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Description</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Units</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">Sheet 1</td>
+<td class="gt_row gt_left">Phytoplankton taxa densities by silk transect</td>
+<td class="gt_row gt_left"># / Transect</td></tr>
+    <tr><td class="gt_row gt_left">Sheet 2</td>
+<td class="gt_row gt_left">Zooplankton taxa densities by silk transect</td>
+<td class="gt_row gt_left"># / Transect</td></tr>
+    <tr><td class="gt_row gt_left">Sheet 3</td>
+<td class="gt_row gt_left">Eyecount taxa densities by silk transect</td>
+<td class="gt_row gt_left"># / Transect</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+<div id="sahfos-taxa-keys" class="section level3" number="3.3.1">
+<h3><span class="header-section-number">3.3.1</span> SAHFOS Taxa Keys</h3>
+<p>The import and reshaping of this data is facilitated by taxon keys, which exist in the targets pipeline as the following targets and are created using information in the headers of the excel sheets:</p>
+<blockquote>
+<p>sahfos_mc1_taxa<br />
+sahfos_mc2_taxa</p>
+</blockquote>
+<p>The SAHFOS keys are “long datasets” with only four columns. A column that details the measurement level (phyto, traverse, eye), a column detailing what taxon it is, the marmap number associated with it, and any notes from the header.</p>
+</div>
+<div id="sahfos-abundances" class="section level3" number="3.3.2">
+<h3><span class="header-section-number">3.3.2</span> SAHFOS Abundances</h3>
+<p>Because the SAHFOS data came as different sheets for different observation scales, we processed the data accordingly. Each measurement scale was processed in parallel for the MC1 &amp; MC2 datasets before appending them together. This produced three sets of abundance data, one for phyto, traverse, and for eye count abundances. These were tagged as the following targets:</p>
+<blockquote>
+<p>sahfos_phyto</p>
+<p>sahfos_trav</p>
+<p>sahfos_eye</p>
+</blockquote>
+</div>
+<div id="resolving-unit-differences" class="section level3" number="3.3.3">
+<h3><span class="header-section-number">3.3.3</span> Resolving Unit Differences</h3>
+<p>For the SAHFOS data, it was determined that the abundances recorded are in the abundance/transect and not abundance/100<span class="math inline">\(m^3\)</span> as recorded in the NOAA data.</p>
+<p>These values are converted in this step to the <strong>common unit of the zooplankton density as:</strong> <em>Abundance per 100 cubic meters of water</em>.</p>
+<p>To convert from the volume of water covered by a silk transect, the following constants are used:</p>
+<div id="kjwcyolfif" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#kjwcyolfif .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#kjwcyolfif .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#kjwcyolfif .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#kjwcyolfif .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#kjwcyolfif .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#kjwcyolfif .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#kjwcyolfif .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#kjwcyolfif .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#kjwcyolfif .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#kjwcyolfif .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#kjwcyolfif .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#kjwcyolfif .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#kjwcyolfif .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#kjwcyolfif .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kjwcyolfif .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kjwcyolfif .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#kjwcyolfif .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#kjwcyolfif .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kjwcyolfif .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#kjwcyolfif .gt_left {
+  text-align: left;
+}
+
+#kjwcyolfif .gt_center {
+  text-align: center;
+}
+
+#kjwcyolfif .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#kjwcyolfif .gt_font_normal {
+  font-weight: normal;
+}
+
+#kjwcyolfif .gt_font_bold {
+  font-weight: bold;
+}
+
+#kjwcyolfif .gt_font_italic {
+  font-style: italic;
+}
+
+#kjwcyolfif .gt_super {
+  font-size: 65%;
+}
+
+#kjwcyolfif .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 65%;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Constant</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Value</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">Distance Traveled by CPR Device for Transect</td>
+<td class="gt_row gt_left">10 Nautical Miles</td></tr>
+    <tr><td class="gt_row gt_left">CPR Opening Aperture Size</td>
+<td class="gt_row gt_left">1.27 square cm</td></tr>
+    <tr><td class="gt_row gt_left">CPR Aperture Size (square meters)</td>
+<td class="gt_row gt_left">0.0016129</td></tr>
+    <tr><td class="gt_row gt_left">Meters in 10 Nautical Miles</td>
+<td class="gt_row gt_left">18520</td></tr>
+    <tr><td class="gt_row gt_left">Volume Sampled in 10 Nautical Mile Transect</td>
+<td class="gt_row gt_left">2.987091 cubic meters</td></tr>
+    <tr><td class="gt_row gt_left">Transect to 100m3 Equation</td>
+<td class="gt_row gt_left">(1 / 2.987091) * 100</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+<p>Once abundances were in a common unit, zooplankton at the traverse and eye count scales were combined for a common zooplankton abundance dataset.</p>
+<blockquote>
+<p>sahfos_zoo_100m</p>
+</blockquote>
+</div>
+<div id="resolving-taxon-group-differences" class="section level3" number="3.3.4">
+<h3><span class="header-section-number">3.3.4</span> Resolving Taxon Group differences</h3>
+<p>The steps needed to unite the NOAA starting points and their counterparts among the SAHFOS starting points involves finding parsimony among the different column names that are a combination of <strong>Taxa</strong> and their <strong>Development Stages</strong>.</p>
+<p>Across the two sources different groupings have been used that sometimes overlap and include some or all of another group. Example: Calanus 1-3 &amp; Calanus 1-4 or Calanus 4-6…</p>
+<p>Before these tables can be appended together these groupings need to be sorted out. This is done using the following two scripts which were later written as independent function steps for the targets pipeline:</p>
+<blockquote>
+<p><strong>15_NOAA_CPR_Cleanup.R</strong><br />
+<strong>16_SAHFOS_CPR_Cleanup.R</strong></p>
+</blockquote>
+<p>The resulting targets are:</p>
+<blockquote>
+<p>sahfos_zoo_renamed</p>
+<p>noaa_taxa_resolved</p>
+</blockquote>
+</div>
+</div>
+<div id="appending-data-sources" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> Appending Data Sources</h2>
+<p>Once data from these two sources have been converted to common units of measurement and common taxonomic groupings they are able to be appended for one consistent timeseries.</p>
+<blockquote>
+<p>gom_combined_zooplankton</p>
+</blockquote>
+<hr />
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="Single_Taxon.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="mid-atlantic-transect-1.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>4 Mid-Atlantic Transect | Continuous Plankton Recorder Data Provenance</title>
+  <meta name="description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="4 Mid-Atlantic Transect | Continuous Plankton Recorder Data Provenance" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="github-repo" content="gulfofmaine/sdm_workflow" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="4 Mid-Atlantic Transect | Continuous Plankton Recorder Data Provenance" />
+  
+  <meta name="twitter:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  
+
+<meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
+
+
+<meta name="date" content="2021-10-18" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="All_Taxa.html"/>
+
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/vis-4.20.1/vis.css" rel="stylesheet" />
+<script src="libs/vis-4.20.1/vis.min.js"></script>
+<script src="libs/visNetwork-binding-2.0.9/visNetwork.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> About the Project</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#cpr-data-provenance"><i class="fa fa-check"></i><b>1.1</b> CPR Data Provenance</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#cpr-data-starting-points"><i class="fa fa-check"></i><b>1.2</b> CPR Data: Starting Points</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#cpr-survey-transects"><i class="fa fa-check"></i><b>1.3</b> CPR Survey Transects</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#gulf-of-maine-transect"><i class="fa fa-check"></i><b>1.3.1</b> Gulf of Maine Transect</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="Single_Taxon.html"><a href="Single_Taxon.html"><i class="fa fa-check"></i><b>2</b> Single Taxon Starting Points</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="Single_Taxon.html"><a href="Single_Taxon.html#box-file-locations"><i class="fa fa-check"></i><b>2.1</b> Box File Locations</a></li>
+<li class="chapter" data-level="2.2" data-path="Single_Taxon.html"><a href="Single_Taxon.html#original-file-structure"><i class="fa fa-check"></i><b>2.2</b> Original File Structure</a></li>
+<li class="chapter" data-level="2.3" data-path="Single_Taxon.html"><a href="Single_Taxon.html#consolidated-taxa-files"><i class="fa fa-check"></i><b>2.3</b> Consolidated Taxa Files</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="All_Taxa.html"><a href="All_Taxa.html"><i class="fa fa-check"></i><b>3</b> All Taxa Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#box-file-locations-1"><i class="fa fa-check"></i><b>3.1</b> Box File Locations</a></li>
+<li class="chapter" data-level="3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#noaanefsc-starting-points"><i class="fa fa-check"></i><b>3.2</b> NOAA/NEFSC Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="All_Taxa.html"><a href="All_Taxa.html#noaa-abundances-and-taxa-keys"><i class="fa fa-check"></i><b>3.2.1</b> NOAA Abundances and Taxa Keys</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-starting-points"><i class="fa fa-check"></i><b>3.3</b> SAHFOS Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-taxa-keys"><i class="fa fa-check"></i><b>3.3.1</b> SAHFOS Taxa Keys</a></li>
+<li class="chapter" data-level="3.3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-abundances"><i class="fa fa-check"></i><b>3.3.2</b> SAHFOS Abundances</a></li>
+<li class="chapter" data-level="3.3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-unit-differences"><i class="fa fa-check"></i><b>3.3.3</b> Resolving Unit Differences</a></li>
+<li class="chapter" data-level="3.3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-taxon-group-differences"><i class="fa fa-check"></i><b>3.3.4</b> Resolving Taxon Group differences</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#appending-data-sources"><i class="fa fa-check"></i><b>3.4</b> Appending Data Sources</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="mid-atlantic-transect.html"><a href="mid-atlantic-transect.html"><i class="fa fa-check"></i><b>4</b> Mid-Atlantic Transect</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Continuous Plankton Recorder Data Provenance</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="mid-atlantic-transect" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Mid-Atlantic Transect</h1>
+<p>The Mid-Atlantic transect is currently not processed to the extent of the Gulf of Maine data.</p>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="All_Taxa.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+# Single Taxon Starting Points {#Single_Taxon}
+
+
+## Box File Locations
+
+CPR data on individual taxon were delivered through email and stored in the following directory on box.
+
+> **Box/Adam Kemberling/Box_Projects/continuous_plankton_recorder/**
+
+All derived data from these starting files are under this directory. This is not a permanent home, but is the location the `cpr_boxpath()` refers to in the code:
+
+## Original File Structure
+
+When initially engaging with the CPR data, requests for CPR data on specific taxa were requested and received as individual files. These came in two groups that contain both annual averages and some within-year averages (bi-monthly or quarterly).
+
+```{r}
+
+# Quarterly: 00_cprdata_first_look.R
+annual_taxa <- tribble(
+  ~"File Name",                         ~"Description",
+  #|                                    |
+  "Calanus_finmarchicus.txt",      "Late stage C. Finmarchicus densities",
+  "Calanus_I-IV.txt",              "Early-stage C. finmarchicus densities",
+  "Centropages_typicus.txt",       "Centropages typicus densities",
+  "Chaetognatha_eyecount.txt",     "Chaetognatha spp. densities",
+  "Euphausiacea_Total.txt",        "Euphausiacea densities",
+  "Metridia_lucens.txt",           "Metridia lucens densities",
+  "Oithona_spp..txt",              "Oithona spp. densities",
+  "Para-Pseudocalanus_spp..txt",   "Paracalanus & Pseudocalanus densities",
+  "Paraeuchaeta_norvegica.txt",    "Paraeuchaeta norvegica densities",
+  "Temora_longicornis.txt",        "Temora longicornis densities"
+) %>% 
+  mutate(`Temporal Frequency` = "Bi-monthly periods",
+         Folder = "CPRtimeseries_textX6")
+
+
+
+
+# Quarterly: 00b_cprdata_first_look.R
+quarterly_taxa <- tribble(
+  ~"File Name",                         ~"Description",
+  #|                                    |
+  "GOMx.Calanus_finmarchicus.txt",      "Late stage C. Finmarchicus densities",
+  "GOMx.Calanus_I-IV.txt",              "Early-stage C. finmarchicus densities",
+  "GOMx.Centropages_typicus.txt",       "Centropages typicus densities",
+  "GOMx.Chaetognatha_eyecount.txt",     "Chaetognatha spp. densities",
+  "GOMx.Euphausiacea_Total.txt",        "Euphausiacea densities",
+  "GOMx.Metridia_lucens.txt",           "Metridia lucens densities",
+  "GOMx.Oithona_spp..txt",              "Oithona spp. densities",
+  "GOMx.Para-Pseudocalanus_spp..txt",   "Paracalanus & Pseudocalanus densities",
+  "GOMx.Paraeuchaeta_norvegica.txt",    "Paraeuchaeta norvegica densities",
+  "GOMx.Temora_longicornis.txt",        "Temora longicornis densities"
+) %>% 
+  mutate(`Temporal Frequency` = "Quarterly periods",
+         Folder = "CPRtimeseries_textX")
+
+# Show table
+bind_rows(annual_taxa, quarterly_taxa) %>% 
+  select(Folder, `File Name`, Description, `Temporal Frequency`) %>% 
+  arrange(Folder, `File Name`) %>% 
+  gt::gt()
+```
+
+## Consolidated Taxa Files
+
+These collections of individual taxon abundances are each processed into two additional processed files. One for the yearly densities and the second for quarterly densities. These two intermediate/processed files are:
+
+```{r}
+tribble(
+  ~"Folder",        ~"File Name",                       ~"Description", 
+  #                 |                                   |        ,
+  "processed_data", "cpr_allspecies_long.csv",          "reshaping of bi-monthly single species taxa",
+  "processed_data", "cpr_allspecies_long_quarters.csv", "reshaping of quarterly single species taxa"
+) %>% gt()
+```

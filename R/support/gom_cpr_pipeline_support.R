@@ -4,12 +4,12 @@
 
 
 ####  Packages  ####
-library(here)
-library(mgcv)
-library(gmRi)
-library(readxl)
-library(sf)
-library(tidyverse)
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(mgcv))
+suppressPackageStartupMessages(library(gmRi))
+suppressPackageStartupMessages(library(readxl))
+suppressPackageStartupMessages(library(sf))
+suppressPackageStartupMessages(library(tidyverse))
 
 
 

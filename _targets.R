@@ -3,17 +3,17 @@
 
 
 # Load packages and set specific options for the workflow
-
-library(targets)
-library(tarchetypes)
-library(sf)
-library(here)
-library(raster)
-library(tidyverse)
+options(tidyverse.quiet = T)
+suppressPackageStartupMessages(library(targets))
+suppressPackageStartupMessages(library(tarchetypes))
+suppressPackageStartupMessages(library(sf))
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(raster))
+suppressPackageStartupMessages(library(tidyverse))
 source(here::here("R", "cpr_helper_funs.R"))
 source(here("R", "support/gom_cpr_pipeline_support.R"))
 
-options(tidyverse.quiet = T)
+
 
 
 # Additional packages to load specific to target(s)
