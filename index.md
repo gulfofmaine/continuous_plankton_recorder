@@ -6,7 +6,7 @@ This index.md file is used as a shortcut to the following html presentations and
 
 
 For details on the data provenance of the CPR data analyses use this link:
-[CPR Data Provenance](https://adamkemberling.github.io/continuous_plankton_recorder/R/data_dictionaries/CPR_Data_Provenance.html)
+[CPR Data Provenance](https://adamkemberling.github.io/continuous_plankton_recorder/docs/)
 
 
 

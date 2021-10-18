@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Continuous Plankton Recorder Data Provenance</title>
+  <title>Chapter 1 About the Project | Continuous Plankton Recorder Data Provenance</title>
   <meta name="description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Continuous Plankton Recorder Data Provenance" />
+  <meta property="og:title" content="Chapter 1 About the Project | Continuous Plankton Recorder Data Provenance" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="adamkemberling/continuous_plankton_recorder" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Continuous Plankton Recorder Data Provenance" />
+  <meta name="twitter:title" content="Chapter 1 About the Project | Continuous Plankton Recorder Data Provenance" />
   
   <meta name="twitter:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="intro.html"/>
+<link rel="prev" href="index.html"/>
+<link rel="next" href="Single_Taxon.html"/>
 <script src="libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -124,23 +124,48 @@
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Continuous Plankton Recorder Data Provenance</h1>
-<p class="author"><em>Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory</em></p>
-<p class="date"><em>2021-10-18</em></p>
+<div id="intro" class="section level1" number="1">
+<h1><span class="header-section-number">Chapter 1</span> About the Project</h1>
+<p>This report documents the data used for our studies using the Continuous Plankton Recorder Survey (CPR) data, and all data wrangling performed for the analyses.</p>
+<div id="cpr-data-provenance" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> CPR Data Provenance</h2>
+<p>The data for the <a href="https://www.cprsurvey.org/services/the-continuous-plankton-recorder/">continuous plankton recorder survey (CPR)</a> has been collected and maintained by multiple government and non-government organizations.</p>
+<p>The methods for data collection and sampling processes have remained consistent, however the data processing/storage has revealed some differences across research entities.</p>
+<p>This documentation seeks to document the different data available to us here, and the data contained within each starting point. Once the starting points are clear, the data processing steps will be detailed to provide clarity on how these different resources can be used together.</p>
+<p>All final processing code has been moved to the {targets} pipeline, with all processing steps written as functions in:<br />
+&gt; <strong>R/support/gom_cpr_pipeline_support.R</strong></p>
 </div>
-<div id="preface" class="section level1 unnumbered">
-<h1>Preface</h1>
-<p>The Continuous Plankton Recorder Survey is a long-running survey program that collects abundance information for zooplankton populations in the surface ocean around the world. This resource is used when looking at the intra-annual variation in zooplankton populations like those here in the Gulf of Maine.</p>
+<div id="cpr-data-starting-points" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> CPR Data: Starting Points</h2>
+<p>Tracking the data provenance will be documented here for three distinct “starting points”. These starting points are how the data was delivered to us from various institutions, and each starting point has specific data wrangling steps performed in preparation for any analyses.</p>
+<p><strong>The three starting points are:</strong><br />
+1. Individual files for single taxon, for the Gulf of Maine Transect<br />
+2. Files containing data for all taxa, for the Gulf of Maine Transect<br />
+3. Files containing data for all taxa, for the Mid-Atlantic Bight Transect</p>
+</div>
+<div id="cpr-survey-transects" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> CPR Survey Transects</h2>
+<div id="gulf-of-maine-transect" class="section level3" number="1.3.1">
+<h3><span class="header-section-number">1.3.1</span> Gulf of Maine Transect</h3>
+<p>Data for the Gulf of Maine transect was transferred to us from two sources. <a href="https://www.cprsurvey.org/about-us/sir-alister-hardy-and-the-continuous-plankton-recorder-cpr-survey/">The Sir Alister Hardy Foundation</a>, and the Northeast Fisheries Science Center.</p>
+<p>This transect crosses the Gulf of Maine from off the Southern tip of Nova Scotia and to port in the US. The ship of opportunity that the CPR sampler is towed originally traveled to Boston, but transitioned to Portland more recently.</p>
+<p><img src="continuous_plankton_recorder_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="mid-atlantic-transect" class="section level3" number="1.3.2">
+<h3><span class="header-section-number">1.3.2</span> Mid-Atlantic Transect</h3>
+<p>Data for the Mid-Atlantic transect was transferred to us from the Northeast Fisheries Science Center. This transect crosses the Mid-Atlantic Bight, extending seaward from the New Jersey, New York Bight.</p>
+<p><img src="continuous_plankton_recorder_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 
+</div>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="intro.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="Single_Taxon.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

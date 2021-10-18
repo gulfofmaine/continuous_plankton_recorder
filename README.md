@@ -9,7 +9,7 @@ Zooplankton analyses contained here focus on identifying changes in plankton abu
 The analysis pipeline has been documented using the {targets} package and can be seen in the `_targets.R` file.
 
 
-## Data Provenance Documentation
+## Project Data Provenance Documentation
 
 Full documentation of the data provenance for this project have been made available on [github using bookdown and github pages here:](adamkemberling.github.io/continuous_plankton_recorder/docs/)
 

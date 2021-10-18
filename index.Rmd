@@ -7,7 +7,7 @@ output: bookdown::gitbook
 documentclass: book
 biblio-style: apalike
 link-citations: yes
-github-repo: gulfofmaine/sdm_workflow
+github-repo: adamkemberling/continuous_plankton_recorder
 description: "This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown"
 ---
 
