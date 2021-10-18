@@ -11,7 +11,7 @@ The analysis pipeline has been documented using the {targets} package and can be
 
 ## Project Data Provenance Documentation
 
-Full documentation of the data provenance for this project have been made available on [github using bookdown and github pages here:](adamkemberling.github.io/continuous_plankton_recorder/docs/)
+Full documentation of the data provenance for this project have been made available on [github using bookdown and github pages here:](https://adamkemberling.github.io/continuous_plankton_recorder/docs/)
 
 The above link is a repackaging of the original documentation done [here](https://adamkemberling.github.io/continuous_plankton_recorder/R/data_dictionaries/CPR_Data_Provenance.html)
 
