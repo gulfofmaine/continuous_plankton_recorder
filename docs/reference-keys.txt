@@ -10,12 +10,14 @@ original-file-structure
 consolidated-taxa-files
 All_Taxa
 box-file-locations-1
+data-processing-pipeline
 noaanefsc-starting-points
 noaa-abundances-and-taxa-keys
 sahfos-starting-points
 sahfos-taxa-keys
 sahfos-abundances
 resolving-unit-differences
-resolving-taxon-group-differences
-appending-data-sources
-mid-atlantic-transect-1
+resolving-differences-in-development-stage-groups
+appending-noaa-sahfos-data-sources
+seasonal-anomaly-modeling
+mid-atlantic-transect-data-prep

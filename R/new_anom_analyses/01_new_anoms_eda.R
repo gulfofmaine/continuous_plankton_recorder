@@ -45,7 +45,7 @@ species_05 <- c("calanus_i_iv",
                 "paraeuchaeta_norvegica", 
                 "temora_longicornis")
 
-####  Load Refernce Data  ####
+####  Load Reference Data  ####
 # Long form
 cpr_all <- read_csv(str_c(cpr_boxpath, "data", "processed_data", "cpr_allspecies_long.csv", sep = "/"),
                     col_types = cols())

@@ -25,6 +25,9 @@ library(sf)
 # Polygons for mapping
 new_england <- rnaturalearth::ne_states("united states of america") %>% st_as_sf(crs = 4326)
 canada <- rnaturalearth::ne_states("canada") %>% st_as_sf(crs = 4326)
+
+# ggplot theme
+theme_set(theme_bw())
 ```
 
 ```{r}

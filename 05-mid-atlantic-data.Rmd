@@ -1,0 +1,4 @@
+# Mid-Atlantic Transect Data Prep
+
+
+The Mid-Atlantic transect is currently not processed to the extent of the Gulf of Maine data, and is only available as abundance values, not seasonal anomalies.

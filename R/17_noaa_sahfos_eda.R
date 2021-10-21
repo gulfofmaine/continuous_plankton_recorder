@@ -164,10 +164,9 @@ sahfos_zoo_2 <- sahfos_zoo %>%
     `salpidae spp.`             = `salpidae (total)`,
     `siphonostomatoida spp.`    =  siphonostomatoida,
     `thecosomata spp.`          = `thecosomata (north atlantic)`,
-    `tintinnidae spp.`          = `tintinnida total`
-    
-    
-    ) %>% 
+    `tintinnidae spp.`          = `tintinnida total`) %>%
+  
+  
   #This section is for when multiple columns need to be reduced to a single aggregate
   mutate(
     `candacia spp.`                     = `candacia i-iv` + `candacia spp. (unidentified)`, 
@@ -215,7 +214,6 @@ combined_set <- bind_rows(list("NOAA" = noaa_zoo_2, "SAHFOS" =  sahfos_zoo_2), .
 combined_set %>%
   ggplot(aes(year, `calanus i-iv`, color = `Data Source`)) +
     geom_point() +
-    #xlim(c(2010,2017)) +
     labs(y = "Calanus I-IV      (#/100 cubic meters)",
          x = NULL) +
     scale_y_continuous(labels = scales::comma_format()) +

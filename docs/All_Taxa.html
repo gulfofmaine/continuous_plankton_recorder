@@ -24,7 +24,7 @@
 <meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
 
 
-<meta name="date" content="2021-10-18" />
+<meta name="date" content="2021-10-19" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -32,7 +32,7 @@
   
   
 <link rel="prev" href="Single_Taxon.html"/>
-<link rel="next" href="mid-atlantic-transect-1.html"/>
+<link rel="next" href="seasonal-anomaly-modeling.html"/>
 <script src="libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -93,20 +93,22 @@
 <li class="chapter" data-level="3" data-path="All_Taxa.html"><a href="All_Taxa.html"><i class="fa fa-check"></i><b>3</b> All Taxa Starting Points</a>
 <ul>
 <li class="chapter" data-level="3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#box-file-locations-1"><i class="fa fa-check"></i><b>3.1</b> Box File Locations</a></li>
-<li class="chapter" data-level="3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#noaanefsc-starting-points"><i class="fa fa-check"></i><b>3.2</b> NOAA/NEFSC Starting Points</a>
+<li class="chapter" data-level="3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#data-processing-pipeline"><i class="fa fa-check"></i><b>3.2</b> Data Processing Pipeline</a></li>
+<li class="chapter" data-level="3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#noaanefsc-starting-points"><i class="fa fa-check"></i><b>3.3</b> NOAA/NEFSC Starting Points</a>
 <ul>
-<li class="chapter" data-level="3.2.1" data-path="All_Taxa.html"><a href="All_Taxa.html#noaa-abundances-and-taxa-keys"><i class="fa fa-check"></i><b>3.2.1</b> NOAA Abundances and Taxa Keys</a></li>
+<li class="chapter" data-level="3.3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#noaa-abundances-and-taxa-keys"><i class="fa fa-check"></i><b>3.3.1</b> NOAA Abundances and Taxa Keys</a></li>
 </ul></li>
-<li class="chapter" data-level="3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-starting-points"><i class="fa fa-check"></i><b>3.3</b> SAHFOS Starting Points</a>
+<li class="chapter" data-level="3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-starting-points"><i class="fa fa-check"></i><b>3.4</b> SAHFOS Starting Points</a>
 <ul>
-<li class="chapter" data-level="3.3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-taxa-keys"><i class="fa fa-check"></i><b>3.3.1</b> SAHFOS Taxa Keys</a></li>
-<li class="chapter" data-level="3.3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-abundances"><i class="fa fa-check"></i><b>3.3.2</b> SAHFOS Abundances</a></li>
-<li class="chapter" data-level="3.3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-unit-differences"><i class="fa fa-check"></i><b>3.3.3</b> Resolving Unit Differences</a></li>
-<li class="chapter" data-level="3.3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-taxon-group-differences"><i class="fa fa-check"></i><b>3.3.4</b> Resolving Taxon Group differences</a></li>
+<li class="chapter" data-level="3.4.1" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-taxa-keys"><i class="fa fa-check"></i><b>3.4.1</b> SAHFOS Taxa Keys</a></li>
+<li class="chapter" data-level="3.4.2" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-abundances"><i class="fa fa-check"></i><b>3.4.2</b> SAHFOS Abundances</a></li>
+<li class="chapter" data-level="3.4.3" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-unit-differences"><i class="fa fa-check"></i><b>3.4.3</b> Resolving Unit Differences</a></li>
+<li class="chapter" data-level="3.4.4" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-differences-in-development-stage-groups"><i class="fa fa-check"></i><b>3.4.4</b> Resolving Differences in Development Stage Groups</a></li>
 </ul></li>
-<li class="chapter" data-level="3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#appending-data-sources"><i class="fa fa-check"></i><b>3.4</b> Appending Data Sources</a></li>
+<li class="chapter" data-level="3.5" data-path="All_Taxa.html"><a href="All_Taxa.html#appending-noaa-sahfos-data-sources"><i class="fa fa-check"></i><b>3.5</b> Appending NOAA &amp; SAHFOS Data Sources</a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="mid-atlantic-transect-1.html"><a href="mid-atlantic-transect-1.html"><i class="fa fa-check"></i><b>4</b> Mid-Atlantic Transect</a></li>
+<li class="chapter" data-level="4" data-path="seasonal-anomaly-modeling.html"><a href="seasonal-anomaly-modeling.html"><i class="fa fa-check"></i><b>4</b> Seasonal Anomaly Modeling</a></li>
+<li class="chapter" data-level="5" data-path="mid-atlantic-transect-data-prep.html"><a href="mid-atlantic-transect-data-prep.html"><i class="fa fa-check"></i><b>5</b> Mid-Atlantic Transect Data Prep</a></li>
 </ul>
 
       </nav>
@@ -129,10 +131,13 @@
 <div id="box-file-locations-1" class="section level2" number="3.1">
 <h2><span class="header-section-number">3.1</span> Box File Locations</h2>
 <p>For questions relating to the full zooplankton community we also requested and received data on all taxa collected as part of the CPR survey as well as the phytoplankton color index (PCI). These were sourced from the two different management entities, NEFSC and SAHFOS, which were responsible for data collection and management for different periods of time.</p>
-<p>These files were placed within the Climate Change Ecology Lab directory on Box, referenced as <code>ccel_boxpath</code> in the code:</p>
+<p>These files were placed within the Climate Change Ecology Lab directory on Box, which is referenced as <code>ccel_boxpath</code> in the code:</p>
 <blockquote>
 <p><strong>Box/Climate Change Ecology Lab</strong></p>
 </blockquote>
+</div>
+<div id="data-processing-pipeline" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Data Processing Pipeline</h2>
 <p>The discrete steps in the CPR data processing pipeline for these files are detailed using the {targets} package. The following diagram details the data at each step in the pipeline from the three individual files to the combined zooplankton dataset.</p>
 <!--- Adding a border around html output --->
 <!--
@@ -143,11 +148,12 @@
 </style>
 --->
 <pre><code>There were 12 warnings (use warnings() to see them)</code></pre>
-<div id="htmlwidget-2f6bf26e8aa12141c4d2" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
-<script type="application/json" data-for="htmlwidget-2f6bf26e8aa12141c4d2">{"x":{"nodes":{"name":["sahfos_trav_100m","sahfos_mc1_taxa","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_mc2_taxa","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","gom_noaa_zoo_key","sahfos_meta","sahfos_trav","gom_noaa_phyto_key","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","gom_noaa_zoo","gom_noaa_phyto"],"type":["stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem"],"status":["none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none"],"seconds":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"bytes":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"branches":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"id":["sahfos_trav_100m","sahfos_mc1_taxa","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_mc2_taxa","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","gom_noaa_zoo_key","sahfos_meta","sahfos_trav","gom_noaa_phyto_key","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","gom_noaa_zoo","gom_noaa_phyto"],"label":["sahfos_trav_100m","sahfos_mc1_taxa","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_mc2_taxa","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","gom_noaa_zoo_key","sahfos_meta","sahfos_trav","gom_noaa_phyto_key","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","gom_noaa_zoo","gom_noaa_phyto"],"level":[4,1,7,6,2,2,1,3,2,4,2,5,4,2,0,4,3,0,3,2,2,1,0],"color":["#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac"],"shape":["dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot"]},"edges":{"from":["sahfos_trav","noaa_taxa_resolved","sahfos_zoo_renamed","sahfos_zoo_100m","sahfos_mc1_taxa","sahfos_mc2_taxa","gom_sahfos_eye_mc1","gom_sahfos_eye_mc2","sahfos_mc1_taxa","sahfos_eye","sahfos_mc2_taxa","sahfos_eye_100m","sahfos_meta","sahfos_trav_100m","sahfos_phyto","gom_noaa_zoo","sahfos_trav","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2","sahfos_mc1_taxa","sahfos_mc2_taxa"],"to":["sahfos_trav_100m","gom_combined_zooplankton","gom_combined_zooplankton","sahfos_zoo_renamed","gom_sahfos_trav_mc1","gom_sahfos_trav_mc2","sahfos_eye","sahfos_eye","gom_sahfos_eye_mc1","sahfos_eye_100m","gom_sahfos_eye_mc2","sahfos_zoo_100m","sahfos_zoo_100m","sahfos_zoo_100m","sahfos_phyto_100m","noaa_taxa_resolved","sahfos_meta","sahfos_trav","sahfos_trav","sahfos_phyto","sahfos_phyto","gom_sahfos_phyto_mc1","gom_sahfos_phyto_mc2"],"arrows":["to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"smooth":{"type":"cubicBezier","forceDirection":"horizontal"}},"physics":{"stabilization":false},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"right","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Stem"],"shape":["dot"],"color":["#899DA4"]},"nodesToDataframe":true}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-b4c4201fbe42966130cc" style="width:672px;height:480px;" class="visNetwork html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b4c4201fbe42966130cc">{"x":{"nodes":{"name":["sahfos_eye","gom_anomalies","sahfos_phyto","sahfos_renamed","noaa_zoo_key","sahfos_eye_mc1","sahfos_eye_mc2","sahfos_trav_mc1","sahfos_phyto_100m","sahfos_zoo_100m","sahfos_phyto_mc1","sahfos_trav_mc2","sahfos_phyto_mc2","sahfos_trav","noaa_zoo","gom_area_cropped","noaa_taxa_resolved","combined_zooplankton","gom_spline_models","gom_seasonal_splines","taxa_abundance_list","sahfos_meta","noaa_phyto_key","sahfos_mc2_taxa","sahfos_trav_100m","sahfos_eye_100m","sahfos_mc1_taxa","gom_seasonal_avgs","noaa_phyto","cpr_spline_prepped"],"type":["stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem"],"status":["none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none","none"],"seconds":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"bytes":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"branches":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"id":["sahfos_eye","gom_anomalies","sahfos_phyto","sahfos_renamed","noaa_zoo_key","sahfos_eye_mc1","sahfos_eye_mc2","sahfos_trav_mc1","sahfos_phyto_100m","sahfos_zoo_100m","sahfos_phyto_mc1","sahfos_trav_mc2","sahfos_phyto_mc2","sahfos_trav","noaa_zoo","gom_area_cropped","noaa_taxa_resolved","combined_zooplankton","gom_spline_models","gom_seasonal_splines","taxa_abundance_list","sahfos_meta","noaa_phyto_key","sahfos_mc2_taxa","sahfos_trav_100m","sahfos_eye_100m","sahfos_mc1_taxa","gom_seasonal_avgs","noaa_phyto","cpr_spline_prepped"],"label":["sahfos_eye","gom_anomalies","sahfos_phyto","sahfos_renamed","noaa_zoo_key","sahfos_eye_mc1","sahfos_eye_mc2","sahfos_trav_mc1","sahfos_phyto_100m","sahfos_zoo_100m","sahfos_phyto_mc1","sahfos_trav_mc2","sahfos_phyto_mc2","sahfos_trav","noaa_zoo","gom_area_cropped","noaa_taxa_resolved","combined_zooplankton","gom_spline_models","gom_seasonal_splines","taxa_abundance_list","sahfos_meta","noaa_phyto_key","sahfos_mc2_taxa","sahfos_trav_100m","sahfos_eye_100m","sahfos_mc1_taxa","gom_seasonal_avgs","noaa_phyto","cpr_spline_prepped"],"level":[3,12,3,6,0,2,2,2,4,5,2,2,2,3,1,9,2,7,12,11,10,4,0,1,4,4,1,12,0,8],"color":["#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac","#94a4ac"],"shape":["dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot"]},"edges":{"from":["sahfos_eye_mc1","sahfos_eye_mc2","gom_seasonal_splines","sahfos_phyto_mc1","sahfos_phyto_mc2","sahfos_zoo_100m","sahfos_mc1_taxa","sahfos_mc2_taxa","sahfos_mc1_taxa","sahfos_phyto","sahfos_eye_100m","sahfos_meta","sahfos_trav_100m","sahfos_mc1_taxa","sahfos_mc2_taxa","sahfos_mc2_taxa","sahfos_trav_mc1","sahfos_trav_mc2","cpr_spline_prepped","noaa_zoo","noaa_taxa_resolved","sahfos_renamed","gom_seasonal_splines","taxa_abundance_list","gom_area_cropped","sahfos_trav","sahfos_trav","sahfos_eye","gom_seasonal_splines","combined_zooplankton"],"to":["sahfos_eye","sahfos_eye","gom_anomalies","sahfos_phyto","sahfos_phyto","sahfos_renamed","sahfos_eye_mc1","sahfos_eye_mc2","sahfos_trav_mc1","sahfos_phyto_100m","sahfos_zoo_100m","sahfos_zoo_100m","sahfos_zoo_100m","sahfos_phyto_mc1","sahfos_trav_mc2","sahfos_phyto_mc2","sahfos_trav","sahfos_trav","gom_area_cropped","noaa_taxa_resolved","combined_zooplankton","combined_zooplankton","gom_spline_models","gom_seasonal_splines","taxa_abundance_list","sahfos_meta","sahfos_trav_100m","sahfos_eye_100m","gom_seasonal_avgs","cpr_spline_prepped"],"arrows":["to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"smooth":{"type":"cubicBezier","forceDirection":"horizontal"}},"physics":{"stabilization":false},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":false,"hoverNearest":false,"degree":1,"algorithm":"all","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"right","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Stem"],"shape":["dot"],"color":["#899DA4"]},"nodesToDataframe":true}},"evals":[],"jsHooks":[]}</script>
+<p>The above flowchart details the discrete steps that the data follows in preparation for its use in any analyses that operate on anomalies rather than observed densities of zooplankton.</p>
 </div>
-<div id="noaanefsc-starting-points" class="section level2" number="3.2">
-<h2><span class="header-section-number">3.2</span> NOAA/NEFSC Starting Points</h2>
+<div id="noaanefsc-starting-points" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> NOAA/NEFSC Starting Points</h2>
 <p>Data obtained from NOAA/NEFSC spans the period of: <strong>1961-2013</strong>, and was delivered in the following excel file:</p>
 <blockquote>
 <p><strong>Data/NOAA_1961-2013/Gulf of Maine CPR (Feb 14, 2014 update).xlsx</strong></p>
@@ -156,12 +162,12 @@
 <p>Each excel sheet has two or more additional rows in the header explaining the identification and development stage of certain taxa. In the R script <code>13_allspecies_cpr_cleanup.R</code> these headers are stripped, and the different taxa and their stages are appended as the new column names.</p>
 <p>Taxonomic codes are also checked against MARMAP codes to ensure accuracy <a href="https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html" class="uri">https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html</a></p>
 <p>Through email correspondence it was communicated that the units were abundance / 100 meters cubed.</p>
-<div id="plsokbbbes" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="ueacwbqmuv" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#plsokbbbes .gt_table {
+#ueacwbqmuv .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -186,7 +192,7 @@
   border-left-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_heading {
+#ueacwbqmuv .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -198,7 +204,7 @@
   border-right-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_title {
+#ueacwbqmuv .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -208,7 +214,7 @@
   border-bottom-width: 0;
 }
 
-#plsokbbbes .gt_subtitle {
+#ueacwbqmuv .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -218,13 +224,13 @@
   border-top-width: 0;
 }
 
-#plsokbbbes .gt_bottom_border {
+#ueacwbqmuv .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_col_headings {
+#ueacwbqmuv .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -239,7 +245,7 @@
   border-right-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_col_heading {
+#ueacwbqmuv .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -259,7 +265,7 @@
   overflow-x: hidden;
 }
 
-#plsokbbbes .gt_column_spanner_outer {
+#ueacwbqmuv .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -271,15 +277,15 @@
   padding-right: 4px;
 }
 
-#plsokbbbes .gt_column_spanner_outer:first-child {
+#ueacwbqmuv .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#plsokbbbes .gt_column_spanner_outer:last-child {
+#ueacwbqmuv .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#plsokbbbes .gt_column_spanner {
+#ueacwbqmuv .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -291,7 +297,7 @@
   width: 100%;
 }
 
-#plsokbbbes .gt_group_heading {
+#ueacwbqmuv .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -313,7 +319,7 @@
   vertical-align: middle;
 }
 
-#plsokbbbes .gt_empty_group_heading {
+#ueacwbqmuv .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -328,15 +334,15 @@
   vertical-align: middle;
 }
 
-#plsokbbbes .gt_from_md > :first-child {
+#ueacwbqmuv .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#plsokbbbes .gt_from_md > :last-child {
+#ueacwbqmuv .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#plsokbbbes .gt_row {
+#ueacwbqmuv .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -355,7 +361,7 @@
   overflow-x: hidden;
 }
 
-#plsokbbbes .gt_stub {
+#ueacwbqmuv .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -367,7 +373,7 @@
   padding-left: 12px;
 }
 
-#plsokbbbes .gt_summary_row {
+#ueacwbqmuv .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -377,7 +383,7 @@
   padding-right: 5px;
 }
 
-#plsokbbbes .gt_first_summary_row {
+#ueacwbqmuv .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -387,7 +393,7 @@
   border-top-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_grand_summary_row {
+#ueacwbqmuv .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -397,7 +403,7 @@
   padding-right: 5px;
 }
 
-#plsokbbbes .gt_first_grand_summary_row {
+#ueacwbqmuv .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -407,11 +413,11 @@
   border-top-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_striped {
+#ueacwbqmuv .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#plsokbbbes .gt_table_body {
+#ueacwbqmuv .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -420,7 +426,7 @@
   border-bottom-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_footnotes {
+#ueacwbqmuv .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -434,13 +440,13 @@
   border-right-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_footnote {
+#ueacwbqmuv .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#plsokbbbes .gt_sourcenotes {
+#ueacwbqmuv .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -454,41 +460,41 @@
   border-right-color: #D3D3D3;
 }
 
-#plsokbbbes .gt_sourcenote {
+#ueacwbqmuv .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#plsokbbbes .gt_left {
+#ueacwbqmuv .gt_left {
   text-align: left;
 }
 
-#plsokbbbes .gt_center {
+#ueacwbqmuv .gt_center {
   text-align: center;
 }
 
-#plsokbbbes .gt_right {
+#ueacwbqmuv .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#plsokbbbes .gt_font_normal {
+#ueacwbqmuv .gt_font_normal {
   font-weight: normal;
 }
 
-#plsokbbbes .gt_font_bold {
+#ueacwbqmuv .gt_font_bold {
   font-weight: bold;
 }
 
-#plsokbbbes .gt_font_italic {
+#ueacwbqmuv .gt_font_italic {
   font-style: italic;
 }
 
-#plsokbbbes .gt_super {
+#ueacwbqmuv .gt_super {
   font-size: 65%;
 }
 
-#plsokbbbes .gt_footnote_marks {
+#ueacwbqmuv .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
@@ -506,17 +512,17 @@
   <tbody class="gt_table_body">
     <tr><td class="gt_row gt_left">Sheet 1</td>
 <td class="gt_row gt_left">Phytoplankton taxa densities by silk transect</td>
-<td class="gt_row gt_left"># / 100m3</td></tr>
+<td class="gt_row gt_left">Abundance / 100m3</td></tr>
     <tr><td class="gt_row gt_left">Sheet 2</td>
 <td class="gt_row gt_left">Zooplankton taxa densities by silk transect</td>
-<td class="gt_row gt_left"># / 100m3</td></tr>
+<td class="gt_row gt_left">Abundance / 100m3</td></tr>
   </tbody>
   
   
 </table>
 </div>
-<div id="noaa-abundances-and-taxa-keys" class="section level3" number="3.2.1">
-<h3><span class="header-section-number">3.2.1</span> NOAA Abundances and Taxa Keys</h3>
+<div id="noaa-abundances-and-taxa-keys" class="section level3" number="3.3.1">
+<h3><span class="header-section-number">3.3.1</span> NOAA Abundances and Taxa Keys</h3>
 <p>At the end of the reshaping of these NOAA excel sheets, we are left with 4 different tables:</p>
 <blockquote>
 <p>gom_noaa_zoo<br />
@@ -527,8 +533,8 @@ gom_noaa_phyto_key</p>
 <p>The “keys” detail the taxonomic codes in the header, and their associated MARMAP codes. The other targets detail the abundances in a wide form, with columns displaying the abundance for each stage at each CPR station.</p>
 </div>
 </div>
-<div id="sahfos-starting-points" class="section level2" number="3.3">
-<h2><span class="header-section-number">3.3</span> SAHFOS Starting Points</h2>
+<div id="sahfos-starting-points" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> SAHFOS Starting Points</h2>
 <p>Data obtained from SAHFOS spans the period of: <strong>2013-2017</strong>, and was delivered in the following files:</p>
 <blockquote>
 <p><strong>Gulf of Maine CPR/SAHFOS-MBA_2013-2017/MC part1.xlsx</strong><br />
@@ -543,12 +549,12 @@ gom_noaa_phyto_key</p>
 </li>
 <li><strong>Eyecount</strong> - full transect counted</li>
 </ol>
-<div id="giauwjtlbk" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="mhjskieewi" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#giauwjtlbk .gt_table {
+#mhjskieewi .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -573,7 +579,7 @@ gom_noaa_phyto_key</p>
   border-left-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_heading {
+#mhjskieewi .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -585,7 +591,7 @@ gom_noaa_phyto_key</p>
   border-right-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_title {
+#mhjskieewi .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -595,7 +601,7 @@ gom_noaa_phyto_key</p>
   border-bottom-width: 0;
 }
 
-#giauwjtlbk .gt_subtitle {
+#mhjskieewi .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -605,13 +611,13 @@ gom_noaa_phyto_key</p>
   border-top-width: 0;
 }
 
-#giauwjtlbk .gt_bottom_border {
+#mhjskieewi .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_col_headings {
+#mhjskieewi .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -626,7 +632,7 @@ gom_noaa_phyto_key</p>
   border-right-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_col_heading {
+#mhjskieewi .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -646,7 +652,7 @@ gom_noaa_phyto_key</p>
   overflow-x: hidden;
 }
 
-#giauwjtlbk .gt_column_spanner_outer {
+#mhjskieewi .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -658,15 +664,15 @@ gom_noaa_phyto_key</p>
   padding-right: 4px;
 }
 
-#giauwjtlbk .gt_column_spanner_outer:first-child {
+#mhjskieewi .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#giauwjtlbk .gt_column_spanner_outer:last-child {
+#mhjskieewi .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#giauwjtlbk .gt_column_spanner {
+#mhjskieewi .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -678,7 +684,7 @@ gom_noaa_phyto_key</p>
   width: 100%;
 }
 
-#giauwjtlbk .gt_group_heading {
+#mhjskieewi .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -700,7 +706,7 @@ gom_noaa_phyto_key</p>
   vertical-align: middle;
 }
 
-#giauwjtlbk .gt_empty_group_heading {
+#mhjskieewi .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -715,15 +721,15 @@ gom_noaa_phyto_key</p>
   vertical-align: middle;
 }
 
-#giauwjtlbk .gt_from_md > :first-child {
+#mhjskieewi .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#giauwjtlbk .gt_from_md > :last-child {
+#mhjskieewi .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#giauwjtlbk .gt_row {
+#mhjskieewi .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -742,7 +748,7 @@ gom_noaa_phyto_key</p>
   overflow-x: hidden;
 }
 
-#giauwjtlbk .gt_stub {
+#mhjskieewi .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -754,7 +760,7 @@ gom_noaa_phyto_key</p>
   padding-left: 12px;
 }
 
-#giauwjtlbk .gt_summary_row {
+#mhjskieewi .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -764,7 +770,7 @@ gom_noaa_phyto_key</p>
   padding-right: 5px;
 }
 
-#giauwjtlbk .gt_first_summary_row {
+#mhjskieewi .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -774,7 +780,7 @@ gom_noaa_phyto_key</p>
   border-top-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_grand_summary_row {
+#mhjskieewi .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -784,7 +790,7 @@ gom_noaa_phyto_key</p>
   padding-right: 5px;
 }
 
-#giauwjtlbk .gt_first_grand_summary_row {
+#mhjskieewi .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -794,11 +800,11 @@ gom_noaa_phyto_key</p>
   border-top-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_striped {
+#mhjskieewi .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#giauwjtlbk .gt_table_body {
+#mhjskieewi .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -807,7 +813,7 @@ gom_noaa_phyto_key</p>
   border-bottom-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_footnotes {
+#mhjskieewi .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -821,13 +827,13 @@ gom_noaa_phyto_key</p>
   border-right-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_footnote {
+#mhjskieewi .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#giauwjtlbk .gt_sourcenotes {
+#mhjskieewi .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -841,41 +847,41 @@ gom_noaa_phyto_key</p>
   border-right-color: #D3D3D3;
 }
 
-#giauwjtlbk .gt_sourcenote {
+#mhjskieewi .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#giauwjtlbk .gt_left {
+#mhjskieewi .gt_left {
   text-align: left;
 }
 
-#giauwjtlbk .gt_center {
+#mhjskieewi .gt_center {
   text-align: center;
 }
 
-#giauwjtlbk .gt_right {
+#mhjskieewi .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#giauwjtlbk .gt_font_normal {
+#mhjskieewi .gt_font_normal {
   font-weight: normal;
 }
 
-#giauwjtlbk .gt_font_bold {
+#mhjskieewi .gt_font_bold {
   font-weight: bold;
 }
 
-#giauwjtlbk .gt_font_italic {
+#mhjskieewi .gt_font_italic {
   font-style: italic;
 }
 
-#giauwjtlbk .gt_super {
+#mhjskieewi .gt_super {
   font-size: 65%;
 }
 
-#giauwjtlbk .gt_footnote_marks {
+#mhjskieewi .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
@@ -893,20 +899,20 @@ gom_noaa_phyto_key</p>
   <tbody class="gt_table_body">
     <tr><td class="gt_row gt_left">Sheet 1</td>
 <td class="gt_row gt_left">Phytoplankton taxa densities by silk transect</td>
-<td class="gt_row gt_left"># / Transect</td></tr>
+<td class="gt_row gt_left">Abundance / Transect</td></tr>
     <tr><td class="gt_row gt_left">Sheet 2</td>
 <td class="gt_row gt_left">Zooplankton taxa densities by silk transect</td>
-<td class="gt_row gt_left"># / Transect</td></tr>
+<td class="gt_row gt_left">Abundance / Transect</td></tr>
     <tr><td class="gt_row gt_left">Sheet 3</td>
 <td class="gt_row gt_left">Eyecount taxa densities by silk transect</td>
-<td class="gt_row gt_left"># / Transect</td></tr>
+<td class="gt_row gt_left">Abundance / Transect</td></tr>
   </tbody>
   
   
 </table>
 </div>
-<div id="sahfos-taxa-keys" class="section level3" number="3.3.1">
-<h3><span class="header-section-number">3.3.1</span> SAHFOS Taxa Keys</h3>
+<div id="sahfos-taxa-keys" class="section level3" number="3.4.1">
+<h3><span class="header-section-number">3.4.1</span> SAHFOS Taxa Keys</h3>
 <p>The import and reshaping of this data is facilitated by taxon keys, which exist in the targets pipeline as the following targets and are created using information in the headers of the excel sheets:</p>
 <blockquote>
 <p>sahfos_mc1_taxa<br />
@@ -914,8 +920,8 @@ sahfos_mc2_taxa</p>
 </blockquote>
 <p>The SAHFOS keys are “long datasets” with only four columns. A column that details the measurement level (phyto, traverse, eye), a column detailing what taxon it is, the marmap number associated with it, and any notes from the header.</p>
 </div>
-<div id="sahfos-abundances" class="section level3" number="3.3.2">
-<h3><span class="header-section-number">3.3.2</span> SAHFOS Abundances</h3>
+<div id="sahfos-abundances" class="section level3" number="3.4.2">
+<h3><span class="header-section-number">3.4.2</span> SAHFOS Abundances</h3>
 <p>Because the SAHFOS data came as different sheets for different observation scales, we processed the data accordingly. Each measurement scale was processed in parallel for the MC1 &amp; MC2 datasets before appending them together. This produced three sets of abundance data, one for phyto, traverse, and for eye count abundances. These were tagged as the following targets:</p>
 <blockquote>
 <p>sahfos_phyto</p>
@@ -923,17 +929,17 @@ sahfos_mc2_taxa</p>
 <p>sahfos_eye</p>
 </blockquote>
 </div>
-<div id="resolving-unit-differences" class="section level3" number="3.3.3">
-<h3><span class="header-section-number">3.3.3</span> Resolving Unit Differences</h3>
+<div id="resolving-unit-differences" class="section level3" number="3.4.3">
+<h3><span class="header-section-number">3.4.3</span> Resolving Unit Differences</h3>
 <p>For the SAHFOS data, it was determined that the abundances recorded are in the abundance/transect and not abundance/100<span class="math inline">\(m^3\)</span> as recorded in the NOAA data.</p>
 <p>These values are converted in this step to the <strong>common unit of the zooplankton density as:</strong> <em>Abundance per 100 cubic meters of water</em>.</p>
 <p>To convert from the volume of water covered by a silk transect, the following constants are used:</p>
-<div id="kwphzawvhy" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="zxlgytjtxr" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#kwphzawvhy .gt_table {
+#zxlgytjtxr .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -958,7 +964,7 @@ sahfos_mc2_taxa</p>
   border-left-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_heading {
+#zxlgytjtxr .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -970,7 +976,7 @@ sahfos_mc2_taxa</p>
   border-right-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_title {
+#zxlgytjtxr .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -980,7 +986,7 @@ sahfos_mc2_taxa</p>
   border-bottom-width: 0;
 }
 
-#kwphzawvhy .gt_subtitle {
+#zxlgytjtxr .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -990,13 +996,13 @@ sahfos_mc2_taxa</p>
   border-top-width: 0;
 }
 
-#kwphzawvhy .gt_bottom_border {
+#zxlgytjtxr .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_col_headings {
+#zxlgytjtxr .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1011,7 +1017,7 @@ sahfos_mc2_taxa</p>
   border-right-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_col_heading {
+#zxlgytjtxr .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1031,7 +1037,7 @@ sahfos_mc2_taxa</p>
   overflow-x: hidden;
 }
 
-#kwphzawvhy .gt_column_spanner_outer {
+#zxlgytjtxr .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1043,15 +1049,15 @@ sahfos_mc2_taxa</p>
   padding-right: 4px;
 }
 
-#kwphzawvhy .gt_column_spanner_outer:first-child {
+#zxlgytjtxr .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#kwphzawvhy .gt_column_spanner_outer:last-child {
+#zxlgytjtxr .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#kwphzawvhy .gt_column_spanner {
+#zxlgytjtxr .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1063,7 +1069,7 @@ sahfos_mc2_taxa</p>
   width: 100%;
 }
 
-#kwphzawvhy .gt_group_heading {
+#zxlgytjtxr .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1085,7 +1091,7 @@ sahfos_mc2_taxa</p>
   vertical-align: middle;
 }
 
-#kwphzawvhy .gt_empty_group_heading {
+#zxlgytjtxr .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1100,15 +1106,15 @@ sahfos_mc2_taxa</p>
   vertical-align: middle;
 }
 
-#kwphzawvhy .gt_from_md > :first-child {
+#zxlgytjtxr .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#kwphzawvhy .gt_from_md > :last-child {
+#zxlgytjtxr .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#kwphzawvhy .gt_row {
+#zxlgytjtxr .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1127,7 +1133,7 @@ sahfos_mc2_taxa</p>
   overflow-x: hidden;
 }
 
-#kwphzawvhy .gt_stub {
+#zxlgytjtxr .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1139,7 +1145,7 @@ sahfos_mc2_taxa</p>
   padding-left: 12px;
 }
 
-#kwphzawvhy .gt_summary_row {
+#zxlgytjtxr .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1149,7 +1155,7 @@ sahfos_mc2_taxa</p>
   padding-right: 5px;
 }
 
-#kwphzawvhy .gt_first_summary_row {
+#zxlgytjtxr .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1159,7 +1165,7 @@ sahfos_mc2_taxa</p>
   border-top-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_grand_summary_row {
+#zxlgytjtxr .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1169,7 +1175,7 @@ sahfos_mc2_taxa</p>
   padding-right: 5px;
 }
 
-#kwphzawvhy .gt_first_grand_summary_row {
+#zxlgytjtxr .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1179,11 +1185,11 @@ sahfos_mc2_taxa</p>
   border-top-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_striped {
+#zxlgytjtxr .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#kwphzawvhy .gt_table_body {
+#zxlgytjtxr .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1192,7 +1198,7 @@ sahfos_mc2_taxa</p>
   border-bottom-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_footnotes {
+#zxlgytjtxr .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1206,13 +1212,13 @@ sahfos_mc2_taxa</p>
   border-right-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_footnote {
+#zxlgytjtxr .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#kwphzawvhy .gt_sourcenotes {
+#zxlgytjtxr .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1226,41 +1232,41 @@ sahfos_mc2_taxa</p>
   border-right-color: #D3D3D3;
 }
 
-#kwphzawvhy .gt_sourcenote {
+#zxlgytjtxr .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#kwphzawvhy .gt_left {
+#zxlgytjtxr .gt_left {
   text-align: left;
 }
 
-#kwphzawvhy .gt_center {
+#zxlgytjtxr .gt_center {
   text-align: center;
 }
 
-#kwphzawvhy .gt_right {
+#zxlgytjtxr .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#kwphzawvhy .gt_font_normal {
+#zxlgytjtxr .gt_font_normal {
   font-weight: normal;
 }
 
-#kwphzawvhy .gt_font_bold {
+#zxlgytjtxr .gt_font_bold {
   font-weight: bold;
 }
 
-#kwphzawvhy .gt_font_italic {
+#zxlgytjtxr .gt_font_italic {
   font-style: italic;
 }
 
-#kwphzawvhy .gt_super {
+#zxlgytjtxr .gt_super {
   font-size: 65%;
 }
 
-#kwphzawvhy .gt_footnote_marks {
+#zxlgytjtxr .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 65%;
@@ -1297,8 +1303,8 @@ sahfos_mc2_taxa</p>
 <p>sahfos_zoo_100m</p>
 </blockquote>
 </div>
-<div id="resolving-taxon-group-differences" class="section level3" number="3.3.4">
-<h3><span class="header-section-number">3.3.4</span> Resolving Taxon Group differences</h3>
+<div id="resolving-differences-in-development-stage-groups" class="section level3" number="3.4.4">
+<h3><span class="header-section-number">3.4.4</span> Resolving Differences in Development Stage Groups</h3>
 <p>The steps needed to unite the NOAA starting points and their counterparts among the SAHFOS starting points involves finding parsimony among the different column names that are a combination of <strong>Taxa</strong> and their <strong>Development Stages</strong>.</p>
 <p>Across the two sources different groupings have been used that sometimes overlap and include some or all of another group. Example: Calanus 1-3 &amp; Calanus 1-4 or Calanus 4-6…</p>
 <p>Before these tables can be appended together these groupings need to be sorted out. This is done using the following two scripts which were later written as independent function steps for the targets pipeline:</p>
@@ -1306,20 +1312,20 @@ sahfos_mc2_taxa</p>
 <p><strong>15_NOAA_CPR_Cleanup.R</strong><br />
 <strong>16_SAHFOS_CPR_Cleanup.R</strong></p>
 </blockquote>
-<p>The resulting targets are:</p>
+<p>The resulting targets that are produced by these steps are:</p>
 <blockquote>
-<p>sahfos_zoo_renamed</p>
-<p>noaa_taxa_resolved</p>
+<p>sahfos_zoo_renamed
+noaa_taxa_resolved</p>
 </blockquote>
 </div>
 </div>
-<div id="appending-data-sources" class="section level2" number="3.4">
-<h2><span class="header-section-number">3.4</span> Appending Data Sources</h2>
-<p>Once data from these two sources have been converted to common units of measurement and common taxonomic groupings they are able to be appended for one consistent timeseries.</p>
+<div id="appending-noaa-sahfos-data-sources" class="section level2" number="3.5">
+<h2><span class="header-section-number">3.5</span> Appending NOAA &amp; SAHFOS Data Sources</h2>
+<p>Once data from these two sources have been converted to common units of measurement and common taxonomic groupings they are able to be appended for one consistent timeseries. The result is a single continuous record of zooplankton abundance and the accompanying phytoplankton color index records. This dataset is then ready to be converted to seasonal anomalies.</p>
 <blockquote>
 <p>gom_combined_zooplankton</p>
 </blockquote>
-<hr />
+
 </div>
 </div>
             </section>
@@ -1328,7 +1334,7 @@ sahfos_mc2_taxa</p>
         </div>
       </div>
 <a href="Single_Taxon.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="mid-atlantic-transect-1.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="seasonal-anomaly-modeling.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

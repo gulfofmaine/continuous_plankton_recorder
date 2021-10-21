@@ -6,9 +6,13 @@
 
 For questions relating to the full zooplankton community we also requested and received data on all taxa collected as part of the CPR survey as well as the phytoplankton color index (PCI). These were sourced from the two different management entities, NEFSC and SAHFOS, which were responsible for data collection and management for different periods of time.
 
-These files were placed within the Climate Change Ecology Lab directory on Box, referenced as `ccel_boxpath` in the code:
+These files were placed within the Climate Change Ecology Lab directory on Box, which is referenced as `ccel_boxpath` in the code:
 
 > **Box/Climate Change Ecology Lab**
+
+
+
+## Data Processing Pipeline
 
 The discrete steps in the CPR data processing pipeline for these files are detailed using the {targets} package. The following diagram details the data at each step in the pipeline from the three individual files to the combined zooplankton dataset.
 
@@ -28,6 +32,8 @@ The discrete steps in the CPR data processing pipeline for these files are detai
 withr::with_dir(rprojroot::find_root('_targets.R'), 
                 tar_glimpse())   
 ```
+
+The above flowchart details the discrete steps that the data follows in preparation for its use in any analyses that operate on anomalies rather than observed densities of zooplankton.
 
 ## NOAA/NEFSC Starting Points
 
@@ -50,11 +56,11 @@ tribble(
   
   "Sheet 1",  
   "Phytoplankton taxa densities by silk transect",
-  "# / 100m3",
+  "Abundance / 100m3",
   
   "Sheet 2", 
   "Zooplankton taxa densities by silk transect",
-  "# / 100m3"
+  "Abundance / 100m3"
 ) %>% gt()
 ```
 
@@ -91,15 +97,15 @@ tribble(
   
   "Sheet 1",  
   "Phytoplankton taxa densities by silk transect",
-  "# / Transect",
+  "Abundance / Transect",
   
   "Sheet 2", 
   "Zooplankton taxa densities by silk transect",
-  "# / Transect",
+  "Abundance / Transect",
  
   "Sheet 3", 
   "Eyecount taxa densities by silk transect",
-  "# / Transect"
+  "Abundance / Transect"
 ) %>% gt()
 ```
 
@@ -146,7 +152,7 @@ Once abundances were in a common unit, zooplankton at the traverse and eye count
 
 > sahfos_zoo_100m
 
-### Resolving Taxon Group differences
+### Resolving Differences in Development Stage Groups 
 
 The steps needed to unite the NOAA starting points and their counterparts among the SAHFOS starting points involves finding parsimony among the different column names that are a combination of **Taxa** and their **Development Stages**.
 
@@ -157,20 +163,14 @@ Before these tables can be appended together these groupings need to be sorted o
 > **15_NOAA_CPR_Cleanup.R**\
 > **16_SAHFOS_CPR_Cleanup.R**
 
-The resulting targets are:
+The resulting targets that are produced by these steps are:
 
 > sahfos_zoo_renamed
->
 > noaa_taxa_resolved
 
-## Appending Data Sources
+## Appending NOAA & SAHFOS Data Sources
 
-Once data from these two sources have been converted to common units of measurement and common taxonomic groupings they are able to be appended for one consistent timeseries.
+Once data from these two sources have been converted to common units of measurement and common taxonomic groupings they are able to be appended for one consistent timeseries. The result is a single continuous record of zooplankton abundance and the accompanying phytoplankton color index records. This dataset is then ready to be converted to seasonal anomalies.
 
 > gom_combined_zooplankton
 
-------------------------------------------------------------------------
-
-# Mid-Atlantic Transect
-
-The Mid-Atlantic transect is currently not processed to the extent of the Gulf of Maine data.

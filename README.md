@@ -13,8 +13,6 @@ The analysis pipeline has been documented using the {targets} package and can be
 
 Full documentation of the data provenance for this project have been made available on [github using bookdown and github pages here:](https://adamkemberling.github.io/continuous_plankton_recorder/docs/)
 
-The above link is a repackaging of the original documentation done [here](https://adamkemberling.github.io/continuous_plankton_recorder/R/data_dictionaries/CPR_Data_Provenance.html)
-
 
 ## Rmd Reports
 
@@ -24,7 +22,7 @@ Various rendered reports have been made available using github pages. Links to t
 
 ---
 
-## Repo Contents: File Descriptions
+## Repo Contents & File Descriptions
 
 [README.md](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/README.md) - Introduction to the project and project navigation   
  

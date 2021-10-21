@@ -14,9 +14,10 @@ suppressPackageStartupMessages(library(tidyverse))
 
 
 ####  Constants  ####
-# Base path
-ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
-gom_cpr_path <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/")
+# # Base path
+# ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
+# gom_cpr_path <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/")
+gom_cpr_path <- box_path("climate change ecology lab", "Data/Gulf of Maine CPR")
 
 #### NOAA Taxa Key  ####
 # Used to resolve inconsistent groups in noaa GOM taxonomic groups
@@ -292,43 +293,52 @@ import_noaa_cpr <- function(sample_type = c("phyto", "zoo"), return_option = c("
       phyto_group_stage_names[i] <- str_remove_all(phyto_group_stage_names[i], "\\.")         #Drop third period
       phyto_group_stage_names[i] <- str_replace_all(phyto_group_stage_names[i], " _", "_")    #Drop space before _
     }
-    head(phyto_group_stage_names)
+   
     
     #Replace old names with correct names
     names(noaa_phyto_abundances)[11:ncol(noaa_phyto_abundances)] <- phyto_group_stage_names
     names(noaa_phyto_abundances) <- str_replace_all(names(noaa_phyto_abundances), "'", "")
-    head(names(noaa_phyto_abundances), 12)
     
-    #Fix header, and make taxon key
+    
+    ####  Repair MARMAP Key  ####
+    # Prepare header, and make taxon key
+    # MARMAP code key: https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html
+    
+    
+    # Pull columns referencing taxa
     noaa_phyto_header <- noaa_phyto[1, 10:ncol(noaa_phyto)]
+    
+    # Swap in the formatted names
     names(noaa_phyto_header) <- c("code_type", phyto_group_stage_names)
-    head(noaa_phyto_header, 10)
     
-    #Reshape Taxon Key
-    noaa_phyto_key <- noaa_phyto_header %>%
+    
+    # Make Taxon Key for marmap values
+    noaa_phyto_key <- noaa_phyto_header %>% 
       pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% 
-      arrange(`Taxon Name`) %>% 
-      distinct(`Taxon Name`, .keep_all = T)
+      arrange(`Taxon Name`)
     
-    ####  Repair MARMAP Key  
-    #MARMAP code key: https://www.nefsc.noaa.gov/nefsc/Narragansett/taxcodesA.html
-    noaa_phyto_key <- noaa_phyto_key %>% 
-      pivot_wider(names_from = code_type, values_from = `Accepted ID`) %>% 
-      rename_all(tolower)
     
-    #Repair taxon names using NEFSC marmap key
-    which(noaa_phyto[1,] == 9101) #Index for Trichodesmium
-    which(noaa_phyto[1,] == 9169) #Index for Ceratium ranipes
+    # Check for duplicates before reshaping:
+    noaa_phyto_dups <- noaa_phyto_key %>% 
+      pivot_wider(names_from = code_type, values_from = `Accepted ID`, values_fn = length) %>% 
+      filter(`Marmap Code:` > 1)
+    
+    
+    # Address duplicate marmap codes through manually looking them up:
     colnames(noaa_phyto_abundances)[which(noaa_phyto[1,] == 9101)] <- "Trichodesmium"
     colnames(noaa_phyto_abundances)[which(noaa_phyto[1,] == 9169)] <- "Ceratium ranipes"
     
-    #Repair key using NEFSC marmap key
-    noaa_phyto_key <- noaa_phyto_key %>% mutate(
-      `taxon name` = ifelse(`marmap code:` == 9169, "Ceratium ranipes", `taxon name`),
-      `taxon name` = ifelse(`marmap code:` == 9101, "Trichodesmium", `taxon name`))
+    
+    # Replace accepted ID with marmap code once duplicates have been resolved
+    noaa_phyto_key <- noaa_phyto_key %>% 
+      mutate(
+        `Taxon Name` = ifelse( `Accepted ID` == 9101, "Trichodesmium", `Taxon Name`),
+        `Taxon Name` = ifelse( `Accepted ID` == 9169, "Ceratium ranipes", `Taxon Name`)) %>% 
+      pivot_wider(names_from = code_type, values_from = `Accepted ID`) %>% 
+      rename_all(tolower)
     
     
-    ####  Prep for Export  
+    ####  Prep for Export  ####
     noaa_phyto_abundances <- noaa_phyto_abundances %>%  
       rename_all(tolower)  %>% 
       mutate(cruise = str_replace_all(cruise, "'", ""))
@@ -367,54 +377,64 @@ import_noaa_cpr <- function(sample_type = c("phyto", "zoo"), return_option = c("
       group_stage_names[i] <- str_remove_all(group_stage_names[i], "\\.")         #Drop third period
       group_stage_names[i] <- str_replace_all(group_stage_names[i], " _", "_")    #Drop space before _
     }
-    head(group_stage_names)
-    
+   
     #Replace old names with correct names
     names(noaa_zoo_abundances)[11:ncol(noaa_zoo_abundances)] <- group_stage_names
     names(noaa_zoo_abundances) <- str_replace_all(names(noaa_zoo_abundances), "'", "")
-    head(names(noaa_zoo_abundances), 12)
     
     #Fix header, and make taxon key
     noaa_zoo_header <- noaa_zoo[2:3, 10:ncol(noaa_zoo)]
     names(noaa_zoo_header) <- c("code_type", group_stage_names)
-    head(names(noaa_zoo_header), 10)
     
-    #Reshape Taxon Key
+    #Reshape Taxon Key to show taxa and stage with marmap codes
     noaa_zoo_key <- noaa_zoo_header %>% 
       pivot_longer(cols = -code_type, names_to = "Taxon Name", values_to = "Accepted ID") %>% 
-      arrange(`Taxon Name`) %>% 
-      distinct(`Taxon Name`, .keep_all = T)
+      arrange(`Taxon Name`)
+    
+    # Check duplicates, should all be unique
+    key_dups <- noaa_zoo_key %>% 
+      pivot_wider(names_from = code_type, values_from = `Accepted ID`, values_fn = length) %>% 
+      filter(`Marmap Taxonomic Code:` > 1 | `Marmap Stage Code:` > 1 ) %>% 
+      pull(`Taxon Name`)
     
     
-    ####  Repair MARMAP Key 
-    noaa_zoo_key <- noaa_zoo_key %>% 
-      pivot_wider(names_from = code_type, values_from = `Accepted ID`) %>% 
-      rename_all(tolower)
     
-
-    #Repair taxon names that are incorrect using NEFSC marmap key
-    which(noaa_zoo[2,] == 3300) #Index for Heteropoda
-    which(noaa_zoo[2,] == 4039) #Index for something...or nothing...
+    # What duplicate Marmap numbers are representing currently, should be unique to taxa
+    noaa_zoo_key %>% filter(`Taxon Name` %in% key_dups) %>% distinct()
+    
+    #### Replace taxon names using NEFSC marmap key
+    
+    # # Which we need to change, manually checked*
     colnames(noaa_zoo_abundances)[which(noaa_zoo[2,] == 3300)] <- "Heteropoda"
     colnames(noaa_zoo_abundances)[which(noaa_zoo[2,] == 4039)] <- "No record"
     
     #Drop column that has no taxa match for the marmap code 
     noaa_zoo_abundances[,"No record"] <- NULL
     
-    #Repair key using NEFSC marmap key
-    noaa_zoo_key <- noaa_zoo_key %>% mutate(
-      `taxon name` = ifelse(`marmap taxonomic code:` == 3300, "Heteropoda", `taxon name`),
-      `taxon name` = ifelse(`marmap taxonomic code:` == 4039, "No record", `taxon name`)) %>% 
+    
+    ####  Repair MARMAP Key  ####
+    
+    # Make changes to key as well so there is no duplication of codes
+    noaa_zoo_key <- noaa_zoo_key %>% 
+      mutate(
+        `Taxon Name` = ifelse(`Accepted ID` == 3300, "Heteropoda", `Taxon Name`),
+        `Taxon Name` = ifelse(`Accepted ID` == 4039, "No record", `Taxon Name`)) %>% 
+      distinct() %>% 
+      pivot_wider(names_from = code_type, values_from = `Accepted ID`) %>% 
+      rename_all(tolower)%>% 
       filter(`taxon name` != "No record")
+    
+    
     
     #Seperate taxa and stage
     noaa_zoo_key <- noaa_zoo_key %>% mutate(
-      taxa  = str_extract(`taxon name`, "[^_]*"),
+      taxa = str_extract(`taxon name`, "[^_]*"),
       stage = str_extract(`taxon name`, "_.*"),
-      stage = str_replace(stage, "_", ""))
+      stage = str_replace(stage, "_", "")
+    )
     
     
-    ####  Prep for Export  
+    ####  Prep for Export  ####
     noaa_zoo_abundances <- noaa_zoo_abundances %>%  
       rename_all(tolower) %>% 
       mutate(cruise = str_replace_all(cruise, "'", ""))
@@ -445,6 +465,7 @@ import_noaa_cpr <- function(sample_type = c("phyto", "zoo"), return_option = c("
 sahfos_taxa_key <- function(mc_option = "mc1"){
   
   if(mc_option == "mc1"){
+    
     #MC part 1
     mc1_phyto   <- readxl::read_xlsx(str_c(gom_cpr_path, "SAHFOS-MBA_2013-2017/MC part1.xlsx"), sheet = 1)
     mc1_eye     <- readxl::read_xlsx(str_c(gom_cpr_path, "SAHFOS-MBA_2013-2017/MC part1.xlsx"), sheet = 2)
@@ -617,12 +638,12 @@ import_sahfos_mc2 <- function(mc_taxa_key = mc2_taxa, sample_type = c("phyto", "
 ####  SAHFOS Combine Sample Scales  ####
 
 # bind rows on the two mc table sources
-join_mc_data <- function(mc1_data, mc2_data){
+bind_mc_tables <- function(mc1_data, mc2_data){
   bind_rows(mc1_data, mc2_data)
 }
 
 
-# Pull out the first ten columns as sample metadata
+# Pull out the first ten columns as sample metadata structure
 pull_sahfos_metadata <- function(sahfos_data){
   sahfos_meta <- select(sahfos_data, 1:10)
 }
@@ -668,6 +689,7 @@ sahfos_to_100 <- function(abundance_per_transect){
 # Join the two zooplankton groups together
 join_zooplankton <- function(sahfos_trav, sahfos_eye, sahfos_meta){
   
+  # rename to reuse original workflow code
   strav_m3 <- sahfos_trav
   seye_m3  <- sahfos_eye
   
@@ -692,6 +714,7 @@ join_zooplankton <- function(sahfos_trav, sahfos_eye, sahfos_meta){
     
     # Fill that list with traverse abundances when they match
     traverse_counts <- imap(traverse_counts, function(x,y) {
+      
       #Baseline of 0
       taxa_counts <- rep(0, nrow(df_1))
       
@@ -754,16 +777,16 @@ join_zooplankton <- function(sahfos_trav, sahfos_eye, sahfos_meta){
 ####  Prepare NOAA and SAHFOS for Join  ####
 
 
-consolidate_noaa_taxa <- function(noaa_gom_abundances){
+consolidate_noaa_taxa <- function(noaa_abundances){
   
   ####  Cleaner NOAA Consolidation  
   
   
   ####  1. Remove unused Taxa  
   #These names are not found at all in our data
-  no_records <- noaa_gom_abundances %>% 
+  no_records <- noaa_abundances %>% 
     pivot_longer(names_to = "taxon_stage", values_to = "abundance", 
-                 cols = 11:ncol(noaa_gom_abundances)) %>% 
+                 cols = 11:ncol(noaa_abundances)) %>% 
     mutate(abundance = as.numeric(abundance)) %>% 
     group_by(taxon_stage) %>% 
     summarise(presence = ifelse(sum(abundance, na.rm = T) > 0, "present", "absent")) %>% 
@@ -773,7 +796,7 @@ consolidate_noaa_taxa <- function(noaa_gom_abundances){
   
   
   #Take the species with abundances out  of the rest of the data
-  noaa_inuse <- noaa_gom_abundances %>% select(-one_of(no_records))
+  noaa_inuse <- noaa_abundances %>% select(-one_of(no_records))
   
   
   ####  2. Make Column Key,  prep abundance and metadata
@@ -781,10 +804,10 @@ consolidate_noaa_taxa <- function(noaa_gom_abundances){
   # Key moved to top level ^  
 
   # Pull the station information
-  cpr_metadata <- noaa_gom_abundances[,1:10]
+  cpr_metadata <- noaa_abundances[,1:10]
   
   # Make sure abundances are numeric for combining them correctly
-  cpr_abundances <- noaa_gom_abundances[, 11:ncol(noaa_gom_abundances)] %>% 
+  cpr_abundances <- noaa_abundances[, 11:ncol(noaa_abundances)] %>% 
     mutate(across(everything(), as.numeric))
   
   ####  3. Use  Key to Consolidate Abundances
@@ -924,7 +947,7 @@ match_sahfos_to_noaa <- function(sahfos_zoo){
 
 
 #Bind the two data sources
-join_gom_zoo_sources <- function(noaa_zoo_refined, sahfos_zoo_renamed){
+join_zoo_sources <- function(noaa_zoo_refined, sahfos_zoo_renamed){
   
   combined_set <- bind_rows(
     list("NOAA"   = noaa_zoo_refined, 
@@ -933,3 +956,391 @@ join_gom_zoo_sources <- function(noaa_zoo_refined, sahfos_zoo_renamed){
   
   return(combined_set)
 }
+
+
+
+####________________________####
+####  Seasonal Spline Prep  ####
+
+cpr_spline_prep <- function(cpr_abundances){
+  cpr_date_prepped <- cpr_abundances %>% 
+    mutate(cal_date = as.POSIXct(str_c(year, month, day, sep = "/"), format = "%Y/%m/%d"), .after = "day") %>% 
+    mutate(jday = lubridate::yday(cal_date), .after = "cal_date") %>% 
+    rename(lon = `longitude (degrees)`,
+           lat = `latitude (degrees)`)
+  
+  return(cpr_date_prepped)
+}
+
+
+
+
+
+#### Trim Data to Study Area BBox  ####
+
+
+
+#' @title CPR Area Filter
+#' 
+#' @description Subset the Gulf of Maine CPR survey data using a specific survey area, specified by name. 
+#' Extents for the following areas are available: 
+#'
+#' @param study_area Indication of what area to subset with. Includes GOM, GOM_new, CCB, WGOM, EGOM, SS.
+#'
+#' @return 
+#' @export
+#'
+#' @examples
+cpr_area_crop <- function(cpr_dat, study_area = "GOM_new"){
+  
+  area_bboxes <- tribble( ##### Area BBbox Open  ####
+                          ~"area",  ~"lon",  ~"lat",
+                          #Gulf of Maine - Historic
+                          "gom",   -70.000000,	42.200000,
+                          "gom",   -68.600000,	42.200000,
+                          "gom",   -68.600000,	42.400000,
+                          "gom",   -66.600000,	42.400000,
+                          "gom",   -66.600000,	43.400000,
+                          "gom",   -68.600000,	43.400000,
+                          "gom",   -68.600000,	43.200000,
+                          "gom",   -70.000000,	43.200000,
+                          "gom",   -70.000000,	42.200000,
+                          
+                          #Gulf of Maine - Extended North to capture cpr route change
+                          "gom_new",   -70.000000,	42.200000, 
+                          "gom_new",   -66.600000,	42.200000, 
+                          "gom_new",   -66.600000,	43.800000, 
+                          "gom_new",   -70.000000,	43.800000, 
+                          "gom_new",   -70.000000,	42.200000,
+                          
+                          "ccb",   -70.800000,	42.200000,
+                          "ccb",   -70.000000,	42.200000,
+                          "ccb",   -70.000000,	42.800000,
+                          "ccb",   -70.800000,	42.800000,
+                          "ccb",   -70.800000,	42.200000,
+                          
+                          #Western Gulf of Maine
+                          "wgom",  -70.000000, 	42.200000,
+                          "wgom",  -68.600000, 	42.200000,
+                          "wgom",  -68.600000, 	43.200000,
+                          "wgom",  -70.000000, 	43.200000,
+                          "wgom",  -70.000000, 	42.200000,
+                          
+                          #Eastern Gulf of Maine
+                          "egom",  -68.600000,	42.400000,
+                          "egom",  -66.600000,	42.400000,
+                          "egom",  -66.600000,	43.400000,
+                          "egom",  -68.600000,	43.400000,
+                          "egom",  -68.600000,	42.400000,
+                          
+                          "ss",    -66.600000,	42.600000,
+                          "ss",    -65.400000,	42.600000,
+                          "ss",    -65.400000,	43.400000,
+                          "ss",    -66.600000,	43.400000,
+                          "ss",    -66.600000,	42.600000,
+  ) %>% arrange(area) ##### Area BBbox Close  ####
+  
+  
+  #Filter to the correct area
+  study_area_bbox <- filter(area_bboxes, area == tolower(study_area))
+  
+  #subset data that fits
+  cpr_dat <- cpr_dat %>% mutate(lon = ifelse(lon > 0, lon * -1, lon))
+  
+  cpr_dat <- cpr_dat %>% 
+    filter(
+      between(lon, min(study_area_bbox$lon), max(study_area_bbox$lon)),
+      between(lat, min(study_area_bbox$lat), max(study_area_bbox$lat)))
+  
+  # Return the cpr data
+  return(cpr_dat)
+}
+
+
+####  Spline Tools  ####
+
+
+# Split taxa into list, drop groups only present in NOAA or SAHFOS:
+split_cpr_by_taxa <- function(cpr_spline_prepped){
+  
+  # testing: 
+  # tar_load(gom_area_cropped); cpr_spline_prepped <- gom_area_cropped
+  
+  # Start / End Taxa, instead of assuming no columns get added before/after
+  start_taxa <- which(names(cpr_spline_prepped) == "phytoplankton color index")
+  end_taxa <- which(names(cpr_spline_prepped) == "radiolaria spp.")
+  
+  # Identify the columns that represent abundances
+  # taxa_cols <- names(cpr_spline_prepped)[12:ncol(cpr_spline_prepped)]
+  taxa_cols <- names(cpr_spline_prepped)[start_taxa:end_taxa]
+  names(taxa_cols) <- taxa_cols
+  
+  # Make a list with details on each taxa
+  taxa_list <- map(taxa_cols, function(x){
+    taxa_name <- sym(x)
+    taxa_subset <- cpr_spline_prepped %>% 
+      select(year, jday, lat, lon, abundance = !!taxa_name)
+  })
+  
+  #Find those pesky NA taxa
+  na_counts <- map(taxa_list, function(x){
+    sum(is.na(x$abundance))}) %>% 
+    bind_cols() %>%
+    pivot_longer(names_to = "taxa", values_to = "total NA's", cols = everything()) 
+  
+  # falg taxa that are in either period, or just completely absent
+  na_counts <- na_counts %>%
+    mutate(status = case_when(
+      `total NA's` == 290 ~ "NOAA only",
+      `total NA's` == 4799 ~ "SAHFOS only",
+      `total NA's` == 0 ~ "Found in both",
+      `total NA's` > 4799 ~ "Too Many NA's",
+      `total NA's` == nrow(na_counts) ~ "drop",
+      TRUE ~ "unclear"
+      
+    ))
+  
+  # #Taxa with full time series
+  # keepers <- filter(na_counts, status == "Found in both")
+  keepers <- filter(na_counts, status != "drop")
+  fullts_taxa <- taxa_list[names(taxa_list) %in% keepers$taxa]
+  
+  # Return just the taxa that exist in both periods
+  return(fullts_taxa)
+  
+}
+
+
+
+#' Continuous Plankton Recorder Seasonal Spline Tool
+#'
+#' @param cpr_dat Takes output of cpr_area_crop. A data.frame containing the following columns: year, julian day, lat, lon, and abundance.
+#' @param spline_bins Integer value indicating the desired number of basis functions for the seasonal spline fit, default = 10
+#' @param season_bins Integer value indicating the number of periods you wish there to be in a recurring 365 day cycle. 
+#' These are used as labels, not in GAM fitting.
+#'
+#' @return  List containing 1. the original dataframe with log transformed abundances, labeled periods, and log transformed anomalies
+#'  2. the mean, standard deviation, and sample size for each period for each year, and 3. the GAMS themselves
+#' @export
+#'
+#' @examples
+cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4) {
+  ####  Fit Seasonal Trend using all data  ####
+  
+  
+  #Check Input dimensions are correct
+  if(ncol(cpr_dat) != 5) {return(print('dat format requires 5 columns: [year, jday, lat, lon, #]'))}
+  
+  #Transform abundance to log abundance
+  cpr_dat <- cpr_dat %>% 
+    mutate(
+      abundance = as.numeric(abundance),
+      log_abund = log(abundance),
+      log_abund = ifelse(is.infinite(log_abund), 0, log_abund)
+    )
+  
+  
+  #Build spline model using mgsv::gam using cyclic penalized cubic regression spline smooth
+  cc_spline_mod <- gam(log_abund ~  s(jday, bs = "cc", k = spline_bins),
+                       data = cpr_dat)
+  
+  
+  #Add Predictions back to the data
+  cpr_dat$spline_pred <- predict(cc_spline_mod, cpr_dat, type = "response")
+  
+  
+  #Calculate anomalies
+  cpr_dat$anomaly <- cpr_dat$log_abund - cpr_dat$spline_pred
+  
+  #Calculate Anomalies relative to standard deviation in observed log abundance:
+  #overall_sd <- sd(cpr_dat$spline_pred, na.rm = T)
+  overall_sd <- sd(cpr_dat$log_abund, na.rm = T)
+  cpr_dat$rel_anomaly <- cpr_dat$anomaly / overall_sd
+  
+  
+  ####  Calculate Seasonal Averages  ####
+  #Get Period Split Points from number of season_bins
+  bin_splits <- c(seq(0, 365, by = ceiling(365 / (season_bins))), 365)
+  
+  #Set period number in data based on desired number of splits
+  period <- data.frame(
+    period = rep(0, nrow(cpr_dat)),
+    min_date = rep(NA, nrow(cpr_dat)),
+    max_date = rep(NA, nrow(cpr_dat)))
+  
+  #Add period label and datebound
+  for (n in 1:nrow(cpr_dat)) {
+    for (i in 1:season_bins) {
+      if( cpr_dat$jday[n] > bin_splits[i] & cpr_dat$jday[n] <=  bin_splits[i+1]) {
+        period[n, "period"]   <- i
+        period[n, "min_date"] <- bin_splits[i]
+        period[n, "max_date"] <- bin_splits[i+1]
+      }
+    }
+  }
+  
+  # Bind period column and predictions back to original data
+  period <- period %>% 
+    mutate(datebounds = str_c(min_date, "-", max_date)) %>% 
+    select(-c(min_date, max_date))
+  
+  cpr_dat <- bind_cols(cpr_dat, period)
+  
+  #Get Period Means
+  seasonal_summary <- cpr_dat %>% 
+    group_by(year, period, datebounds) %>% 
+    summarise(
+      abund_mu = mean(abundance, na.rm = T),
+      abund_sd = sd(abundance, na.rm = T),
+      log_abund_mu = log(abund_mu),
+      log_abund_mu = ifelse(is.infinite(log_abund_mu), 0, log_abund_mu),
+      anom_mu = mean(anomaly, na.rm = T),
+      anom_sd = sd(anomaly, na.rm = T),
+      anom_z = mean(rel_anomaly, na.rm = T),
+      n_stations = n(),
+      .groups = "drop") %>% 
+    ungroup() %>% 
+    mutate(period = as.character(period))
+  
+  #Get Annual Means
+  annual_summary <- cpr_dat %>% 
+    group_by(year) %>% 
+    summarise(
+      abund_mu = mean(abundance, na.rm = T),
+      abund_sd = sd(abundance, na.rm = T),
+      log_abund_mu = log(abund_mu),
+      log_abund_mu = ifelse(is.infinite(log_abund_mu), 0, log_abund_mu),
+      anom_mu = mean(anomaly, na.rm = T),
+      anom_sd = sd(anomaly, na.rm = T),
+      anom_z = mean(rel_anomaly, na.rm = T),
+      n_stations = n(),
+      .groups = "drop") %>% 
+    mutate(period = "annual",
+           datebounds = "1-365")
+  
+  #Put the annual and period means together
+  period_summaries <- bind_rows(seasonal_summary, annual_summary) %>% 
+    arrange(year, period)
+  
+  # Return Pre out
+  ts_out <- list(
+    "cprdat_predicted" = cpr_dat,
+    "period_summs"     = period_summaries,
+    "spline_model"     = cc_spline_mod
+  )
+  return(ts_out)
+  
+  
+} 
+
+
+
+
+####_________________________####
+
+
+
+# reshape the anomalies, subset into lists by years to include in each set
+prep_PCA_periods <- function(cpr_anomalies_long, 
+                             matrix_var = "standardized anomalies",
+                             use_focal_species = FALSE,
+                             year_subsets = list("1961-2003" = c(1961,2003))){
+  
+  
+  # Testing:
+  # tar_load(gom_seasonal_avgs); cpr_anomalies_long <- gom_seasonal_avgs
+  
+  
+  #### a.  Subset to focal species:
+  if(use_focal_species){
+    
+    # focal species used in 2005 paper
+    species_05 <- c("Calanus I-IV", "Calanus finmarchicus V-VI", "Centropages typicus",
+                    "Oithona spp.","Para-Pseudocalanus spp.",
+                    "Metridia lucens",  "Euphausiacea spp.", "phytoplankton color index")
+    
+    
+    # reformat names and filter the focal taxa out
+    cpr_long <- cpr_anomalies_long %>% 
+      mutate(taxa = tolower(taxa),
+             taxa = str_replace_all(taxa, "para_pseu", "para-pseu"),
+             taxa = str_replace_all(taxa, "_", " "),
+             taxa = str_replace_all(taxa, "spp", "spp."),
+             taxa = str_replace_all(taxa, "spp..", "spp.")) %>% 
+      filter(taxa %in% tolower(species_05))
+    
+  }
+  
+  
+  #### b. Re-format for PCA
+ 
+  # Column to pivot
+  var_col <- switch (matrix_var,
+    "standardized anomalies" = "anom_z",
+    "mean anomalies" = "anom_mu",
+    "mean abundances" = "abund_mu")
+  var_col <- sym(var_col)
+  
+  
+  # Pivot wider to return a matrix
+  cpr_wide <- cpr_long %>% 
+    select(taxa, year, period, datebounds, anom_z) %>% 
+    pivot_wider(names_from = taxa, values_from = {{var_col}}) %>% 
+    janitor::clean_names()
+  
+  ####  Filter the years for each group, and grab just the taxa.
+  subset_years <- map(year_subsets, function(x){
+    
+    # filter years
+    x_years <- filter(cpr_wide, between(year, x[[1]], x[[2]]))
+    
+  })
+  
+  # return the list of wide data and metadata
+  return(subset_years)
+  
+  
+}
+
+
+
+
+# Pick whether to use annual/time periods
+prep_PCA_matrices <- function(period_list, periodicity = "annual"){
+  
+  # Testing:
+  # tar_load(cpr_pca_periods); period_list <- cpr_pca_periods
+  
+  
+  # For any of the period(s) pull abundance matrix and metadata to match
+  map(period_list, function(period_x){
+    
+    # Flag the season/yearly periodicity we want
+    abundance_data <- switch (periodicity,
+                              "annual" = filter(period_x, datebounds == "1-365"),
+                              "seasons"= filter(period_x, datebounds != "1-365"),
+                              "winter" = filter(period_x, datebounds == "0-92"),
+                              "spring" = filter(period_x, datebounds == "92-184"),
+                              "summer" = filter(period_x, datebounds == "184-276"),
+                              "fall"   = filter(period_x, datebounds == "276-365"))
+    
+    # Pull away the metadata
+    meta_data <- select(abundance_data, year, period, datebounds, `phytoplankton_color_index`)
+    
+    
+    # Pull matrix to pass to PCA
+    pca_mat <- select(abundance_data, -c(year, period, datebounds, `phytoplankton_color_index`))
+    
+    # return metadata to match matrix
+    return(list(pca_matrix = pca_mat,
+                metadata = meta_data))
+    
+  })
+  
+  
+  
+}
+
+
+
+

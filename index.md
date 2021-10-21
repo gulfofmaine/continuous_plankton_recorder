@@ -34,5 +34,5 @@ This link is for the report consolidating results from the various analyses.
 
 [Rmarkdown Code Link](/R/12_paper_layout.Rmd)
 
-[HTML Page Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/12_paper_layout.html)
+[HTML Page Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/new_anom_analyses/12_paper_layout.html)
 

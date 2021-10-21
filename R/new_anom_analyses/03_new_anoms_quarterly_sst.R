@@ -8,17 +8,32 @@ library(here)
 library(gmRi)
 library(patchwork)
 library(ggpmisc)
+library(targets)
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
 
 
 ####  NOAA + SAHFOS Anomaly Data  ####
-cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "detrended_anomalies_noaa_sahfos.csv", sep = "/"), 
-                     guess_max = 1e6, 
-                     col_types = cols())
 
-cpr_long <- cpr_wide %>% pivot_longer(names_to = "taxa", values_to = "anomaly", cols = 5:ncol(.))
+# # Original data pipeline
+# cpr_wide <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "detrended_anomalies_noaa_sahfos.csv", sep = "/"), 
+#                      guess_max = 1e6, 
+#                      col_types = cols())
+
+
+# Using targets pipeline
+tar_load(gom_seasonal_avgs)
+
+# reshape to wide format using standardized anomalies
+cpr_wide <- gom_seasonal_avgs %>% 
+  select(taxa, year, period, datebounds, anom_z) %>% 
+  pivot_wider(names_from = taxa, values_from = anom_z) %>% 
+  janitor::clean_names()
+
+cpr_long <- cpr_wide %>% 
+  pivot_longer(names_to = "taxa", values_to = "anomaly", cols = 5:ncol(.))
+
 
 #Reference Taxa
 species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
@@ -82,6 +97,7 @@ sst_combined <- bind_rows(sst_long_lagged, sst_bimonthly)
 cpr_sst <- cpr_long %>%
   left_join(sst_combined, by = c("year", "period"))
 
+####  File Export: CPR + SST ####
 
 # #Save it
 # write_csv(cpr_sst,

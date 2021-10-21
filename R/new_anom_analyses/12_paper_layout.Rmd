@@ -85,6 +85,8 @@ species_05 <- factor(species_05, levels = species_05)
 
 
 ####  Quarterly CPR Data with SST  ####
+
+# source: 03_new_anoms_quarterly_sst.R
 cpr_sst <- read_csv(
   str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "anomalies_w_quarterlysst.csv", sep = "/"),
   col_types = cols(),
