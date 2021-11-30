@@ -32,8 +32,14 @@ canada <- rnaturalearth::ne_states(country = "canada") %>% st_as_sfc(crs = 4326)
 
 ####  Model Transects  ####
 
-# Portland Transect
-pmod <- cpr %>% filter(year == "2017", cruise == "477MC") 
+# what years went to portland - in 2013 they switched, but super awkwardly
+cpr %>% 
+  filter(year == 2013) %>% 
+  ggplot(aes(lon, lat, color = factor(month))) +
+  geom_point()
+
+# Portland Transect - begins 2013
+pmod <- cpr %>% filter(year == "2013")#, cruise == "477MC") 
 pmod_sf <- pmod %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
 
 # Boston Transect
@@ -44,51 +50,30 @@ bmod_sf <- bmod %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
 ggplot() +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
-  geom_sf(data = pmod_sf, aes(color = "Portland Transect - 2017")) +
+  geom_sf(data = pmod_sf, aes(color = "Portland Transects - 2013")) +
   geom_sf(data = bmod_sf, aes(color = "Boston Transect - 1990")) +
   coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
-  theme_bw() 
+  theme_bw() + labs(color = "Transect Routes")
 
 
-####  Generating transects from scratch
-
-# what years went to portland - in 2013 they switched, but super awkwardly
-cpr %>% 
-  filter(year == 2013) %>% 
-  ggplot(aes(lon, lat, color = factor(month))) +
-    geom_point()
-
+####  Portland Transect Endpoints  ####
 # take all portland transects and get a mean/var for the start/end coordinates to set up the end points
+# Do the same for boston transect
 
 # West End
 west <- cpr %>%
   filter(year >= 2014) %>% 
   split(.$cruise) %>% 
-  map(function(x) {first_station <- x %>% arrange(desc(lon)) %>% slice(1) }) %>% 
+  map(function(x) {first_station <- x %>% arrange(lon) %>% slice(1) }) %>% 
   bind_rows() %>% 
   filter(lon < -65) 
-
-west %>% 
-  ggplot(aes(lon, lat, color = factor(cruise))) +
-  geom_point()
 
 # East End
 east <- cpr %>%
   filter(year >= 2014) %>% 
   split(.$cruise) %>% 
-  map(function(x) {first_station <- x %>% arrange(lon) %>% slice(1) }) %>% 
+  map(function(x) {first_station <- x %>% arrange(desc(lon)) %>% slice(1) }) %>% 
   bind_rows()
-
-east %>% 
-  ggplot(aes(lon, lat, color = factor(cruise))) +
-  geom_point()
-
-
-# Together
-ggplot() +
-  geom_point(data = west, aes(lon, lat)) +
-  geom_point(data = east, aes(lon, lat))
-
 
 # Save their summary stats
 west_summ <- west %>% summarise(
@@ -104,9 +89,73 @@ east_summ <- east %>% summarise(
   lat_sd = sd(lat))
 
 
+# Together
+ggplot() +
+  geom_point(data = west, aes(lon, lat)) +
+  geom_point(data = east, aes(lon, lat)) +
+  geom_point(data = west_summ, aes(lon_mu, lat_mu, color = "Western Endpoint"), size = 3) +
+  geom_point(data = east_summ, aes(lon_mu, lat_mu, color = "Eastern Endpoint"), size = 3) +
+  geom_segment(x = west_summ$lon_mu,
+               xend = east_summ$lon_mu,
+               y = west_summ$lat_mu,
+               yend = east_summ$lat_mu,
+               linetype = 2,
+               size = 1, color = "black")
+
+
+
+
+
+
+####  Generate Endpoint Function  ####
+endpoint_means <- function(cpr_data){
+  
+  # West End
+  west <- cpr_data %>%
+    split(.$cruise) %>% 
+    map(function(x) {first_station <- x %>% arrange(lon) %>% slice(1) }) %>% 
+    bind_rows() %>% 
+    filter(lon < -65) 
+  
+  # East End
+  east <- cpr_data %>%
+    split(.$cruise) %>% 
+    map(function(x) {first_station <- x %>% arrange(desc(lon)) %>% slice(1) }) %>% 
+    bind_rows()  %>% 
+    filter(lon < -65) 
+ 
+  # Save their summary stats
+  west_summ <- west %>% summarise(
+    lon_mu = mean(lon),
+    lon_sd = sd(lon),
+    lat_mu = mean(lat),
+    lat_sd = sd(lat))
+  
+  east_summ <- east %>% summarise(
+    lon_mu = mean(lon),
+    lon_sd = sd(lon),
+    lat_mu = mean(lat),
+    lat_sd = sd(lat))
+  
+  return(list(
+    "west_end" = west_summ,
+    "east_end" = east_summ
+  ))
+   
+}
+
+
+####  Generate Portland/Boston Endpoints
+port_endpoints <- endpoint_means(cpr_data = filter(cpr, year >= 2014))
+bost_endpoints <- endpoint_means(cpr_data = filter(cpr, year <= 2012))
+
+
+
+
+
 ####  Generate Transect Function  ####
-generate_transect <- function(west_center = west_summ, 
-                              east_center = east_summ, 
+generate_transect <- function(west_center = port_endpoints$west_end, 
+                              east_center = port_endpoints$east_end, 
                               n_stations = 10, 
                               n_transects = 1){
   
@@ -137,17 +186,27 @@ generate_transect <- function(west_center = west_summ,
 
 
 # And Voila
-tester <- generate_transect(n_transects = 3)
+portland_tester <- generate_transect(west_center = port_endpoints$west_end, 
+                                     east_center = port_endpoints$east_end, 
+                                     n_stations = 10,
+                                     n_transects = 4) %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) 
 
-tester %>% 
-  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
-  ggplot() +
-    geom_sf(aes(color = transect_id)) +
+boston_tester <- generate_transect(west_center = bost_endpoints$west_end, 
+                                   east_center = bost_endpoints$east_end, 
+                                   n_stations = 10,
+                                   n_transects = 4) %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) 
+
+# Map simulations
+ggplot() +
+    geom_sf(data = portland_tester, aes(shape = transect_id, color = "Simulated Portland Transects")) +
+    geom_sf(data = boston_tester, aes(shape = transect_id, color = "Simulated Boston Transects")) +
     geom_sf(data = northeast) +
     geom_sf(data = canada) +
     coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
     theme_bw()+
-    labs(subtitle = "Simulated Portland Transects")
+    labs(subtitle = "Transect Simulation", color = "Transect Origins", shape = "Transect ID#'s")
 
 
 

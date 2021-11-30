@@ -1344,3 +1344,99 @@ prep_PCA_matrices <- function(period_list, periodicity = "annual"){
 
 
 
+#### Perform PCA Return Timeseries and Loadings
+perform_PCA <- function(pca_matrix, pca_meta){
+  
+  # 1. Perform PCA
+  pca_full <- prcomp(pca_mat, center = F, scale. = F)
+  
+  
+  
+  # 2. Get the the PC weights for each column in matrix
+  pc_weights <- rownames_to_column(as.data.frame(pca_full$rotation)) %>% 
+    dplyr::select(taxa = rowname, PC1, PC2, PC3, PC4)
+  
+  # 3. Get percent explained 
+  pca_sdev <- pca_full$sdev
+  eigs <- pca_sdev ^ 2
+  
+  # put pieces in a table
+  deviance_df <- rbind(
+    SD = sqrt(eigs),
+    Proportion = eigs/sum(eigs),
+    Cumulative = cumsum(eigs)/sum(eigs))
+  
+  # Put the percent explained in a table
+  pca_dev_out <- data.frame(
+    "PC1" = str_c(as.character(round(deviance_df[2,1] * 100, 2)), "% of Variance"),
+    "PC2" = str_c(as.character(round(deviance_df[2,2] * 100, 2)), "% of Variance"),
+    "PC3" = str_c(as.character(round(deviance_df[2,3] * 100, 2)), "% of Variance"),
+    "PC4" = str_c(as.character(round(deviance_df[2,4] * 100, 2)), "% of Variance"))
+  
+  
+  # 4. Fill gap years and build timeseries
+  ### NOTE: PCA direction not multiplied by *1 ####
+
+  #Fill in Year Gap
+  gap_years <- tibble(year = rep(c(1975, 1976), 2),
+                      PC = c(rep("First Mode", 2), c(rep("Second Mode", 2))))
+
+
+  # Timeseries of first Mode
+  pc1 <- pca_mat %>%
+    #Add a filler column because function expects years to be column 1
+    mutate(filler = NA) %>%
+    select(filler, everything()) %>%
+    apply_pca_load(pca_load = .,
+                   pca_rotations = pca_full$rotation,
+                   mode_num = 1) %>%
+    rowSums() %>%
+    as.data.frame()   %>%
+    mutate(PC = "First Mode")
+
+  # Get years and fill gaps
+  colnames(pc1)[1] <- "Principal component value"
+  pc1 <- bind_cols(year = meta$year, pc1)
+  pc1 <- full_join(gap_years, pc1, by = c("year", "PC")) %>%
+    filter(PC == "First Mode") %>%
+    arrange(year)
+
+  # Do the second Mode
+  pc2 <- pca_mat %>%
+    mutate(filler = NA) %>% select(filler, everything()) %>%
+    apply_pca_load(pca_load = .,
+                   pca_rotations = pca_full$rotation,
+                   mode_num = 2) %>%
+    rowSums() %>%
+    as.data.frame()  %>%
+    mutate(PC = "Second Mode")
+
+  colnames(pc2)[1] <- "Principal component value"
+  pc2 <- bind_cols(year = meta$year, pc2)
+  pc2 <- full_join(gap_years, pc2, by = c("year", "PC")) %>%
+    filter(PC == "Second Mode") %>%
+    arrange(year)
+
+  # Bind PCA Timeseries
+  pc_modes <- bind_rows(pc1, pc2)
+
+  
+  #### Outputs
+  return(
+    list(
+      "PC_timeseries" = pc_modes,
+      "PC_weights" = pc_weights,
+      "Perc_explained" = pca_dev_out
+    )
+  )
+  
+  
+  
+  
+  
+  
+  
+  
+}
+
+
