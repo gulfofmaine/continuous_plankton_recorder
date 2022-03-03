@@ -6,8 +6,8 @@ library(tidyverse)
 library(here)
 
 ####  Functions  ####
-source(here::here("R", "cpr_helper_funs.R"))
-
+# source(here::here("R", "cpr_helper_funs.R"))
+cpr_boxpath <- gmRi::cs_path("root", "Adam Kemberling/Box_Projects/continuous_plankton_recorder")
 
 ####____________________________####
 ####  Import Buoy Data  ####
@@ -16,7 +16,7 @@ source(here::here("R", "cpr_helper_funs.R"))
 # 2. R/buoy_data/Update_Buoy.Rmd
 
 #load(file = str_c(cpr_boxpath, "/data/processed_data/Buoy.RData"))
-load(file = str_c(cpr_boxpath, "/data/processed_data/Buoys_Md_2019.RData"))
+load(file = str_c(cpr_boxpath, "data/processed_data/Buoys_Md_2019.RData"))
 
 ###__ 1. Collapse List Structure  ####
 

@@ -171,10 +171,12 @@ percent_explained <- pull_deviance(daily_pca$sdev)
 # Data for timeline
 t1_data <- pca_out %>% 
   filter(`Principal Component` != "PC3" & is.na(`Principal Component`) == FALSE) %>% 
-  mutate(`Principal Component` = if_else(`Principal Component` == "PC1", 
+  mutate(PC_num = `Principal Component`,
+         `Principal Component` = if_else(`Principal Component` == "PC1", 
                                          as.character(percent_explained$PC1), 
                                          as.character(percent_explained$PC2)),
-         `Principal Component` = fct_rev(`Principal Component`))  
+         `Principal Component` = fct_rev(`Principal Component`))  %>% 
+  select(Date, PC_num, everything())
 
 
 # Timeline plot
@@ -223,10 +225,12 @@ pc2_ts_i$"Principal Component" <- "PC2"
 
 # Data for plot
 interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>% 
-  mutate(`Principal Component` = if_else(`Principal Component` == "PC1", 
+  mutate(PC_num = `Principal Component`,
+         `Principal Component` = if_else(`Principal Component` == "PC1", 
                                          as.character(percent_explained$PC1), 
                                          as.character(percent_explained$PC2)),
-         `Principal Component` = fct_rev(`Principal Component`))
+         `Principal Component` = fct_rev(`Principal Component`)) %>% 
+  select(Date, PC_num, everything())
 
 
 
@@ -253,7 +257,7 @@ interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>%
 
 
 # Save for future use
-# write_csv(pca_out, here("R/new_anom_analyses/derived_data/buoy_pca_raw.csv"))
+# write_csv(t1_data, here("R/new_anom_analyses/derived_data/buoy_pca_raw.csv"))
 # write_csv(interp_timeline, here("R/new_anom_analyses/derived_data/buoy_pca_interp.csv"))
 
 

@@ -3,6 +3,8 @@
 #Set ggplot theme
 ggplot2::theme_set(ggplot2::theme_classic())
 
+
+
 #' @title Locate Data Path on Box
 #' @description Safely navigate to box path within GMRI in lieu of here function
 #'
@@ -18,9 +20,13 @@ find_box_data <- function(box_project_name) {
   return(box_path)
 }
 
-cpr_boxpath <- find_box_data("continuous_plankton_recorder")
-ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
+# # Set the main paths - originals
+# cpr_boxpath <- find_box_data("continuous_plankton_recorder")
+# ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
 
+# Change to use gmRi::cs_path()
+cpr_boxpath <- gmRi::cs_path("root", "Adam Kemberling/Box_Projects/continuous_plankton_recorder")
+ccel_boxpath <- gmRi::cs_path("ccel")
 
 
 

@@ -17,7 +17,8 @@ suppressPackageStartupMessages(library(tidyverse))
 # # Base path
 # ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
 # gom_cpr_path <- str_c(ccel_boxpath, "/Data/Gulf of Maine CPR/")
-gom_cpr_path <- box_path("climate change ecology lab", "Data/Gulf of Maine CPR")
+# gom_cpr_path <- box_path("ccel", "Data/Gulf of Maine CPR")
+gom_cpr_path <- cs_path("ccel", "Data/Gulf of Maine CPR")
 
 #### NOAA Taxa Key  ####
 # Used to resolve inconsistent groups in noaa GOM taxonomic groups
@@ -1240,7 +1241,22 @@ cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4
 
 
 
-# reshape the anomalies, subset into lists by years to include in each set
+#' @title Reshape CPR Anomalies into PCA Matrix
+#' 
+#' 
+#' @description Resahapes the CPR anomalies/abundances into a wide format suitable for 
+#' performing principal component analysis. Options to filter the taxa to match previous work
+#' and to set time periods of specific interest using start and end years.
+#'
+#' @param cpr_anomalies_long 
+#' @param matrix_var 
+#' @param use_focal_species 
+#' @param year_subsets 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 prep_PCA_periods <- function(cpr_anomalies_long, 
                              matrix_var = "standardized anomalies",
                              use_focal_species = FALSE,
@@ -1268,19 +1284,17 @@ prep_PCA_periods <- function(cpr_anomalies_long,
              taxa = str_replace_all(taxa, "spp", "spp."),
              taxa = str_replace_all(taxa, "spp..", "spp.")) %>% 
       filter(taxa %in% tolower(species_05))
-    
-  }
+    }
   
   
-  #### b. Re-format for PCA
+  #### b. Spread wider to make PCA matrix 
  
-  # Column to pivot
+  # Set column to pivot
   var_col <- switch (matrix_var,
     "standardized anomalies" = "anom_z",
-    "mean anomalies" = "anom_mu",
-    "mean abundances" = "abund_mu")
+    "mean anomalies"         = "anom_mu",
+    "mean abundances"        = "abund_mu")
   var_col <- sym(var_col)
-  
   
   # Pivot wider to return a matrix
   cpr_wide <- cpr_long %>% 
@@ -1290,10 +1304,7 @@ prep_PCA_periods <- function(cpr_anomalies_long,
   
   ####  Filter the years for each group, and grab just the taxa.
   subset_years <- map(year_subsets, function(x){
-    
-    # filter years
     x_years <- filter(cpr_wide, between(year, x[[1]], x[[2]]))
-    
   })
   
   # return the list of wide data and metadata
@@ -1305,8 +1316,21 @@ prep_PCA_periods <- function(cpr_anomalies_long,
 
 
 
-# Pick whether to use annual/time periods
-prep_PCA_matrices <- function(period_list, periodicity = "annual"){
+
+
+#' @title Set temporal period to use for PCA
+#' 
+#' @description Takes the prepared PCA data and filters it to either include
+#' annual timesteps or a seasonally averaged timestep
+#'
+#' @param period_list 
+#' @param periodicity 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+set_PCA_timestep <- function(period_list, periodicity = "annual"){
   
   # Testing:
   # tar_load(cpr_pca_periods); period_list <- cpr_pca_periods
@@ -1344,11 +1368,52 @@ prep_PCA_matrices <- function(period_list, periodicity = "annual"){
 
 
 
+
+
+#' @title Apply Principal Component Loadings to Data Matrix
+#'
+#' @param pca_load The data we wish to apply loadings to. Must have same column dimensions as the PCA dataset.
+#' @param pca_rotations Rotations obtained from the PCA object (results from prcomp())
+#' @param mode_num The Principal component loading to apply as an integer
+#'
+#' @return pca_adjusted dataframe containing original values of pca_load adjusted by the selected PCA loading's weights
+#' @export
+#'
+#' @examples
+apply_pca_load <- function(pca_load, pca_rotations, mode_num = 1) {
+  
+  #Pull PCA rotations/loadings
+  rotations <- as.data.frame(pca_rotations)
+  rotations_t <- t(rotations)
+  
+  #Principal component whose weights we want to apply
+  mode_num <- as.integer(mode_num)
+  
+  #Copy of the initial values to apply them to
+  pca_adjusted <- pca_load[, 2:ncol(pca_load)]
+  
+  #Multiply the columns by their PCA weights
+  for (i in 1:ncol(rotations_t)) {
+    pca_adjusted[, i] <- pca_adjusted[, i] * rotations_t[mode_num, i]
+    
+  }
+  
+  return(pca_adjusted)
+}
+
+
+
 #### Perform PCA Return Timeseries and Loadings
-perform_PCA <- function(pca_matrix, pca_meta){
+perform_CPR_PCA <- function(pca_data_list,
+                            pca_group_id = "1961-2003"){
+  
+  # Pull relevant pieces out (pca data in mamtrix form, matching metadata)
+  pca_matrix <- pca_data_list[[pca_group_id]][["pca_matrix"]]
+  pca_meta <- pca_data_list[[pca_group_id]][["metadata"]]
+  
   
   # 1. Perform PCA
-  pca_full <- prcomp(pca_mat, center = F, scale. = F)
+  pca_full <- prcomp(pca_matrix, center = F, scale. = F)
   
   
   
@@ -1378,12 +1443,16 @@ perform_PCA <- function(pca_matrix, pca_meta){
   ### NOTE: PCA direction not multiplied by *1 ####
 
   #Fill in Year Gap
-  gap_years <- tibble(year = rep(c(1975, 1976), 2),
-                      PC = c(rep("First Mode", 2), c(rep("Second Mode", 2))))
+  gap_years <- tibble(year = rep(c(1975, 1976), 4),
+                      PC = c(
+                        rep("First Mode", 2), 
+                        rep("Second Mode", 2),
+                        rep("Third Mode", 2),
+                        rep("Fourth Mode", 2)))
 
 
-  # Timeseries of first Mode
-  pc1 <- pca_mat %>%
+  # Pull Timeseries of first Mode
+  pc1 <- pca_matrix %>%
     #Add a filler column because function expects years to be column 1
     mutate(filler = NA) %>%
     select(filler, everything()) %>%
@@ -1396,13 +1465,13 @@ perform_PCA <- function(pca_matrix, pca_meta){
 
   # Get years and fill gaps
   colnames(pc1)[1] <- "Principal component value"
-  pc1 <- bind_cols(year = meta$year, pc1)
+  pc1 <- bind_cols(year = pca_meta$year, pc1)
   pc1 <- full_join(gap_years, pc1, by = c("year", "PC")) %>%
     filter(PC == "First Mode") %>%
     arrange(year)
 
   # Do the second Mode
-  pc2 <- pca_mat %>%
+  pc2 <- pca_matrix %>%
     mutate(filler = NA) %>% select(filler, everything()) %>%
     apply_pca_load(pca_load = .,
                    pca_rotations = pca_full$rotation,
@@ -1412,7 +1481,7 @@ perform_PCA <- function(pca_matrix, pca_meta){
     mutate(PC = "Second Mode")
 
   colnames(pc2)[1] <- "Principal component value"
-  pc2 <- bind_cols(year = meta$year, pc2)
+  pc2 <- bind_cols(year = pca_meta$year, pc2)
   pc2 <- full_join(gap_years, pc2, by = c("year", "PC")) %>%
     filter(PC == "Second Mode") %>%
     arrange(year)

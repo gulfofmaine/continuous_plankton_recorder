@@ -155,25 +155,37 @@ list(
   
   # Store the GAMS
   tar_target(gom_spline_models,
-             command = map(gom_seasonal_splines, pluck, "spline_model"))
+             command = map(gom_seasonal_splines, pluck, "spline_model")),
  
  
  
  ####  PCA work  ####
   
  # reshape as matrix (pick abundance or anomalies here)
+ tar_target(anom_z_matrices,
+            prep_PCA_periods(
+              cpr_anomalies_long = gom_seasonal_avgs, 
+              matrix_var = "standardized anomalies",
+              use_focal_species = TRUE,
+              year_subsets = list("1961-2003" = c(1961,2003),
+                                  "All years" = c(1961, 2017))
+            )),
  
  
- 
- # select time period
- 
- 
- 
- # select taxa to include
+ # Set whether to use annual or seasonal time steps
+ tar_target(annual_anom_z_matrices,
+            set_PCA_timestep(period_list = anom_z_matrices, periodicity = "annual")),
  
  
- 
+
  # perform PCA's
+ tar_target(Pershing05_period_PCA,
+            perform_CPR_PCA(pca_data_list = annual_anom_z_matrices,
+                            pca_group_id = "1961-2003")),
+ 
+ tar_target(All_years_annual_PCA,
+            perform_CPR_PCA(pca_data_list = annual_anom_z_matrices,
+                            pca_group_id = "All years"))
   
  
  ####______________________####

@@ -114,7 +114,7 @@ buoy_raw <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_raw.csv
                      col_types = cols(),
                      guess_max = 1e5)
 
-# Interputed NA Buoy data - source: 10_buoy_daily_interpolations.R
+# Interpolated NA Buoy data - source: 10_buoy_daily_interpolations.R
 buoy_i <- read_csv(str_c(cpr_boxpath, "data/processed_data/buoy_pcadat_interpolated.csv", sep = "/"),
                    col_types = cols())
 

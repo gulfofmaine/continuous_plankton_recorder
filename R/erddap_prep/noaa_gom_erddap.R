@@ -1,6 +1,12 @@
 ####  NOAA GOM CPR
 #### ERDDAP Prep
 
+# About:
+"
+This code generates the structure of the CPR data that will be put onto ERDDAP, 
+originally received from NOAA and the NEFSC, for the Gulf of Maine Transect.
+"
+
 
 
 ####  Packages  ####

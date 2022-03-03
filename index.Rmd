@@ -38,3 +38,4 @@ gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
 
 The Continuous Plankton Recorder Survey is a long-running survey program that collects abundance information for zooplankton populations in the surface ocean around the world. This resource is used when looking at the intra-annual variation in zooplankton populations like those here in the Gulf of Maine.
 
+For more information about the continuous plankton recorder program, its history, and the status of other transects please visit www.cprsurvey.org.

@@ -2,13 +2,14 @@
 
 This report documents the data used for our studies using the Continuous Plankton Recorder Survey (CPR) data, and all data wrangling performed for the analyses.
 
+
 ## CPR Data Provenance
 
 The data for the [continuous plankton recorder survey (CPR)](<https://www.cprsurvey.org/services/the-continuous-plankton-recorder/>) has been collected and maintained by multiple government and non-government organizations.
 
-The methods for data collection and sampling processes have remained consistent, however the data processing/storage has revealed some differences across research entities.
+The operation of the Gulf of  Maine CPR transect has been conducted since 1961 through joint collaboration between the Sir Alister Hardy Foundation (now Marine Biological Association) and the Northeast Fisheries Science Center under NOAA. While the core sampling methodology and sample processing has remained consistent, there are some noteworthy changes-of-hand and differences in data storage formatting between research entities.
 
-This documentation seeks to document the different data available to us here, and the data contained within each starting point. Once the starting points are clear, the data processing steps will be detailed to provide clarity on how these different resources can be used together.
+This documentation seeks to document the different data available to us here, and the data contained within each when working from each starting point. Once the starting points are clear, the data processing steps will be detailed to provide clarity on how these different resources can be used together.
 
 All final processing code has been moved to the {targets} pipeline, with all processing steps written as functions in:\
 > **R/support/gom_cpr_pipeline_support.R**

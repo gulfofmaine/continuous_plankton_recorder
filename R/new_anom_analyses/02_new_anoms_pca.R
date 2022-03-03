@@ -2,6 +2,17 @@
 #### Adam A. Kemberling
 #### 2/11/2020
 
+# NOTE:
+"
+The following code was the original workthrough used to produce the figures used in the CPR
+analysis paper. This code was then refactored to be implemented in {targets}. An example using
+all the years of data is found at the bottom.
+
+File Created: cpr_focal_pca_timeseries_period_1961-2017.csv
+"
+
+
+
 ####  Packages  ####
 library(tidyverse)
 library(here)
@@ -175,6 +186,8 @@ pc1 <- bind_cols(year = cpr_2005$year, pc1)
 pc1 <- full_join(gap_years, pc1) %>% arrange(year)
 
 
+
+# Prepare PCA loading 2
 pc2 <- cpr_2005_vals %>% 
   #Add a filler column because function expects years to be column 1
   mutate(filler = NA) %>% select(filler, everything()) %>% 
@@ -193,7 +206,8 @@ pc2 <- full_join(gap_years, pc2) %>% arrange(year)
 pc_modes <- bind_rows(pc1, pc2)
 
 
-(fig_2b <- ggplot(pc_modes, aes(year, `Principal component value`, color = PC)) +
+(fig_2b <- pc_modes %>% 
+    ggplot(aes(year, `Principal component value`, color = PC)) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
     geom_line() +
     scale_color_gmri(palette = "mixed") +
@@ -419,14 +433,13 @@ full_period_prepped <- prep_PCA_periods(cpr_anomalies_long = gom_seasonal_avgs,
 
 
 # Pull Time Period & periodicity
-full_period_pca <- prep_PCA_matrices(period_list = full_period_prepped, periodicity = "annual")
+full_period_pca <- set_PCA_timestep(period_list = full_period_prepped, periodicity = "annual")
 meta <- full_period_pca$`1961-2017`$metadata
 pca_mat <- full_period_pca$`1961-2017`$pca_matrix 
 
 
 # 1. Perform PCA using function
-full_pca <- perform_PCA(pca_matrix = pca_mat,
-                        pca_meta = meta)
+full_pca <- perform_CPR_PCA(pca_data_list = full_period_pca, pca_group_id = "1961-2017")
 
 
 
@@ -460,4 +473,5 @@ full_pca$PC_weights %>%
 # full_pca$PC_timeseries %>%
 #   pivot_wider(names_from = PC, values_from = `Principal component value`) %>%
 #   mutate(taxa_used = "seven focal taxa", pca_period = "1961-2017") %>%
-#   write_csv(here("results_data/cpr_focal_pca_timeseries_period_1961-20017.csv"))
+#   write_csv(here("results_data/cpr_focal_pca_timeseries_period_1961-2017.csv"))
+
