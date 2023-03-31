@@ -1089,7 +1089,7 @@ split_cpr_by_taxa <- function(cpr_spline_prepped){
     bind_cols() %>%
     pivot_longer(names_to = "taxa", values_to = "total NA's", cols = everything()) 
   
-  # falg taxa that are in either period, or just completely absent
+  # flag taxa that are in either period, or just completely absent
   na_counts <- na_counts %>%
     mutate(status = case_when(
       `total NA's` == 290 ~ "NOAA only",

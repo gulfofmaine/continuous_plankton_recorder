@@ -412,6 +412,15 @@ pca_modes_master <- pc_modes %>%
 
 
 ####_________________________####
+
+
+
+####  Exporting PCA Modes    ####
+# PCA modes were exported for use as environmental indicators
+# These were given to Matt Dzaugis for his work on lobster indicators
+
+
+
 ####_________________________####
 ####  All Years, Focal Species Only  ####
 # NOT used in paper
@@ -439,7 +448,8 @@ pca_mat <- full_period_pca$`1961-2017`$pca_matrix
 
 
 # 1. Perform PCA using function
-full_pca <- perform_CPR_PCA(pca_data_list = full_period_pca, pca_group_id = "1961-2017")
+full_pca <- perform_CPR_PCA(pca_data_list = full_period_pca, 
+                            pca_group_id = "1961-2017")
 
 
 

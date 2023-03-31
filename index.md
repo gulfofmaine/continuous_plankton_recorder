@@ -14,15 +14,13 @@ The following links direct you to the xaringan slideshow walking through pattern
 
 [Presentation Code link](/R/presentations/cpr_paper_story.html)
 
-[Presentation Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/presentations/cpr_paper_story.html#1)
+[Presentation Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/presentations/cpr_paper_story.html#1)
 
 
 
 The next links direct you to the clustering analysis markdown document and its code:
 
-[Rmarkdown Code Link](/R/05_cpr_clustering.Rmd)
-
-[HTML Page Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/05_cpr_clustering.html)
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/05_cpr_clustering.html)
 
 
 This link directs you to the shiny web app for comparing species abundance relationships to the buoy measurements.
@@ -32,7 +30,9 @@ This link directs you to the shiny web app for comparing species abundance relat
 
 This link is for the report consolidating results from the various analyses.
 
-[Rmarkdown Code Link](/R/12_paper_layout.Rmd)
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/new_anom_analyses/12_paper_layout.html)
 
-[HTML Page Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/new_anom_analyses/12_paper_layout.html)
+
+This link is to the figure testing link for Maria's paper:
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/mgrigoratou_collaboration/figure_edits_2023.html)
 

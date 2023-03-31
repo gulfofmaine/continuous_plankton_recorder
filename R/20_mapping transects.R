@@ -14,7 +14,8 @@ library(here)
 library(tidyverse)
 
 #CCEL Boxpath
-ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
+# ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
+ccel_boxpath <-cs_path(box_group = "ccel", subfolder = NULL)
 
 # ggtheme
 theme_set(theme_bw())
@@ -178,6 +179,7 @@ t1_summs %>% filter(station == 13)
 
 
 #Geographic boundaries
+library(rnaturalearth)
 northeast <- ne_states("united states of america") %>%
   st_as_sf() #%>% filter(region_sub %in% c("New England", "Middle Atlantic", "South Atlantic"))
 canada <- ne_states("canada") %>% st_as_sf()
