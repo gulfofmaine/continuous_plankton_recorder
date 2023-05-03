@@ -31,7 +31,16 @@ source(here::here("R", "cpr_helper_funs.R"))
 #Set ggplot theme
 theme_set(theme_minimal())
 
+# Figure note: Many figures if pre-made come from
+# 02_new_anoms_pca.R
+# 09_new_anoms_buoy_cpr_PCA.R
 
+```
+
+
+```{r, results='asis'}
+# Use gmri css
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
 ```
 
 
@@ -54,8 +63,7 @@ As of June, 2020 the data used in this document and for the purposes of the pape
 
 ####  Load Data  ####
 
-# Use gmri css
-gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+
 
 ####  Reference Taxa  ####
 # species_05 <- c("calanus_i_iv",
@@ -237,10 +245,12 @@ p3
 
 # 
 # # save out all three together
-# stacked <- (p1 + theme(axis.text.x = element_blank())) / (p2 + theme(axis.text.x = element_blank())) / p3
+stacked <- (p1 + theme(axis.text.x = element_blank())) / 
+  (p2 + theme(axis.text.x = element_blank())) / 
+  p3
 # ggsave(plot = stacked,
 #        filename =  here::here("R", "new_anom_analyses", "figures", "cpr_timeline_comparison.png"),
-#        device = "png",
+#        device = "png", dpi = 300,
 #        height = 10, width = 8, units = "in")
 
 ```
@@ -258,14 +268,14 @@ Taking the PCA weights from the 1961-2003 PCA (mimicking the 2005 paper) we can 
 ```
 
 
-![](new_anom_analyses/figures/Figure2b_recreation.png)
+![](figures/Figure2b_recreation.png)
 
 ### Extended Through 2017
 
 ```{r}
 #![](presentations/pershing05_recreations/Figure2b_full.png)
 ```
-![](new_anom_analyses/figures/Figure2c_extended_timeline.png)
+![](figures/Figure2c_extended_timeline.png)
 
 
 ### Applying 1961-2005 Weights to 91-Day Quarters
@@ -370,7 +380,7 @@ Using quarterly averages in seas surface temperature anomalies we can compare th
 ```{r}
 #![](presentations/sst_plots/sst_quarterly_corrplot.png)
 ```
-![](new_anom_analyses/figures/sst_quarterly_corrplot.png)
+![](figures/sst_quarterly_corrplot.png)
 
 
 
@@ -379,7 +389,7 @@ Using quarterly averages in seas surface temperature anomalies we can compare th
 #![](presentations/sst_plots/sst_qlagged_corrplot.png)
 ```
 
-![](new_anom_analyses/figures/sst_lagged_corrplot.png)
+![](figures/sst_lagged_corrplot.png)
 
 
 # Buoy Correlations with CPR Anomalies  {.tabset .tabset-pills}
@@ -390,7 +400,7 @@ Across the Gulf of Maine region there are a number of NERACOOS buoys recording r
 
 Buoys B, E, F, I, M, & N are part of the Northeastern Regional Association of Coastal and Ocean Observing Systems [(NERACOOS)](www.neracoos.org). Their locations have been plotted below:
 
-![](new_anom_analyses/figures/buoy_map.png)
+![](figures/buoy_map.png)
 
 ## Individual Correlations - Sensors & Taxa
 
@@ -407,7 +417,7 @@ These individual relationships can also be viewed in the following correlation p
 ![](presentations/buoy_plots/buoy_quarterly_corrplot.png)
 ```
 
-![](new_anom_analyses/figures/buoy_quarterly_corrplot.png)
+![](figures/buoy_quarterly_corrplot.png)
 
 # Buoy Sensor PCA  {.tabset .tabset-pills}
 
@@ -456,7 +466,7 @@ buoy_weights <- leading_modes %>%
 
 
 
-buoy_weights %>% 
+buoy_pca_weights <- buoy_weights %>% 
   mutate(PC = fct_rev(PC)) %>% 
   ggplot(aes(reading_depth, `Principal Component Weight`, fill = PC)) +
     geom_col(position  = "dodge") +
@@ -465,6 +475,19 @@ buoy_weights %>%
     facet_grid(var_id ~ buoy_id) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.2))
+
+
+buoy_pca_weights
+
+
+# # Save it
+# ggsave(
+#   buoy_pca_weights,
+#   filename = here::here("R/new_anom_analyses/figures/buoy_pca_weights_barplot.png"), 
+#   width = 8, 
+#   height = 6, 
+#   units = "in", 
+#   dpi = 300)
 
 ```
 

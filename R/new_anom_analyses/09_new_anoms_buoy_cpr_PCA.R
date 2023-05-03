@@ -128,11 +128,11 @@ sensor_p <- sensor_p + guides("fill" = guide_legend(title.position = "top", titl
 sensor_p
 
 
-#Export plot
+# # Export plot
 # ggsave(sensor_p,
 #        filename =  here::here("R", "new_anom_analyses", "figures", "buoy_pca_weights.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 
 
 
@@ -197,7 +197,7 @@ timeline_raw
 # ggsave(timeline_raw,
 #        filename =  here::here("R", "new_anom_analyses", "figures", "pca_ts_raw.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 
 
 ####__ 3. Loadings on Imputed Data  ####
@@ -253,7 +253,7 @@ interp_timeline <- bind_rows(pc1_ts_i, pc2_ts_i) %>%
 # ggsave(timeline_interp,
 #        filename =  here::here("R", "new_anom_analyses", "figures", "pca_ts_interp.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 
 
 # Save for future use
@@ -280,7 +280,7 @@ timelines_stacked
 # ggsave(timelines_stacked,
 #        filename =  here::here("R", "new_anom_analyses", "figures", "buoy_pca_ts_stacked.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 
 
 
@@ -373,10 +373,11 @@ sensor_status <- ggplot(bin_df, aes(Date, ID, fill = `Buoy Status`)) +
 trip_stack <- (sensor_status + theme(legend.position = "none")) / p2 / p3
 trip_stack #+ plot_annotation(tag_levels = 'A') 
 
-# ggsave(plot = trip_stack,
-#        filename =  here::here("R", "new_anom_analyses", "figures", "buoy_pca_triple.png"),
-#        device = "png",
-#        height = 10, width = 8, units = "in")
+#. Plot shows the data availability, the pca without interp., and what it is with it
+ggsave(plot = trip_stack,
+       filename =  here::here("R", "new_anom_analyses", "figures", "buoy_pca_triple.png"),
+       device = "png",
+       height = 10, width = 6, units = "in", dpi = 300)
 
 
 
@@ -467,10 +468,10 @@ ggplot(interpolated_means, aes(x = Year)) +
 
 
 ###__ Combine with CPR Data  ####
-interpolated_pc <- interpolated_means %>% select(Year, period, PC1_interpolated = PC1, PC2_interpolated = PC2)
-gappy_pc <- select(actual_means, Year, period, PC1_actual = PC1, PC2_actual = PC2)
+interpolated_pc   <- interpolated_means %>% select(Year, period, PC1_interpolated = PC1, PC2_interpolated = PC2)
+gappy_pc          <- select(actual_means, Year, period, PC1_actual = PC1, PC2_actual = PC2)
 buoy_pca_quarters <- full_join(interpolated_pc, gappy_pc, by = c("Year", "period"))
-buoy_w_cpr <- left_join(buoy_pca_quarters, cpr_quarters)
+buoy_w_cpr        <- left_join(buoy_pca_quarters, cpr_quarters)
 
 
 
@@ -485,12 +486,28 @@ buoy_w_cpr <- buoy_w_cpr %>%
     Q_Date = as.Date(paste(Year, jday, sep = "-"),"%Y-%j")) %>% 
   select(Year, period, jday, Q_Date, everything())
 
+
+
+
 # Interpolated Timeline - Ordered by date of occurrence
-ggplot(buoy_w_cpr, aes(x = Q_Date)) +
-  geom_line(aes(y = PC1_interpolated, color = "Buoy PC1 Interpolated")) +
-  geom_line(aes(y = PC2_interpolated, color = "Buoy PC2 Interpolated")) +
-  labs(x = "Date", y = "Principal Component Loading") +
-  scale_color_gmri(name = "", palette = "mixed")
+buoy_pca_timeline <- ggplot(buoy_w_cpr, aes(x = Q_Date)) +
+  geom_line(aes(y = PC1_interpolated, color = "Buoy Sensor PC1 (Interpolated)"), 
+            linewidth = 0.8) +
+  geom_line(aes(y = PC2_interpolated, color = "Buoy Sensor PC2 (Interpolated)"), 
+            linewidth = 0.8) +
+  # geom_point(aes(y = PC1_interpolated, color = "Buoy Sensor PC1 (Interpolated)"), 
+  #           size = 1.5) +
+  # geom_point(aes(y = PC2_interpolated, color = "Buoy Sensor PC2 (Interpolated)"), 
+  #           size = 1.5) +
+  labs(
+    x = "Year", 
+    y = "Principal Component Loading") +
+  scale_color_gmri(name = "", palette = "mixed") +
+  theme(legend.position = c(0.7, 0.2))
+
+buoy_pca_timeline
+
+
 # Non-interpolated, date of occurrence
 ggplot(buoy_w_cpr, aes(x = Q_Date)) +
   geom_line(aes(y = PC1_actual, color = "Buoy PC1 Measured")) +
@@ -498,6 +515,13 @@ ggplot(buoy_w_cpr, aes(x = Q_Date)) +
   labs(x = "Date", y = "Principal Component Loading") +
   scale_color_gmri(name = "", palette = "mixed")
 
+
+
+# Save the timeline for the buoy_pca_timeline
+ggsave(plot = buoy_pca_timeline,
+       filename =  here::here("R", "new_anom_analyses", "figures", "buoy_pca_interpolated_timeseries.png"),
+       device = "png",
+       height = 4, width = 6, units = "in", dpi = 300)
 
 
 
@@ -566,11 +590,11 @@ interp_quarterly_corrplot
 # ggsave(plot = obs_quarterly_corrplot,
 #        filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_actual.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 # ggsave(plot = interp_quarterly_corrplot,
 #        filename = here::here("R", "new_anom_analyses", "figures", "quarterly_buoy_pca_correlations_interpolated.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 
 # Possible better way to impute gappy matrix
 # http://menugget.blogspot.com/2012/10/dineof-data-interpolating-empirical.html

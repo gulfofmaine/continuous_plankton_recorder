@@ -79,6 +79,8 @@ area_bboxes <- tribble( #### open area bboxes  ####
 ) %>% arrange(area) #### close area bboxes  ####
 
 
+
+
 #Turn them into polygons
 area_polygons <- area_bboxes %>%
   split(.$area) %>% #Be careful here because split makes the list alphabetical
@@ -187,8 +189,11 @@ canada <- ne_states("canada") %>% st_as_sf()
 # Depth contours
 bathy <- raster("~/Documents/Repositories/Points_and_contours/NEShelf_Etopo1_bathy.tiff")
 contours_make <- c(-50, -100, -250)
-bathy_contours <- rasterToContour(bathy, levels = contours_make) %>% st_as_sf()
+bathy_contours <- rasterToContour(bathy, levels = contours_make) %>% 
+  st_as_sf(crs = st_crs(4326))
 bathy_contours$level <- factor(bathy_contours$level, levels = as.character(contours_make))
+
+
 
 # Buoy Locations
 buoy_locations <- tribble(
@@ -208,11 +213,11 @@ buoy_locations <- tribble(
 buoy_map <- ggplot() +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
-  geom_sf(data = bathy_contours, aes(color = level, fill = level, linetype = level), 
-          #color = "gray80", fill = "gray80",
-          show.legend = FALSE) +
+  # geom_sf(data = bathy_contours, aes(color = level, fill = level, linetype = level), 
+  #         #color = "gray80", fill = "gray80",
+  #         show.legend = FALSE) +
   geom_sf(data = buoy_locations) +
-  geom_text(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
+  geom_label(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
   scale_color_grey(start = 0.6) +
   scale_fill_grey(start = 0.6) +
   coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE) +
@@ -256,7 +261,7 @@ metR_map <- ggplot() +
                     rotate = FALSE,
                     check_overlap = TRUE) +
   geom_sf(data = buoy_locations) +
-  geom_text(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
+  geom_label(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
   coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE) +
   labs(x = NULL, y = NULL) +
   theme(panel.grid.major = element_line(colour = "transparent"))
@@ -271,7 +276,7 @@ metR_map
 
 
 ####____________________________####
-#### CPR + Buoys  ####
+#### CPR + Buoys on one Map ####
 
 
 # So base plot with the contours
@@ -280,38 +285,35 @@ base_plot <- ggplot() +
   geom_sf(data = canada) +
   geom_contour(data = bathy_df, aes(x, y, z = depth), 
                breaks = contours_make, 
-               color = "gray80") +
-  # geom_text_contour(data = bathy_df, aes(x, y, z = depth), 
-  #                   breaks = contours_make, 
-  #                   color = "gray40",
-  #                   size = 1.8,
-  #                   min.size = 10,
-  #                   stroke = 0.2, 
-  #                   rotate = FALSE,
-  #                   check_overlap = TRUE) +
-  # coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE) +
+               color = "gray90") +
   labs(x = NULL, y = NULL) +
   theme(panel.grid.major = element_line(colour = "transparent"))
 
 base_plot
 
-# Add Cpr Locations
+
+
+# 2. Add Cpr Locations
 cpr_sf <- cpr %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
+
 
 # Flag if they are within the study area somehow
 gom_area <- area_polygons %>% filter(area == "GOM_new") 
-cpr_areas <- cpr_sf %>% st_ (gom_area)
+
+#cpr_areas <- cpr_sf %>% st_ (gom_area)
 cpr_sf$indicator <- st_within(cpr_sf, gom_area) %>% lengths > 0
 
 
 # Add cpr to base
 combo_plot <- base_plot +
-  geom_sf(data = cpr_sf, shape = 3, size = 0.5, aes(color = indicator), show.legend = FALSE) +
-  scale_color_manual(values = c("gray80", "gray20")) +
-  geom_sf(data = gom_area, fill = "transparent", size = 1, color = "royalblue") +
+  geom_sf(data = cpr_sf, shape = 3, size = 0.5, 
+          aes(color = indicator), show.legend = FALSE) +
+  scale_color_manual(values = c("gray60", "gray20")) +
+  #scale_size_manual(values = c(0.2, 0.6)) +
+  geom_sf(data = gom_area, fill = "transparent", linewidth = 1, color = "royalblue") +
   #geom_sf(data = buoy_locations, shape = 17, size = 2) +
   #geom_label(data = buoy_locations, aes(label_lon, label_lat, label = Buoy), colour = "black") +
-  geom_label(data = buoy_locations, aes(lon, lat, label = Buoy), colour = "black") +
+  geom_label(data = buoy_locations, aes(lon, lat, label = Buoy), colour = "black", size = 4) +
   coord_sf(xlim = c(-71.25, -65.25), ylim = c(41, 44.65), expand = FALSE)
   
 
@@ -320,4 +322,9 @@ combo_plot
 
 # Save this better map
 ggsave(combo_plot,
-       filename = here::here("R", "new_anom_analyses", "figures", "buoy_cpr_map.png"), device = "png")
+       filename = here::here("R", "new_anom_analyses", "figures", "buoy_cpr_map.png"), 
+       device = "png",
+       height = 5,
+       width = 6,
+       unit = "in",
+       dpi = 300)

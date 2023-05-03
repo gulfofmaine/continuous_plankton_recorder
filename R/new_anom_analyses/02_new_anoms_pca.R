@@ -94,13 +94,14 @@ gap_anoms <- map_dfr(species_05, function(x){
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.4) +
     geom_line(aes(group = taxa), color = gmri_cols("gmri blue")) + 
     facet_wrap(~taxa, ncol = 2) + 
+    theme_minimal() +
     labs(x = NULL, y = "Abundance Index"))
 
-# # Export
-# ggsave(plot = fig1,
-#        filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"),
-#        device = "png",
-#        height = 6, width = 8, units = "in")
+# Export
+ggsave(plot = fig1,
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure1_recreation.png"),
+       device = "png",
+       height = 6, width = 8, units = "in", dpi = 300)
 
 
 ####  1. Figure 2 PCA Modes  ####
@@ -159,7 +160,7 @@ percent_explained <- pull_deviance(pca_2005$sdev)
 # ggsave(plot = fig2a,
 #        filename = here::here("R", "new_anom_analyses", "figures", "Figure2a_recreation.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 
 
 ####  2. Figure 2b PCA Time-series  ####
@@ -209,26 +210,29 @@ pc_modes <- bind_rows(pc1, pc2)
 (fig_2b <- pc_modes %>% 
     ggplot(aes(year, `Principal component value`, color = PC)) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
-    geom_line() +
+    geom_line(linewidth = 0.8) +
     scale_color_gmri(palette = "mixed") +
     labs(x = NULL, y = "Principal Component Loading") + 
     theme(legend.position = c(0.85, 0.12),
           legend.box.background = element_rect(fill = "white")))
 
+# # Export
 # ggsave(plot = fig_2b,
 #        filename = here::here("R", "new_anom_analyses", "figures", "Figure2b_recreation.png"),
 #        device = "png",
-#        height = 6, width = 8, units = "in")
+#        height = 6, width = 8, units = "in", dpi = 300)
 
 
 
 ####__ 2b. Stacked figure  ####
 fig_2_stacked <- fig2a / fig_2b + theme(legend.position = "none")
 fig_2_stacked
+
+# Export
 # ggsave(fig_2_stacked,
 #        filename = here::here("R", "new_anom_analyses", "figures", "Figure2_stacked.png"),
 #        device = "png",
-#        height = 10, width = 8, units = "in")
+#        height = 10, width = 8, units = "in", dpi = 300)
 
 ####  3. Figure 3 - Temperature and PCA Modes  ####
 
@@ -257,6 +261,7 @@ cpr_pca_sst %>% filter(PC == "Second Mode") %>% drop_na(`Principal component val
    facet_wrap(~PC, nrow = 2) +
    labs(y = "Magnitude", x = NULL))
 
+# Don't need to export
 # ggsave(plot = fig3, 
 #        filename = here::here("R", "new_anom_analyses", "figures", "2005_PCAts_wtemps.png"), 
 #        device = "png",
@@ -323,21 +328,21 @@ pc_modes <- pc_modes %>%
 
 ####  1. Figure 4a Full PCA Time-Series  ####
 (fig_4a <- ggplot(pc_modes) +
-    geom_rect(xmin = 1998, xmax = 2003, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
-    geom_rect(xmin = 2009, xmax = 2017, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+    #geom_rect(xmin = 1998, xmax = 2003, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
+    #geom_rect(xmin = 2009, xmax = 2017, ymin = -3, ymax = 3, fill = "gray90", alpha = 0.05) +
     geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.2) +
     geom_line(aes(year, `Principal component value` * -1, color = PC)) +
     scale_color_gmri(palette = "mixed") +
     labs(x = NULL, y = "Principal Component Loading") + 
-    theme(legend.position = c(0.85, 0.12), 
+    theme(legend.position = c(0.15, 0.825), 
           legend.box.background = element_rect(fill = "white"))
  )
 
 # # Export
-# ggsave(plot = fig_4a,
-#        filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"),
-#        device = "png",
-#        height = 6, width = 8, units = "in")
+ggsave(plot = fig_4a,
+       filename = here::here("R", "new_anom_analyses", "figures", "Figure2c_extended_timeline.png"),
+       device = "png",
+       height = 4, width = 6, units = "in", dpi = 300)
 
 
 
