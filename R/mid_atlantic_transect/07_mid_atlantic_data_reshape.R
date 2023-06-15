@@ -52,13 +52,17 @@ mc_cleanup <- function(messy_df = mb_phyto, taxon_key = mb_key) {
            hour = lubridate::hour(midpoint_UTC),
            minute = lubridate::minute(midpoint_UTC)) 
     
+  # Grab all the important columns
     clean_df <- clean_df %>% 
       select(sample_id, cruise, station, year, month, day, hour, minute, 
              latitude, longitude, everything()) %>% 
       select(-midpoint_UTC) 
   
-    # Swap names from key
-    names(clean_df) <- ifelse(names(clean_df) %in% taxon_key$`Accepted ID`, taxon_key$`Taxon Name`, names(clean_df)) %>% 
+    # Swap names for each taxa using the name key key
+    names(clean_df) <- ifelse(
+      names(clean_df) %in%  taxon_key$`Accepted ID`, 
+      taxon_key$`Taxon Name`, 
+      names(clean_df)) %>% 
       str_remove_all(pattern = "'") 
     
     clean_df <- clean_df %>% 
@@ -68,47 +72,64 @@ mc_cleanup <- function(messy_df = mb_phyto, taxon_key = mb_key) {
   return(clean_df)
 }
 
-#Clean them up
+
+
+#Clean the three pieces with the cleanup function:
 mb_phyto <- mc_cleanup(messy_df = mb_phyto)
-mb_trav <- mc_cleanup(messy_df = mb_trav)
-mb_eye <- mc_cleanup(messy_df = mb_eye)
+mb_trav  <- mc_cleanup(messy_df = mb_trav)
+mb_eye   <- mc_cleanup(messy_df = mb_eye)
+
+
+
+
 
 
 ####__####
-####  Combining Datasets  ####
+####  Combining Datasets (Phyto, Traverse, Transect)  ####
 
 
 
-###__1. Meters Cubed Conversion    ####
+###__1. 100 Meters Cubed Conversion    ####
 
+# NOAA ECOMON Records plankton density as #/100m3
+# To match this unit we need to convert from the counting system of the CPR survey 
+
+
+# These are the amount of each silk transect that are counted under a microscope
+# Each transet is 10 nautical miles travelled
+# A. subsample count to full transect
+# phyto 1/8000th of transect counted
+# traverse 1/40th of transect counted
+# eyecount full transect counted
 
 #Conversions - 
 
-# A. subsample count to full transect
-#phyto 1/8000th of transect counted
-#traverse 1/40th of transect counted
-#eyecount full transect counted
-
+# Look at the two measurement scales to note the values recorded:
 mb_trav %>% count(`centropages bradyi`)
-mb_eye %>% count(`centropages bradyi`)
+mb_eye  %>% count(`centropages bradyi`)
 
-#Original calculation to get to # per meters cubed
+
+
+# Original calculation to get to # per meters cubed
+# Based on opening aperture area and the distance travelled per sample (i.e. water volume sampled)
+# This rate resolves density per 1m3
 conversion_rate <- 1/2.987091
 
-#Multiply by 100 to get to 100 cubic meters
+# Multiply by 100 to get to 100 cubic meters
 conversion_rate <- conversion_rate * 100
 
 #Listed by source
-mb_abundances <- list("traverse" = mb_trav   %>% select(11:ncol(mb_trav)), 
-                      "eyecount" = mb_eye    %>% select(11:ncol(mb_eye)), 
-                      "phyto"    = mb_phyto  %>% select(12:ncol(mb_phyto)))
+mb_abundances <- list(
+  "traverse" = mb_trav   %>% select(11:ncol(mb_trav)), 
+  "eyecount" = mb_eye    %>% select(11:ncol(mb_eye)), 
+  "phyto"    = mb_phyto  %>% select(12:ncol(mb_phyto)))
 
 
 
 # Get the meters cubed numbers
-mb_m3 <-  map(mb_abundances, function(x){
-  x_meters_cubed <- x * conversion_rate
-  return(x_meters_cubed)
+mb_100_m3 <-  map(mb_abundances, function(x){
+  x_100_meters_cubed <- x * conversion_rate
+  return(x_100_meters_cubed)
 })
 
 
@@ -116,25 +137,29 @@ mb_m3 <-  map(mb_abundances, function(x){
 
 ####__2. Combine Traverse and eyecount  ####
 
-trav_m3 <- mb_m3$traverse
-eye_m3 <- mb_m3$eye
+trav_100_m3 <- mb_100_m3$traverse
+eye_100_m3 <- mb_100_m3$eye
 
 
 #Dataframe comparisons
 
 #All have the same number of rows, but columns are present in some but not others
-janitor::compare_df_cols(trav_m3, eye_m3)
-janitor::compare_df_cols_same(trav_m3, eye_m3)
+janitor::compare_df_cols(trav_100_m3, eye_100_m3)
+janitor::compare_df_cols_same(trav_100_m3, eye_100_m3)
 
-#Idea, create a dataframe with names found in both, make the values the added contribution from one or both the subsample types
-unique_names     <- sort(unique(c(names(trav_m3), names(eye_m3))))
-new_df           <- data.frame(matrix(0, nrow = nrow(trav_m3), ncol = length(unique_names)))
+#Idea, create a dataframe with names found in both, 
+# make the values the added contribution from one or both the subsample types
+unique_names     <- sort(unique(c(names(trav_100_m3), names(eye_100_m3))))
+new_df           <- data.frame(matrix(0, nrow = nrow(trav_100_m3), ncol = length(unique_names)))
 colnames(new_df) <- unique_names
 
 
 #Function to add columns as they appear in either set. 
 #Overwrites NA's with zeros
-taxa_fill <- function(empty_frame = new_df,  df_1 = trav_m3, df_2 = eye_m3) {
+taxa_fill <- function(
+    empty_frame = new_df,  
+    df_1 = trav_100_m3, 
+    df_2 = eye_100_m3) {
   
   #Taxon Names We want for the output
   taxa_names <- colnames(empty_frame)
@@ -147,6 +172,7 @@ taxa_fill <- function(empty_frame = new_df,  df_1 = trav_m3, df_2 = eye_m3) {
   
   # Fill that list with traverse abundances when they match
   traverse_counts <- imap(traverse_counts, function(x,y) {
+    
     #Baseline of 0
     taxa_counts <- rep(0, nrow(df_1))
     
@@ -198,7 +224,10 @@ taxa_fill <- function(empty_frame = new_df,  df_1 = trav_m3, df_2 = eye_m3) {
 
 ####  Combined Traverse and Eyecounts  ####
 # 1:1 sum of traverse and eyecount abunndances in # per cubic meter
-mb_zoo <- taxa_fill(empty_frame = new_df, df_1 = trav_m3, df_2 = eye_m3)
+mb_zoo <- taxa_fill(
+  empty_frame = new_df, 
+  df_1 = trav_100_m3, 
+  df_2 = eye_100_m3)
 mb_zoo <- bind_cols(mb_trav %>% select(1:10), mb_zoo)
 
 
@@ -214,4 +243,4 @@ mb_zoo %>%
 
 
 #remove unnecesary objects for use when sourcing
-rm(new_df, mb_abundances, mb_eye, mb_m3, mb_phyto, mb_trav, eye_m3, trav_m3)
+rm(new_df, mb_abundances, mb_eye, mb_100_m3, mb_phyto, mb_trav, eye_100_m3, trav_100_m3)

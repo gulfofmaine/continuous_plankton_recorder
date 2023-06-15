@@ -17,7 +17,7 @@ source(here::here("R", "cpr_helper_funs.R"))
 
 ####  1. MAB Consolidated  ####
 #Reshaped Mid-Atlantic Bight dataset obtained from new_anom_analyses/07_mid_atlantic_data_reshape.R
-source("R/new_anom_analyses/07_mid_atlantic_data_reshape.R")
+source("R/mid_atlantic_transect/07_mid_atlantic_data_reshape.R")
 
 
 ####__####

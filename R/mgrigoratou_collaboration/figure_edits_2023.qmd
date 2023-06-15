@@ -1298,7 +1298,7 @@ seasonal_response$`Autumn HW` %>%
     position = "stack") +
   theme_bw() +
   geom_vline(xintercept = 5, color = "black", linewidth = 1.5, lty = 2) +
-  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  scale_fill_brewer(palette = "RdYlBu", direction = 1) +
   scale_x_continuous(
     limits = c(0,12),
     breaks = season_breaks,
@@ -1377,7 +1377,7 @@ seasonal_response$`Autumn HW` %>%
   theme_bw() +
   geom_vline(xintercept = 5, color = "black", linewidth = 1.5, lty = 2) +
   facet_col(vars(functional_group), scales = "free_y") +
-  scale_fill_brewer(palette = "RdYlBu", direction = -1) +
+  scale_fill_brewer(palette = "RdYlBu", direction = 1) +
   scale_y_continuous(expand = expansion(add = c(0,0))) +
   scale_x_continuous(
     limits = c(0,24),
@@ -1419,7 +1419,7 @@ seasonal_response$`Autumn HW`  %>%
   theme_bw() +
   geom_hline(yintercept = 0, color = "black", linewidth = 1, lty = 1) +
   geom_vline(xintercept = 5, color = "red", linewidth = 1.5, lty = 2) +
-  scale_fill_brewer(palette = "RdBu", direction = -1) +
+  scale_fill_brewer(palette = "RdBu", direction = 1) +
   scale_x_continuous(
     limits = c(2,24),
     breaks = season_breaks,
@@ -1449,7 +1449,7 @@ seasonal_response$`Autumn HW`  %>%
   theme_bw() +
   geom_hline(yintercept = 0, color = "black", linewidth = 1, lty = 1) +
   geom_vline(xintercept = 5, color = "red", linewidth = 1.5, lty = 2) +
-  scale_fill_distiller(palette = "RdYlBu", direction = -1, trans = "log10", labels = label_log(base = 10)) +
+  scale_fill_distiller(palette = "RdYlBu", direction = 1, trans = "log10", labels = label_log(base = 10)) +
   scale_x_continuous(
     limits = c(2,24),
     breaks = season_breaks,
@@ -1480,7 +1480,7 @@ seasonal_response$`Autumn HW`  %>%
   geom_hline(yintercept = 0, color = "black", linewidth = 1, lty = 1) +
   geom_vline(xintercept = 5, color = "red", linewidth = 1.5, lty = 2) +
   facet_col(vars(functional_group), scales = "free_y") +
-  scale_fill_brewer(palette = "RdBu", direction = -1) +
+  scale_fill_brewer(palette = "RdBu", direction = 1) +
   scale_x_continuous(
     limits = c(2,24),
     breaks = season_breaks,
@@ -1523,7 +1523,7 @@ seasonal_response$`Autumn HW`  %>%
     expand = expansion(add = c(0,-1))) +
   labs(x = "Season", 
        y = "Diffirence from Control State - Absolute Biomass", 
-       title = "Autumn Heatwave Response - Temperature Optima")
+       title = "Autumn Heatwave Response - Max Size")
   
 
 
@@ -1548,7 +1548,7 @@ seasonal_response$`Autumn HW`  %>%
   geom_hline(yintercept = 0, color = "black", linewidth = 1, lty = 1) +
   geom_vline(xintercept = 1, color = "red", linewidth = 1.5, lty = 2) +
   facet_grid(seasons~functional_group, scales = "free") +
-  scale_fill_brewer(palette = "RdBu", direction = -1) +
+  scale_fill_brewer(palette = "RdBu", direction = 1) +
   scale_x_continuous(
     limits = c(0,8)) +
   labs(x = "Years", 
