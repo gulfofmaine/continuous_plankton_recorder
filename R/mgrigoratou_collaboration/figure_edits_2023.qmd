@@ -12,14 +12,16 @@ execute:
   message: ""
   warning: false
 ---
+# Notes 7/13/2023
+
+Fig 2: 
+Make the control cycles match the design of Marias python figures
+X axis: time (daily for a, seasonal for b and c). Y axis: absolute biomass. In subplots (a): dashed line shows the end of each season. In subplots (c): Bars: temperature optima. Stacked bars: absolute biomass concentrations of the different size groups (color bar for the size range of groups from small to big. You can use another colorbar 😊).  
+Subtitle for each season on x axis
+Top to bottom: active, passive, protists
 
 
-# Notes 3/30/2023
-
-Use just the data for the dominant species, not all taxa, for the dominant species plot. there will be one figure showing autumn heatwave response in the paper, the rest of the seasons will need to exist but will go in supplement. 
-
-Try the horizons to see if that is insightful at all, but don't spend all day on it. Maria suggested the absolute biomass difference as a unit, not percent change.
-
+Fig 
 
 
 # About
@@ -486,6 +488,37 @@ dom_spec_ctrl %>%
   theme(axis.text.x = element_text(angle = 90)) +
   labs(x = "Season", y = "Absolute Biomass", title = "Seasonal Cycle - Control")
 ```
+
+
+
+```{r}
+#| label: control-conditions-size-and-temp
+
+# Facet = season
+# x axis = temperature optima
+# y axis = biomass
+# fill = max body size
+
+# Show year(s) of the control cycle
+dom_spec_ctrl %>% 
+  mutate(temp_opt = factor(temp_opt)) %>%
+  mutate(id = fct_reorder2(id, functional_group, max_size, .desc = F)) %>% 
+  ggplot(aes(temp_opt, absolute_bio)) +
+  geom_col(
+    aes(group = id, 
+        fill = max_size),
+    color = "gray90", linewidth = 0.1,
+    position = "stack") +
+  facet_grid(functional_group ~ seasons, scales = "free") +
+  scale_fill_distiller(palette = "Spectral", direction = -1, trans = "log10", labels = label_log(base = 10)) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(
+    x = "Temperature Optima", 
+    y = "Absolute Biomass", 
+    title = "Seasonal Cycle - Control",
+    fill = "Body Size")
+```
+
 
 
 ---
@@ -1195,76 +1228,6 @@ seasonal_response$`Autumn HW` %>%
 
 
 
-### AHW Horizons
-
- Just so many taxa to show, but the idea is to use horizons to show how many seasons taxa are above/below their control state in some common unit (percent difference). The following figure is just the protists.
-
-For added control or clarity I could try nesting the facet labels with this package: https://stackoverflow.com/questions/62652308/combine-multiple-facet-strips-across-columns-in-ggplot2-facet-wrap 
-
-```{r}
-#| eval: true
-#| fig-height: 12
-#| fig-width: 8
-
-# So for this one we the x axis is the repeating seasons
-# Start with a full year of control cycle, then kick in to the horizons
-
-# Done.
-
-# breaks and labels for discrete x scale, repeating as many times as needed
-season_breaks <- c(1:length(unique(seasonal_response_all$`Autumn HW`$matrix_row)))
-season_labs <- rep(c("A", "W", "Sp", "Su"), 10)
-
-
-# Set the scale breaks:
-sca <- seq(0, 100, length.out = 9)
-sca_bins <- str_c(sca[1:(length(sca)-1)], " to ", sca[2:length(sca)], " %")
-sca_labels <- rev(sca_bins)
-
-# Set origin for scale:
-ori <- 0
-
-# Get the label order
-lab_order <- seasonal_response_all$`Autumn HW` %>% 
-  distinct(matrix_row, seasons) %>% 
-  arrange(matrix_row) %>% 
-  pull(seasons)
-
-
-# Plot Horizon Plot Using All Years
-seasonal_response_all$`Autumn HW` %>% 
-  filter(hw_season != "Control", 
-         is.na(seasons) == FALSE) %>% 
-  filter(!temp_opt %in% str_c(c(0, 4, 8, 12, 16),"C")) %>% #distinct(seasons)
-  filter(str_detect(functional_group,"Copepod")) %>% 
-  ggplot() +
-  geom_horizon(
-    aes(
-      x = matrix_row, 
-      y = diff_percent, 
-      fill = after_stat(Cutpoints)),
-  origin = ori,
-  horizonscale = sca) + 
-  facet_grid( id + temp_opt + functional_group ~ seasons, 
-             scales = "free") +
-  scale_fill_hcl(palette = 'RdBu', reverse = T, labels = sca_labels, ) +
-  #scale_x_continuous(breaks = c(1:40), labels = lab_order) +
-  theme(
-    panel.grid = element_blank(),
-    panel.spacing.y=unit(0.1, "lines"),
-    strip.text.y = element_text(size = 7, angle = 0, hjust = 0),
-    axis.text.y = element_blank(),
-    axis.title.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    panel.border = element_blank(),
-    legend.position = "left") +
-  labs(
-    x = '', 
-    fill = "Abundance Difference",
-    title= "Autumn Heatwave Response") 
-
-```
-
 
  
  
@@ -1866,7 +1829,8 @@ size_bin_plot <- function(x, y, plims = c(-8, 8), max_years = 9){
         labels = year_labs,
         expand = expansion()) +
       labs(x = "Years", 
-           y = "Body. Size Bin",
+           y = "Body Size Bin",
+           fill = "Absolute Biomass",
            title = str_c("Absolute Biomass of ", y , " Size Bins")) +
       guides(
         fill = guide_colourbar(
@@ -2088,5 +2052,468 @@ shannon_2 %>%
   labs(color = "Seasonal Response", y = "Shannon Index", x = "Seasonal Increment")
 
 ```
+
+
+
+
+
+
+
+# Notes 7/13/2023
+
+
+
+# Fig 2: 
+Make the control cycles match the design of Marias python figures
+X axis: time (daily for a, seasonal for b and c). Y axis: absolute biomass. In subplots (a): dashed line shows the end of each season. In subplots (c): Bars: temperature optima. Stacked bars: absolute biomass concentrations of the different size groups (color bar for the size range of groups from small to big. You can use another colorbar 😊).  
+Subtitle for each season on x axis
+Top to bottom: active, passive, protists
+
+```{r}
+library(rcartocolor)
+
+
+# Load the Data:
+dat_path <- here("maria_data/maria_paper_data/")
+
+
+
+
+
+#### Column 1: SST-MLD-Nitrogen
+
+abiotic <- read_csv(str_c(dat_path, "control_values/abiotic_control_daily.csv"))
+
+f2_a <- abiotic %>% 
+  pivot_longer(cols = c(temp, MLD, Nitrogen), names_to = "var", values_to = "vals") %>% 
+  mutate(
+    labels = case_when(
+    var == "temp" ~ "Temperature (\u00b0C)",
+    var == "MLD"  ~ "Mixed Layer Depth (m)",
+    var == "Nitrogen"  ~ "Nitrogen"),
+    labels = fct_rev(labels),
+    date = as.Date("2000-01-01") + (day-1)
+  ) %>% 
+  ggplot(aes(date, vals)) +
+  geom_line(linewidth  = 1) +
+  facet_wrap(~labels, ncol = 1,scales = "free") +
+  scale_x_date(breaks = "1 month",  labels = date_format("%b")) +
+  labs(x = NULL,  y = "Measurement", title = "Abiotic Conditions") +
+  theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"),
+        plot.background = element_rect(color = "black"))
+
+
+# Show it
+#f2_a
+```
+
+
+```{r}
+
+####  Column 2: Daily Biomass Streamgraph
+
+# Data
+ac_daily <- read_csv(str_c(dat_path, "control_values/Cop_act_control_daily.csv"))
+pc_daily <- read_csv(str_c(dat_path, "control_values/Cop_Pas_control_daily.csv"))
+pr_daily <- read_csv(str_c(dat_path, "control_values/P_control_daily.csv"))
+
+
+# Load the size bins - accurate but not helpful this way
+size_bin_labels <- tribble(
+  ~"functional_group", ~"size_bin", ~"bin_label", 
+  "Active Copepod",   "sizebin1",   expression("m <"~10^-2), 
+  "Active Copepod",   "sizebin2",   expression(10^-2~"\u2264 m <"~10^-1), 
+  "Active Copepod",   "sizebin3",   expression(10^-1~"\u2264 m <"~10^0), 
+  "Active Copepod",   "sizebin4",   expression(10^-0~"\u2264 m <"~10^1), 
+  "Active Copepod",   "sizebin5",   expression(10^1~"\u2264 m <"~10^2), 
+  "Active Copepod",   "sizebin6",   expression(10^2~"\u2264 m"), 
+  "Passive Copepod",  "sizebin1",   expression("m <"~10^-2), 
+  "Passive Copepod",  "sizebin2",   expression(10^-2~"\u2264 m <"~10^-1), 
+  "Passive Copepod",  "sizebin3",   expression(10^-1~"\u2264 m <"~10^0), 
+  "Passive Copepod",  "sizebin4",   expression(10^-0~"\u2264 m <"~10^1), 
+  "Passive Copepod",  "sizebin5",   expression(10^1~"\u2264 m <"~10^2), 
+  "Passive Copepod",  "sizebin6",   expression(10^2~"\u2264 m"), 
+  "Protist",          "sizebin1",   expression("m <"~10^-6), 
+  "Protist",          "sizebin2",   expression(10^-6~"\u2264 m <"~10^-5), 
+  "Protist",          "sizebin3",   expression(10^-5~"\u2264 m <"~10^-4), 
+  "Protist",          "sizebin4",   expression(10^-4~"\u2264 m <"~10^-3), 
+  "Protist",          "sizebin5",   expression(10^-3~"\u2264 m <"~10^-2), 
+  "Protist",          "sizebin6",   expression(10^-2~"\u2264 m")
+)
+
+# # For checking them
+# plot(1,1, type = "n")
+# text(1,1, expression(10^-2~"\u2264 m <"~10^-1))
+
+# Pivot them longer, Plot
+fig2_b_ac <- ac_daily %>% 
+  pivot_longer(cols = -day, names_to = "size_bin", values_to = "daily_bio") %>% 
+  mutate(
+    functional_group = "Active Copepod",
+    date = as.Date("2000-01-01") + (day-1),
+    size_bin = factor(str_remove(size_bin, "sizebin"))) %>% 
+  ggplot() +
+  geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25) +
+  geom_vline(xintercept = as.Date("2000-03-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  geom_vline(xintercept = as.Date("2000-06-30"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  geom_vline(xintercept = as.Date("2000-09-30"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  # scale_fill_brewer(
+  #   palette = "YlGnBu",
+  scale_fill_carto_d(
+    palette = "ag_Sunset", direction = -1,
+    labels = c(
+      expression("           m <"~10^-2),
+      expression(10^-2~"\u2264 m <"~10^-1),
+      expression(10^-1~"\u2264 m <"~10^0),
+      expression(10^-0~"\u2264 m <"~10^1),
+      expression(10^1~"\u2264 m <"~10^2),
+      expression(10^2~"\u2264 m         "))) +
+  guides(fill = guide_legend(title = "Copepod\nMass Range", label.hjust = 0.5)) +
+  facet_wrap(~functional_group) +
+  scale_y_continuous(expand = expansion(add = c(0,0))) +
+  scale_x_date(
+    breaks = "1 month",  labels = date_format("%b"),
+    limits = as.Date(c("2000-01-01", "2000-12-31")),
+    expand = expansion(add = c(0,0))) +
+  labs(x = NULL, y = expression("Biomass mg / m"^3), title = "Daily Biomass") +
+  theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"),
+        legend.background = element_rect(color = "black", fill = "white"))
+
+
+# Plot passive copepods
+fig2_b_pc <- pc_daily %>% 
+  mutate(sizebin5 = 0.00001, sizebin6 = 0.00001) %>% 
+  pivot_longer(cols = -day, names_to = "size_bin", values_to = "daily_bio") %>% 
+  mutate(
+    functional_group = "Passive Copepod",
+    date = as.Date("2000-01-01") + (day-1),
+    size_bin = factor(str_remove(size_bin, "sizebin"))) %>% 
+  ggplot() +
+  geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25, show.legend = F) +
+  geom_vline(xintercept = as.Date("2000-03-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  geom_vline(xintercept = as.Date("2000-06-30"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  geom_vline(xintercept = as.Date("2000-09-30"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  #scale_fill_brewer(palette = "YlGnBu") +
+  scale_fill_carto_d(palette = "ag_Sunset", direction = -1) +
+  facet_wrap(~functional_group) +
+  scale_y_continuous(expand = expansion(add = c(0,0))) +
+  scale_x_date(
+    breaks = "1 month",  labels = date_format("%b"),
+    limits = as.Date(c("2000-01-01", "2000-12-31")),
+    expand = expansion(add = c(0,0))) +
+  labs(x = NULL, y = expression("Biomass mg / m"^3)) +
+  theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"))
+
+
+
+# Pivot them wider, Plot
+fig2_b_pr <- pr_daily %>% 
+  pivot_longer(cols = -day, names_to = "size_bin", values_to = "daily_bio") %>% 
+  mutate(
+    functional_group = "Protist",
+    date = as.Date("2000-01-01") + (day-1),
+    size_bin = factor(str_remove(size_bin, "sizebin"))) %>% 
+  ggplot() +
+  geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25) +
+  geom_vline(xintercept = as.Date("2000-03-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  geom_vline(xintercept = as.Date("2000-06-30"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  geom_vline(xintercept = as.Date("2000-09-30"), linetype = 2, color = "gray30", linewidth = 0.75) + 
+  scale_fill_brewer(
+    palette = "YlGnBu",
+    labels = c(
+      expression("           m <"~10^-6),
+      expression(10^-6~"\u2264 m <"~10^-5),
+      expression(10^-5~"\u2264 m <"~10^-4),
+      expression(10^-4~"\u2264 m <"~10^-3),
+      expression(10^-3~"\u2264 m <"~10^-2),
+      expression(10^-2~"\u2264 m         "))) +
+  guides(fill = guide_legend(title = "Protist\nMass Range", label.hjust = 0.5)) +
+  facet_wrap(~functional_group) +
+  scale_y_continuous(expand = expansion(add = c(0,0))) +
+  scale_x_date(
+    breaks = "1 month",  labels = date_format("%b"),
+    limits = as.Date(c("2000-01-01", "2000-12-31")),
+    expand = expansion(add = c(0,0))) +
+  labs(x = NULL, y = expression("Biomass mg / m"^3)) +
+  theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"),
+        legend.background = element_rect(color = "black", fill = "white"))
+
+
+
+# Assemble them as one stack
+fig2_b_all <- fig2_b_ac / fig2_b_pc / fig2_b_pr + plot_layout(guides = "collect")
+#fig2_b_all
+```
+
+
+```{r}
+####_____________________####
+####  Column 3: Seasonal Control
+
+# # Dominant Species Seasonal Mean Biomass
+# # Show year(s) of the control cycle
+# total_cols <- dom_spec_ctrl %>% 
+#   group_by(functional_group, seasons) %>% 
+#   summarise(absolute_bio = sum(absolute_bio),
+#             .groups = "drop") %>% 
+#   mutate(
+#     seasons = str_c(seasons, " Total"),
+#     id = "total",
+#     seasons = factor(
+#     seasons,
+#     levels = c("Spring", "Spring Total", "Summer", "Summer Total",
+#                "Autumn", "Autumn Total", "Winter", "Winter Total")))
+
+# Column 3 Panels
+
+
+# Active Copepods
+f2_c_ac <- dom_spec_ctrl %>% 
+  filter(functional_group %in% c("Active Copepod")) %>% 
+  mutate(
+    seasons = factor(
+      seasons,
+      levels = c("Spring", "Spring Total", "Summer", "Summer Total",
+                 "Autumn", "Autumn Total", "Winter", "Winter Total")),
+    temp_opt = fct_rev(factor(temp_opt)),
+    id = fct_reorder2(id, functional_group, max_size, .desc = F)) %>%
+  ggplot(aes(seasons, absolute_bio)) +
+  geom_col(aes(group = id, fill = max_size),
+           position = "dodge",
+           width = 0.75, show.legend = F
+           ) +
+  facet_wrap(~functional_group) +
+  scale_fill_carto_c(
+    name = "Body Size\n(\u00b5g)",
+    palette = "ag_Sunset", 
+    direction = -1, 
+    trans = "log10", 
+    labels = label_log(base = 10),
+    guide = guide_colorbar(barheight = unit(3, "in")),
+    limits = c(10^-2, 10^3)) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Season", y = "Absolute Biomass", title = "Seasonal Average Biomass") +
+  theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"))
+
+
+# Passive Copepods
+f2_c_pc <- dom_spec_ctrl %>% 
+  filter(functional_group %in% c("Passive Copepod")) %>% 
+  mutate(
+    seasons = factor(
+      seasons,
+      levels = c("Spring", "Spring Total", "Summer", "Summer Total",
+                 "Autumn", "Autumn Total", "Winter", "Winter Total")),
+    temp_opt = fct_rev(factor(temp_opt)),
+    id = fct_reorder2(id, functional_group, max_size, .desc = F)) %>%
+  ggplot(aes(seasons, absolute_bio)) +
+  geom_col(aes(group = id, fill = max_size),
+           position = "dodge",
+           width = 0.75, show.legend = F
+           ) +
+  facet_wrap(~functional_group) +
+  scale_fill_carto_c(
+    name = "Body Size\n(\u00b5g)",
+    palette = "ag_Sunset", 
+    direction = -1, 
+    trans = "log10", 
+    labels = label_log(base = 10),
+    guide = guide_colorbar(barheight = unit(3, "in")),
+    limits = c(10^-2, 10^3)) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Season", y = "Absolute Biomass") +
+  theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"))
+
+f2_c_prots <- dom_spec_ctrl %>% 
+  filter(functional_group %in% c("Protist")) %>% 
+  mutate(
+    seasons = factor(
+      seasons,
+      levels = c("Spring", "Spring Total", "Summer", "Summer Total",
+                 "Autumn", "Autumn Total", "Winter", "Winter Total")),
+    temp_opt = fct_rev(factor(temp_opt)),
+    id = fct_reorder2(id, functional_group, max_size, .desc = F)) %>%
+  ggplot(aes(seasons, absolute_bio)) +
+  geom_col(aes(group = id, fill = max_size),
+           position = "dodge",
+           width = 0.75, show.legend = F
+           ) +
+  facet_wrap(~functional_group) +
+  scale_fill_distiller(
+    name = "Body Size\n(\u00b5g)",
+    palette = "YlGnBu", 
+    #direction = -1, 
+    trans = "log10", 
+    labels = label_log(base = 10),
+    guide = guide_colorbar(barheight = unit(3, "in"))) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(x = "Season", y = "Absolute Biomass") +
+  theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"))
+
+
+
+fig2_c_all <- f2_c_ac / f2_c_pc / f2_c_prots + plot_layout(guides = "collect")
+#fig2_c_all
+
+
+```
+
+
+```{r}
+#| fig.height = 5
+#| fig.width = 12
+# # All of them
+(f2_a | fig2_b_all | fig2_c_all )
+```
+
+
+
+
+```{r}
+# Column 4
+
+# Temperature Optima - Stacked bars for total biomass at each temperature optima
+# these are the population totals, they have population size bins
+
+```
+
+
+# Fig 3.
+Absolute Biomass concentration anomalies (HW/afterHW – preHW) for the biomass size bins of (a) protists, (b) passive and (c) active copepod feeders for the winter, autumn, spring and summer HW scenarios. 
+
+Note for Adam: Here we will have a figure with the figures you have under the Size-Bins Absolute Biomass section for protists, passive and active copepods as subplots. Could you please add (a), (b), (c) for protists, passive and active copepod feeders respectively? For the protists use a biomass range anomaly of -20 to 20. For copepods from – 8 to 8. Can you make the vertical border every 4 seasons dark black to separate the years? You can keep the seasonal vertical borders light grey if you want- or remove them. Whatever you think looks better.  
+
+```{r}
+# Change Color Scales
+#rcartocolor::display_carto_all()
+
+
+# rcartocolor palettes
+size_bin_carto <- function(x, y, plims = c(-8, 8), max_years = 9, palette = "Geyser"){
+  
+  # Set up color limit labels
+  # Set the center as the halfway between absolute min/max
+  lim_labs <- c(plims[1], mean(c(0, plims[1])), 0, mean(c(0, plims[2])),  plims[2])
+  lim_labs[1] <- str_c("<",lim_labs[1])
+  lim_labs[5] <- str_c(">",lim_labs[5])
+  
+  # Label every four rows for the years
+  year_breaks <- seq(1, max_years*4, by = 4) + 2.5
+  year_labs <- c(1:length(year_breaks))
+  
+  
+  # And the plot
+  x %>% 
+    ggplot(aes(row, y = size_bin, fill = absolute_biomass)) +
+      geom_tile(linewidth = 0.1, color = "gray") +
+      facet_grid(hw_taxa~hw_season, scales = "free", space = "free") +
+      scale_fill_carto_c(
+        palette = palette, 
+        direction = -1,
+        limits = plims,
+        labels = lim_labs, 
+        oob = oob_squish) +
+      scale_x_continuous(
+        limits = c(1, (max_years*4)+1),
+        breaks = year_breaks, 
+        labels = year_labs,
+        expand = expansion(add = c(-0.5,1.5))) +
+      geom_vline(xintercept = 5.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
+      geom_vline(xintercept = 9.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
+      geom_vline(xintercept = 13.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
+      geom_vline(xintercept = 17.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
+      labs(x = "Years", 
+           y = "Body Size Bin",
+           fill = "Absolute Biomass",
+           title = y) +
+      guides(
+        fill = guide_colourbar(
+          title.position = "top", 
+          title.hjust = 0.5, 
+          barwidth = unit(4, "in"), 
+          frame.colour = "black", 
+          ticks.colour = "black")) +
+    theme_minimal() +
+  theme(strip.background = element_rect(color = "black"),
+        panel.background = element_rect(color = "black"),
+        legend.position = "bottom")
+  }
+```
+
+
+
+```{r}
+# Active Copepod Response
+sbin_means_taxa$`Active Copepods` %>% 
+  filter(size_bin %not in% c("size_bin_1", "size_bin_2") ) %>% 
+  size_bin_carto(
+    ., 
+    y = "Active Copepods", 
+    plims = c(-8, 8), 
+    max_years = 5,
+    palette="Tropic")
+```
+
+#### Passive Copepods Response
+
+```{r}
+# Passive Copepod REsponse
+sbin_means_taxa$`Passive Copepods` %>% 
+  filter(size_bin %not in% c("size_bin_1") ) %>% 
+  size_bin_plot(
+    ., 
+    y = "Passive Copepods", 
+    plims = c(-8, 8), 
+    max_years = 5)
+```
+
+```{r}
+# Protist Response
+sbin_means_taxa$Protists %>% 
+  filter(size_bin %not in% c("size_bin_1") ) %>% 
+  size_bin_carto(
+    ., 
+    y = "Protists", 
+    plims = c(-20, 20), 
+    max_years = 5,
+    palette = "Tropic")
+```
+
+
+ 
+ 
+# Fig 4.
+ Absolute seasonal biomass concentration anomalies of the dominant groups of (a) protists, (b) passive and (a) active copepod feeders for the autumn HW scenario during the heatwave and 9 years after the heatwave.   
+
+ 
+
+Note for Adam: Here we will have a figure with the figures you have under the Change in Absolute Biomass section for protists, passive and active copepods as subplots. Could you please add (a), (b), (c) for protists, passive and active copepod feeders respectively? For the protists can you please add the 16 oC temperature optima as well? I think the protists have a biomass anomaly 1 order higher than copepods. If yes, then use one biomass range for copepods (active, passive) and one for protists. Can you make the vertical border every 4 seasons dark black to separate the years? You can keep the seasonal vertical borders light grey.  
+
+
+# Fig 5.
+ Annual Shannon Diversity Index for (a) protists, (b) passive and (c) active copepod feeders for the winter, spring, autumn and winter HW scenarios.  y axis: years. Year 0: pre-heatwave, Year 1: heatwave (in red) Years 2-9: after-heatwave.  
+
+Note for Adam: Here we will have the figure you have under the Annual Change within a Season section. Same ranges for the Shannon index for all groups (2.4- 6.5). X axis: can you please change it to 0 1 2 3 4 5 6 7 8 9 than 0 2 4 6 8 years?  
+
+
+
+# Fig 6. 
+Biomass anomalies (HW protists or copepods only -  HW on both protists and copepods) for all seasons for the seasonal HWs and the 7 seasons afterwards. X axis: size bins, y axis: absolute biomass anomalies. The median value is presented with a square and the Standard deviation with the bar line.
+
+Note for Adam: This is an example of what we want. It doesn’t have to be like that, the key elements we want to show is the noice in the anomalies (in this figure are the dots), the mean (square) and the standard deviation (line).  The plot shows that, at least in our model, it is hard to distinguish the temperature vs the ecosystem driver. They seem to act synergistically. The model shows that at least for passive copepods the top-down control (blue) seems to be more important that the bottom up (yellow) highlighting the importance of resource competition on the copepod community structure. For active and protist copepods is more complicated. Thus, we argue that as we move from individuals to populations to ecosystem using temperature as the key driver might not be enough. A multidriver approach should be taken into consideration.  
 
 

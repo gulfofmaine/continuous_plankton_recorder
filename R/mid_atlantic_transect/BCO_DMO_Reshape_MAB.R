@@ -64,7 +64,7 @@ phyto_long <- mb_phyto %>%
   pivot_longer(cols = c(8:ncol(mb_phyto)),
                names_to = "taxa_num",
                values_to = "count", 
-               values_drop_na = T)
+               values_drop_na = F)
 
 
 ####  Eyecount Zooplankton Abundances  ####
@@ -76,7 +76,7 @@ eyecount_long <- mb_eye %>%
   pivot_longer(cols = c(7:ncol(mb_eye)),
                names_to = "taxa_num",
                values_to = "count", 
-               values_drop_na = T)
+               values_drop_na = F)
 
 
 ####  Traverse Zooplankton Abundances  ####
@@ -87,7 +87,7 @@ traverse_long <- mb_trav %>%
   pivot_longer(cols = c(7:ncol(mb_trav)),
                names_to = "taxa_num",
                values_to = "count", 
-               values_drop_na = T)
+               values_drop_na = F)
 
 
 # Put all the counts together
@@ -104,7 +104,7 @@ rm(mb_eye, mb_phyto, mb_trav)
 
 
 ####  Match Taxonomic ID to Taxa Number  ####
-counts_tidy <- left_join(counts_long, tidy_key) %>% 
+counts_tidy <- left_join(counts_long, tidy_key, by = join_by(taxa_num)) %>% 
   arrange(midpoint_UTC, taxa_name)
 
 
@@ -114,7 +114,7 @@ counts_tidy
 
 
 # SAVE it:
-write_csv(counts_tidy, here::here("erddap_data/mid_atlantic_long_bco_dmo.csv"))
+write_csv(counts_tidy, here::here("erddap_data/mid_atlantic_long_bco_dmo_complete.csv"))
 
 
 
