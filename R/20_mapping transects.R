@@ -105,24 +105,75 @@ area_polygons <- st_sf(area = unique(area_bboxes$area), st_sfc(area_polygons), c
 # Cruises by year
 # cpr %>% group_by(year) %>% summarise(n_cruises = n_distinct(cruise)) %>% View("cruise counts")
 
-####__Sample Coverage + Study Area  ####
+
+# How many transects are typical:
+# This would be better if we showed NA's and made it a heatmap
+just_gom_cpr <- cpr %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
+  st_join(filter(area_polygons, area == "GOM_new")) %>% 
+  filter(!is.na(area)) %>% 
+  st_drop_geometry() 
+
+
+####  Sampling Coverage Heatmap  ####
+just_gom_cpr %>% 
+  expand(year, month) %>% 
+  left_join(just_gom_cpr) %>% 
+  group_by(year, month) %>% 
+  summarise(n_stations = n_distinct(station),
+            .groups = "drop") %>% 
+  mutate(
+    year = as.numeric(as.character(year)),
+    month = month.abb[month],
+    month = factor(month, levels = month.abb),
+    n_stations = ifelse(n_stations == 0, NA, n_stations)) %>% 
+  ggplot(aes(month, year)) +
+  geom_tile(aes(fill = n_stations)) +
+  scale_fill_distiller(
+    palette = "BuGn", direction = 1, 
+    na.value = "red",
+    limits = c(1,15), breaks  = scales::pretty_breaks()) +
+  theme_dark() +
+  labs(title = "Gulf of Maine CPR Sampling Coverage")
+
+# Width of transect around 200 miles
+# typically 0-10 samples in a month
+
+
+
+####__Sampling Coverage + Study Area  ####
 t_2017 <- cpr %>% filter(year == "2017") 
 t_2017_sf <- t_2017 %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
 
 
+# Plot a year
 ggplot() +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
-  #geom_sf(data = st_as_sf(cpr, coords = c("lon", "lat"), crs = 4326)) +
-  geom_sf(data = t_2017_sf) +
+  geom_sf(
+    data = t_2017_sf, 
+    aes(size = `calanus finmarchicus v-vi`)) +
   geom_sf(data = filter(area_polygons, area == "GOM_new"), aes(fill = area), alpha = 0.3) +
   coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
+  facet_wrap(~month) +
+  geom_text(
+    data = t_2017 %>% group_by(month) %>% summarise(n_samps = str_c("n = ", n())),
+    aes(x = -66, y = 42, label = n_samps)) +
   theme_bw() +
-  guides(fill = guide_legend(title = "Gulf of Maine Study Area", 
-                             label = FALSE, 
-                             title.position = "left")) +
-  theme(legend.position = c(0.7, 0.15),
-        legend.background = element_blank()) #+ labs(caption = "Sampling Conducted in 2017 - 4 Transects")
+  guides(fill = guide_legend(
+    title = "Gulf of Maine CPR Paper Study Area", 
+    label = FALSE, 
+    title.position = "left")) +
+  labs(title = "2017 CPR sampling") +
+  theme(
+    #legend.position = c(0.7, 0.15),
+    legend.position = "bottom",
+    legend.background = element_blank()) #+ labs(caption = "Sampling Conducted in 2017 - 4 Transects")
+
+
+###__ Regional Boundaries  ####
+# These different regions have either been used in analyses
+# or described in CPR papers
 
 # plotting all areas
 ggplot() +
@@ -133,21 +184,24 @@ ggplot() +
   facet_wrap(~area)
 
 
-###__Yearly Coverage  ####
+###__Single Year Coverage  ####
 ggplot() +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
   #geom_line(data = t_2017, aes(lon, lat, color = month)) +
-  geom_sf(data = t_2017_sf, aes(color = month)) +
+  geom_sf(
+    data = t_2017_sf, 
+    aes(color = month, size = `calanus i-iv`)) +
   coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
   theme_bw() +
   theme(legend.position = c(0.85, 0.15),
-        legend.background = element_blank()) + 
+        legend.background = element_blank(), 
+        legend.box = "horizontal") + 
   labs(caption = "Sampling Conducted in 2017 - 4 Transects")
 
 
 
-####__ Single Transect  ####
+####__ Single Transect/Station  ####
 t1 <- t_2017 %>% filter(cruise == "477MC")
 t1_sf <- t1 %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
 

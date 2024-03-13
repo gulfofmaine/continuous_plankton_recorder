@@ -11,13 +11,16 @@
 
 ####  Packages  ####
 library(raster)
+library(exactextractr)
 library(here)
 library(gmRi)
 library(ggpmisc)
 library(patchwork)
 library(tidyverse)
 library(sf)
-library(exactextractr)
+conflicted::conflict_prefer("select", "dplyr")
+conflicted::conflict_prefer("filter", "dplyr")
+
 
 
 # Polygons for mapping
@@ -35,7 +38,7 @@ oisst_path   <- cs_path(box_group = "RES_Data", subfolder = "OISST/oisst_mainsta
 
 
 
-####____####
+####__________________####
 ####  Gulf of Maine Transect  ####
 
 # Combined dataset from NOAA/SAHFOS, concentrations in common units: # / meters cubed
@@ -61,7 +64,16 @@ gom_abund <- gom_abund %>%
     `longitude (degrees)` = `longitude (degrees)`*-1)
 
 
-##### Map GOM  ####
+# sf for GOM points
+gom_sf <- gom_abund %>% 
+  distinct(date, station, `longitude (degrees)`, `latitude (degrees)`) %>% 
+  st_as_sf(coords = c("longitude (degrees)", "latitude (degrees)"), crs = 4326, remove = FALSE)
+
+
+
+
+
+##### Map of GOM Transect ####
 
 # Build data window for loading sst later
 gom_window <- data.frame(lon = c(min(gom_abund$`longitude (degrees)`), max(gom_abund$`longitude (degrees)`)),
@@ -80,10 +92,6 @@ gom_window_sf <- gom_window %>%
   st_cast("POLYGON") %>% 
   st_convex_hull()
 
-# sf for GOM points
-gom_sf <- gom_abund %>% 
-  distinct(date, station, `longitude (degrees)`, `latitude (degrees)`) %>% 
-  st_as_sf(coords = c("longitude (degrees)", "latitude (degrees)"), crs = 4326, remove = FALSE)
 
 
 # Map for GOM region
@@ -91,26 +99,34 @@ gom_map <- ggplot() +
   geom_sf(data = new_england) +
   geom_sf(data = canada) +
   geom_sf(data = gom_sf) +
-  geom_sf(data = gom_window_sf, aes(fill = area), alpha = 0.3) +
+  geom_sf(data = gom_window_sf, aes(fill = "Gulf of Maine Transect BBOX"), alpha = 0.3) +
   coord_sf(xlim = c(-73, -64),
            ylim = c(41.75, 45),
            expand = F)
 gom_map
 
 
-##### Gulf of Maine Daily  ####
+
+
+
+
+##### Gulf of Maine Daily Averages  ####
 
 # Make it long format for grouping
 gom_long <- gom_abund %>% 
-  pivot_longer(names_to = "taxa", values_to = "abundance_per_100_cubic_meters", cols = 10:ncol(.))
+  pivot_longer(
+    names_to = "taxa", 
+    values_to = "abundance_per_100_cubic_meters", 
+    cols = 10:ncol(.))
 
 
 
 # make date and station key to expand taxa * station
 # need to do this to not create stations that didnt exist
-gom_long <- mutate(gom_long, 
-                   station = str_pad(station, side = "left", width = 2, pad = "0"),
-                   sta_date = str_c(station, "-", date))
+gom_long <- mutate(
+  gom_long, 
+  station = str_pad(station, side = "left", width = 2, pad = "0"),
+  sta_date = str_c(station, "-", date))
 
 
 
@@ -129,17 +145,18 @@ gom_daily <- gom_long %>%
 
 
 
-
+####__________________####
 ####  Mid Atlantic Bight Transect  ####
 # Source: 01_mab_firstlook.R
-mab_abund <- read_csv(str_c(ccel_boxpath, "Data/Mid Atlantic CPR/noaa_mab_cpr_long.csv"), 
-                      guess_max = 1e6, 
-                      col_types = cols())
+mab_abund <- read_csv(
+  str_c(ccel_boxpath, "Data/Mid Atlantic CPR/noaa_mab_cpr_long.csv"), 
+        guess_max = 1e6, 
+        col_types = cols())
 
 
 
-# Drop a bunch of years
-mab_abund <- mab_abund %>% 
+# # Drop a bunch of years
+mab_abund <- mab_abund %>%
   filter(year %in% c(2009,2010))
 
 
@@ -157,18 +174,41 @@ mab_abund <- mab_abund %>%
 
 
 
-
-#####  Mapping Mid-Atlantic Data ####
-
-
-
-#####_Mid Atlantic Region Creation  ####
-
-# Distinct locations from MAB transect:
+# Distinct shelf/slope regions from MAB transect:
 # map mab transect
 mab_sf <- mab_abund %>% 
   distinct(date, sample, longitude, latitude) %>% 
-  st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
+  st_as_sf(coords = c("longitude", "latitude"), 
+           crs = 4326, remove = FALSE)
+
+
+
+
+
+
+#####  Mapping the two survey transects  ####
+ggplot() +
+  geom_sf(data = mab_sf, pch = 3, aes(color = "Gulf of Maine Transect"), alpha = 0.4) +
+  geom_sf(data = gom_sf, pch = 3, aes(color = "Mid-Atlantic Transect"), alpha = 0.4) +
+  geom_sf(data = canada) +
+  geom_sf(data = new_england) +
+  scale_color_gmri() +
+  theme_bw() +
+  labs(color = "") +
+  coord_sf(xlim = c(-76,-64),
+           ylim = c(36, 45), 
+           expand = F)
+
+
+
+
+
+
+##### Mid Atlantic Sub-Regions: Shelf/Slope  ####
+
+
+
+
 
 
 
@@ -191,7 +231,7 @@ mab_slope <- tribble(
   st_cast("POLYGON") %>% 
   st_convex_hull()
 
-#
+# Also from that paper
 mab_shelf <- tribble(
     ~"longitude",       ~"latitude",
     -72.83219169837525, 39.227208911783926,
@@ -223,35 +263,22 @@ mab_plot
 
 
 
-####  Mapping Shelf and Slope  ####
-ggplot() +
-  geom_sf(data = mab_sf, pch = 3, aes(color = "Gulf of Maine Transect"), alpha = 0.4) +
-  geom_sf(data = gom_sf, pch = 3, aes(color = "Mid-Atlantic Transect"), alpha = 0.4) +
-  geom_sf(data = canada) +
-  geom_sf(data = new_england) +
-  scale_color_gmri() +
-  theme_bw() +
-  labs(color = "") +
-  coord_sf(xlim = c(-76,-64),
-           ylim = c(36, 45), 
-           expand = F)
 
 
-
-##### Region Assignment  ####
+##### MAB Region Assignment  ####
 
 
 # Use st_join to get area overlay
 mab_sf_shelf <- mab_sf %>% 
   st_join(mab_shelf, join = st_intersects) %>% 
   drop_na(area) %>% 
-  select(-geometry) %>% 
+  dplyr::select(-geometry) %>% 
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
 mab_sf_slope <- mab_sf %>% 
   st_join(mab_slope, join = st_intersects) %>% 
   drop_na(area)  %>% 
-  select(-geometry) %>% 
+  dplyr::select(-geometry) %>% 
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
 
@@ -269,9 +296,9 @@ ggplot() +
 
 
 
-##### Mid-Atlantic Daily  ####
+##### Mid-Atlantic Daily Averages  ####
 # already long
-glimpse(mab_sf_shelf)
+
 mab_points_to_daily <- function(mab_region_sf){
   
   # make date and station key to expand taxa * station
@@ -312,8 +339,8 @@ ggplot(gom_daily, aes(x = avg_abund_per_100m)) + geom_histogram() + labs(subtitl
 
 
 
-
-####  Daily CPR Exports  ####
+####__________________####
+####  CPRDaily Average Exports  ####
 # write_csv(gom_daily , here::here("maria_data/gom_cpr_mean_abund100m3.csv"))
 # write_csv(mab_shelf_daily , here::here("maria_data/mab_shelf_mean_abund100m3.csv"))
 # write_csv(mab_slope_daily , here::here("maria_data/mab_slope_mean_abund100m3.csv"))
@@ -323,9 +350,9 @@ ggplot(gom_daily, aes(x = avg_abund_per_100m)) + geom_histogram() + labs(subtitl
 
 
 
-####_____####
+####__________________####
 
-#### About SST Work
+#### CPR Transect SST ####
 
 "
 OISST data used for analyses was made available by the NOAA physical sciences laboratory (PSL) REFERENCE. 
@@ -338,45 +365,44 @@ temperature data has been added to the supplementary materials
 "
 
 
-####  Prepare Regional SST  ####
-
-##### Gulf of Maine SST  ####
-
-
-# load sst
-gom_sst <- oisst_window_load(
-  box_location = "cloudstorage",
-  data_window = gom_window,
-  anomalies = FALSE) %>% 
-  stack()
-
-
-# Crop to specific dimensions
-gom_sst_df <- exact_extract(gom_sst, gom_window_sf, "mean") %>% 
-  t() %>%  
-  as.data.frame() %>% 
-  rownames_to_column(var = "date") %>% 
-  rename(sst = V1) %>% 
-  mutate(date = str_sub(date, 7, -1),
-         date = str_replace_all(date, "[.]", "-"),
-         date = as.Date(date),
-         area = "Gulf of Maine")
+####  Prepare Regional SST Timeseries  ####
 
 
 
+#####  Mid Atlantic Bight SST  ####
 
-#####  Mid Atlantic Bight Overall  ####
-mab_window <- data.frame(lon = c(min(mab_sf$longitude), max(mab_sf$longitude)),
-                         lat = c(min(mab_sf$latitude), max(mab_sf$latitude)),
-                         time = as.Date(c("1998-01-01", "2010-12-31")))
+
+# Dates and geographic limits for mab transect
+mab_window <- data.frame(
+  lon = c(min(mab_sf$longitude), max(mab_sf$longitude)),
+  lat = c(min(mab_sf$latitude), max(mab_sf$latitude)),
+  time = as.Date(c("2000-01-01", "2010-12-31")))
+
+
+
+# build sf for that general bbox area
+mab_window_sf <- mab_window %>% 
+  expand(lon, lat) %>% 
+  left_join(gom_window) %>% 
+  mutate(area = "GOM Area") %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
+  group_by(area) %>% 
+  summarise() %>% 
+  st_cast("POLYGON") %>% 
+  st_convex_hull()
+
+
 
 
 # Load OISST for MAB
-mab_oisst <- oisst_window_load(box_location = "cloudstorage", 
-                               data_window = mab_window,
-                               anomalies = FALSE) %>% stack()
+mab_oisst <- oisst_window_load(
+  box_location = "cloudstorage", 
+  data_window = mab_window,
+  anomalies = FALSE) %>% stack()
 
-# Make it a table - overall MAB
+
+
+# 1. - overall MAB for CPR Transect Area
 mab_sst_df <- raster::cellStats(mab_oisst, mean, na.rm = T) %>% 
   as.data.frame() %>% 
   rownames_to_column(var = "date") %>% 
@@ -391,15 +417,25 @@ mab_sst_df <- raster::cellStats(mab_oisst, mean, na.rm = T) %>%
 
 
 
+# Map what regions we're working with
+ggplot() +
+  geom_sf(data = mab_shelf, aes(fill = area), alpha = 0.3) +
+  geom_sf(data = mab_sf) +
+  geom_sf(data = mab_slope, aes(fill = area), alpha = 0.3) + 
+  geom_sf(data = mab_window_sf, aes(fill = "Whole Mid-Atlantic CPR Area"), alpha = 0.3) + 
+  geom_sf(data = new_england) +
+  map_theme() +
+  coord_sf(xlim = c(-76,-69.5),
+           ylim = c(36, 41.5), 
+           expand = T)
+  
 
 
 
-#####  MAB OISST  Extraction  ####
 
+#####  Masking MAB Slope and Shelf sub-regions ####
 
-
-####  Mask the MAB Slope and Shelf
-
+# These two regions were defined in Pershing et al 2010
 # Calculate vector of daily mean temps for the areas
 
 # MAB Shelf
@@ -412,6 +448,8 @@ mab_shelf_sst_df <- exact_extract(mab_oisst, mab_shelf, "mean") %>%
          date = str_replace_all(date, "[.]", "-"),
          date = as.Date(date),
          area = "MAB Shelf")
+
+
 
 # MAB Slope
 mab_slope_sst_df <- exact_extract(mab_oisst, mab_slope, "mean")  %>% 
@@ -426,45 +464,79 @@ mab_slope_sst_df <- exact_extract(mab_oisst, mab_slope, "mean")  %>%
 
 
 
+####  Shelf Map  ####
+
+# Bathymetric Contour Data
+bathy <- raster(str_c(cs_path("res","Bathy/"), "ETOPO1/NEShelf_Etopo1_bathy.tiff")) 
+
+# Make a terra copyfor ggplot using tidyterra
+elev_terra <- terra::rast(bathy)
+
+# Map of MAB Slope region
+mab_slope_map <- ggplot() +
+  tidyterra::geom_spatraster_contour(
+    data = elev_terra,
+    breaks = seq(0,-15000,-100),
+    alpha = 0.4) +
+  geom_sf(
+    data = mab_slope, 
+    color = "orange", 
+    fill = "orange", 
+    alpha = 0.3,
+    linewidth = 1,
+    linetype = 1) + 
+  geom_sf(data = new_england) +
+  map_theme() +
+  coord_sf(xlim = c(-76.2,-69),
+           ylim = c(36, 42.1), 
+           expand = T)
+mab_slope_map
+
+
+
+
+##### Gulf of Maine SST  ####
+
+
+# # load sst
+# gom_sst <- oisst_window_load(
+#   box_location = "cloudstorage",
+#   data_window = gom_window,
+#   anomalies = FALSE) %>% 
+#   stack()
+# 
+# 
+# # Crop to specific dimensions
+# gom_sst_df <- exact_extract(gom_sst, gom_window_sf, "mean") %>% 
+#   t() %>%  
+#   as.data.frame() %>% 
+#   rownames_to_column(var = "date") %>% 
+#   rename(sst = V1) %>% 
+#   mutate(date = str_sub(date, 7, -1),
+#          date = str_replace_all(date, "[.]", "-"),
+#          date = as.Date(date),
+#          area = "Gulf of Maine")
+
+
+
+
+
 #####  Regional SST Exports  ####
+
+# Gulf of Maine CPR bbox
 # write_csv(gom_sst_df, here::here("maria_data/gom_daily_sst.csv"))
+
+# Mid-Atlantic CPR BBox
 # write_csv(mab_sst_df, here::here("maria_data/mab_daily_sst.csv"))
+
+# Mid-Atlantic Slope Area
 # write_csv(mab_slope_sst_df, here::here("maria_data/mab_slope_daily_sst.csv"))
+
+# Mid-Atlantic Shelf Area
 # write_csv(mab_shelf_sst_df, here::here("maria_data/mab_shelf_daily_sst.csv"))
 
-
-
-# What is going on with 2010?
-raster::stack(str_c(oisst_path, "annual_observations/sst.day.mean.2010.v2.nc")) %>% names() %>% tail()
+# Map of shelf area
 
 
 
 
-####___________________####
-
-
-
-####  ASIDE: rgeboundaries  ####
-# Using geoboundaries instead of rnaturalearth
-library(rgeoboundaries)
-us_bounds <- gb_adm1(country = "usa", type = "sscgs")
-can_bounds <- gb_adm1(country = "canada", type = "sscgs")
-
-# Filter to our area
-new_england <- us_bounds %>% filter(shapeISO %in% str_c("US-", c("ME", "NH", "MA", "CT", "MD", "PA", "NY", "VT", "NC", "SC", "VA", "WV", "DE")))
-plot(st_geometry(new_england))
-canada <- can_bounds %>% filter(shapeName %in% c("Quebec", "Ontario", "Prince Edward Island", "Nova Scotia", "New Brunswick", "Newfoundland and Labrador")) 
-canada %>%  st_geometry() %>% plot()
-
-# wtf canada
-ggplot(bind_rows(canada, new_england)) +
-  geom_sf(aes(fill = shapeName))
-
-# try one of both
-canada <- rnaturalearth::ne_states("canada") %>% st_as_sf(crs = 4326)
-ggplot() +
-  geom_sf(data = new_england, aes(fill = shapeName))+
-  geom_sf(data = canada, aes(fill = woe_name))
-
-
-#### END ASIDE  ####

@@ -51,10 +51,15 @@ library(gt)
 # Set theme
 theme_set(
   theme_minimal() +
-  theme(plot.title = element_text(face = "bold",size = 14),
-        strip.background = element_rect(color = "black"),
-        panel.background = element_rect(color = "black"),
-        panel.grid.minor = element_blank())
+  theme(
+    plot.title = element_text(face = "bold",size = 14),
+    axis.text = element_text(size = 11),
+    axis.title = element_text(size = 12),
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.text = element_text(size = 11),
+    strip.background = element_rect(color = "black"),
+    panel.background = element_rect(color = "black"),
+    panel.grid.minor = element_blank())
 )
 
 # levels for season factors
@@ -240,6 +245,8 @@ Couple data wrangling steps here:
 
 
 ```{r}
+#| label: load-dom-species-data
+
 # 2. Dominant Species
 
 # # 2. Load files for the Dominant Species
@@ -259,18 +266,12 @@ abs_matrices <- dom_species[which(str_detect(names(dom_species), "abs"))]
 trial_names <- unique(str_sub(names(dom_species), 5, -1))
 trial_names <- setNames(trial_names, trial_names)
 
+
+
 # Reshape all the experimental trials, joining the three matrices:
 #dom_species_long <- trial_names[-c(is_control)] %>% map(join_duos)
 dom_species_long <- trial_names %>% map(join_duos)
 
-
-```
-
-Prepare the absolute biomass data for the dominant species:
-
-
-```{r}
-#| label: prepare-hw-trials-data
 
 # 1. Separate Control Conditions from Experiments
 
@@ -279,12 +280,14 @@ Prepare the absolute biomass data for the dominant species:
 dom_spec_hw <- dom_species_long[!str_detect(names(dom_species_long), "control")]
 
 
-#---------
 ```
+
+Prepare the absolute biomass data for the dominant species:
+
 
 
 ```{r}
-#| label: tidying-dominant-species
+#| label: tidying-dominant-species-hw-info
 
 
 # Function to strip out control row and label everything:
@@ -302,6 +305,7 @@ tidy_dom_species <- function(x){
           str_detect(trial, "winter") ~ "Winter HW",
           str_detect(trial, "control") ~ "Control"),
         hw_season = factor(hw_season, levels = hw_season_order),
+        
         # Label what season the response is occuring in
         seasons = str_remove_all(seasons, "_hw"),
         seasons = ifelse(seasons == "S", "Spring", seasons),
@@ -311,12 +315,12 @@ tidy_dom_species <- function(x){
         seasons = ifelse(seasons == "A", "Autumn", seasons),
         seasons = ifelse(seasons == "W", "Winter", seasons),
         seasons = factor(seasons, level = season_order),
+        
         # Clean up the functional group labels
         functional_group = case_when(
           species == "act_cop" ~ "Active Copepod",
           species == "pass_cop" ~ "Passive Copepod",
-          species == "protist" ~ "Protist")
-        ) %>% 
+          species == "protist" ~ "Protist")) %>% 
       # Within each season do row numbers independently to get the year
       mutate(id = str_c(species, control, sep = "-")) %>% 
       complete(matrix_row, id, seasons) %>% 
@@ -330,6 +334,9 @@ tidy_dom_species <- function(x){
       mutate(abs_bio_z = scale_this(absolute_bio)) %>% 
       ungroup()
 }
+
+
+
 
 
 #----------------
@@ -366,9 +373,6 @@ prep_control <- function(x){
   
   # Do the same reshaping
   
-  
-  
-  
   # Put all the control data together
   control_all <- bind_rows(dom_spec_ctrl) %>% 
     mutate( 
@@ -388,9 +392,10 @@ prep_control <- function(x){
       seasons = ifelse(seasons == "W", "Winter", seasons),
       seasons = factor(seasons, level = season_order)) %>% 
     # Within each season, row number independently to get the year
-    mutate(id = str_c(species, control, sep = "-"),
-           year = 0,
-           yseason = year + as.numeric(seasons))
+    mutate(
+      id = str_c(species, control, sep = "-"),
+      year = 0,
+      yseason = year + as.numeric(seasons))
   
   
   
@@ -462,10 +467,11 @@ pull_hw_season <- function(dom_species_data, season_x){
 
 
 # Make list for each seasonal heatwave dataset:
-hw_season_list <- list("Spring HW" = "Spring HW", 
-                       "Summer HW" = "Summer HW", 
-                       "Autumn HW" = "Autumn HW", 
-                       "Winter HW" = "Winter HW")
+hw_season_list <- list(
+  "Spring HW" = "Spring HW", 
+  "Summer HW" = "Summer HW", 
+  "Autumn HW" = "Autumn HW", 
+  "Winter HW" = "Winter HW")
 
 
 
@@ -480,7 +486,6 @@ dom_species_seasons <- map(hw_season_list, function(.x){
 
 # # What is happening with the season matching
 # all_species_seasons$`Summer HW`  %>% distinct(seasons)
-
 
 # Results:
 # ahw = august heatwave response
@@ -497,8 +502,14 @@ dom_species_seasons <- map(hw_season_list, function(.x){
 
 #------------------------
 
+# 1. Inputs:
+# dom_species_seasons$`Spring HW`
 
-# Function to throw a year of cotrol conditions in front
+
+
+
+
+# 2. Function to throw a year of cotrol conditions in front
 attach_control_lead <- function(hw_response, hw_ctrl, hw_season){
   
   
@@ -562,6 +573,10 @@ control_and_response <- imap(dom_species_seasons, function(.x, .y){
 
 **3. Calculate Difference from Control:**
 
+This step joins the control biomass in so that we can get the difference between biomass at a given time step and the biomass expectation from the control.
+
+
+
 ```{r}
 #| label: difference from control
 
@@ -570,32 +585,62 @@ control_and_response <- imap(dom_species_seasons, function(.x, .y){
 #--------- Join control by season to get difference: --------------
 
 
-# Function to join in the control set and get the differences etc.
-process_bio_differences <- function(x, x_ctrl){
+
+# 1. Inputs
+# control_and_response
+
+# Year setup debug:
+
+# # Starting situation
+# control_and_response$`Spring HW`  %>% 
+#   distinct(year, seasons, hw_season) %>% 
+#   arrange(seasons, year)
+# 
+# # Ending Situation - failing for spring (year = 0 x 2)
+# control_and_response$`Spring HW` %>% 
+#   mutate(
+#     year = (plyr::round_any(matrix_row, accuracy = 4, ceiling) / 4) - 1,
+#     year = ifelse(hw_season == "Spring HW", year+1, year)) %>% 
+#   distinct(year, seasons, hw_season) %>% 
+#   arrange(seasons, year)
+
+
+
+
+
+# 2. Function to join in the control set and get the differences etc.
+calc_biomass_change <- function(x, x_ctrl){
 
   # Join the control values to the results from the trials
   season_diff <- left_join(
     x = x, 
     y = select(
-      x_ctrl, id, seasons, ctrl_bio = absolute_bio, ctrl_low, ctrl_high, ctrl_range),
+      x_ctrl, id, seasons, 
+      ctrl_bio = absolute_bio, ctrl_low, 
+      ctrl_high, ctrl_range),
     by = c("id", "seasons"))
-  
   
   
   # Reap the benefits of joining the control information back in:
   season_diff <- season_diff %>% 
     mutate(
       # Set the year using the row
-      year = (plyr::round_any(matrix_row, accuracy = 4, ceiling) / 4) - 1,
+      year = (plyr::round_any(matrix_row, accuracy = 4, ceiling) / 4) - 1, # original
+      year = ifelse(hw_season == "Spring HW", year+1, year),
+      
       # Set the display order for taxa
       id = fct_reorder2(id, functional_group, temp_opt),
+      
       # Set seasonal factor order
       seasons = factor(seasons, levels = season_order),
+      
       # Add label to temp opt
       temp_opt = str_c(temp_opt, "C"),
       temp_opt = fct_rev(temp_opt),
+      
       # Calculate difference (absolute bio - ctrl_bio)
       abs_bio_diff = absolute_bio - ctrl_bio,
+      
       # Some sort of flag for when biomass is back to control conditions?
       diff_percent = (abs_bio_diff/ctrl_bio)*100,
       diff_flag = ifelse(between(diff_percent, -20, 20), "<20% from Control", ">20% from Control"))
@@ -609,12 +654,18 @@ process_bio_differences <- function(x, x_ctrl){
 ```
 
 
+
+
 ```{r}
 #------- Prep for each seasonal heatwave
 
 # Do it for all the seasons
-seasonal_response <- map(control_and_response, function(.x){
-  process_bio_differences(x = .x, x_ctrl = dom_spec_ctrl)
+seasonal_response <- map(
+  .x = control_and_response, 
+  .f = function(.x){
+  calc_biomass_change(
+    x = .x, 
+    x_ctrl = dom_spec_ctrl)
 })
 
 
@@ -622,6 +673,10 @@ seasonal_response <- map(control_and_response, function(.x){
 # dim(ahw_diff)
 # dim(seasonal_response$`Autumn HW`)
 ```
+
+
+
+
 
 
 # Fig. 1: Abiotic Conditions
@@ -646,6 +701,7 @@ abiot_long <- abiotic %>%
     var == "MLD"  ~ "Mixed Layer Depth (m)",
     var == "Nitrogen"  ~ "Nitrogen"),
     labels = fct_rev(labels),
+    # Start Day 1 at this date and add them forward:
     date = as.Date("2000-12-01") + (day-1),
     szn_mid =  case_when(
       between(date, as.Date("2000-12-01"), as.Date("2001-03-01")) ~ as.Date("2000-12-01")+45,
@@ -675,13 +731,16 @@ var_means <- var_dat %>% group_by(szn_mid) %>%
 f1_sst <- ggplot(var_dat, aes(date, vals)) +
   geom_line(linewidth  = 1) +
   geom_label(data = var_means, aes(x = szn_mid, y = 13, label = mu)) +
-  geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  facet_wrap(~labels, ncol = 1,scales = "free") +
+  geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  #facet_wrap(~labels, ncol = 1,scales = "free") +
   scale_x_date(breaks = "1 month",  labels = date_format("%b"),
                expand = expansion(add = c(0,0))) +
-  labs(x = NULL,  y = "Temperature") + 
+  labs(
+    title = "Sea Surface Temperature",
+    x = NULL,  
+    y = "Temperature") + 
   scale_y_continuous(labels = number_format(suffix = "\u00b0C"))
 
 f1_sst
@@ -703,13 +762,16 @@ var_means <- var_dat %>% group_by(szn_mid) %>%
 f1_mld <- ggplot(var_dat, aes(date, vals)) +
   geom_line(linewidth  = 1) +
   geom_label(data = var_means, aes(x = szn_mid, y = 22, label = mu)) +
-  geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  facet_wrap(~labels, ncol = 1,scales = "free") +
+  geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  #facet_wrap(~labels, ncol = 1,scales = "free") +
   scale_x_date(breaks = "1 month",  labels = date_format("%b"),
                expand = expansion(add = c(0,0))) +
-  labs(x = NULL,  y = "Mixed Layer Depth") + 
+  labs(
+    title = "Mixed Layer Depth",
+    x = NULL, 
+    y = "Mixed Layer Depth") + 
   scale_y_continuous(labels = number_format(suffix = "m"))
 
 f1_mld
@@ -724,24 +786,68 @@ f1_mld
 abiotic_var <- "Nitrogen"
 var_dat <- abiot_long %>% filter(var == abiotic_var)
 var_means <- var_dat %>% group_by(szn_mid) %>% 
-  summarise(mu = str_c("Mean = ", round(mean(vals), 2), "m"))
+  summarise(mu = str_c("Mean = ", round(mean(vals), 2)))
 
 
 f1_n <- ggplot(var_dat, aes(date, vals)) +
   geom_line(linewidth  = 1) +
   geom_label(data = var_means, aes(x = szn_mid, y = 0, label = mu)) +
-  geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
-  facet_wrap(~labels, ncol = 1,scales = "free") +
+  geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  #facet_wrap(~labels, ncol = 1,scales = "free") +
   scale_x_date(breaks = "1 month",  labels = date_format("%b"),
                expand = expansion(add = c(0,0))) +
-  labs(x = NULL,  y = "Mixed Layer Depth") + 
+  labs(
+    title = "Nitrogen",
+    x = "",  
+    y = "Nitrogen") + 
   scale_y_continuous(labels = number_format(suffix = "m"))
 
 f1_n
 
 ```
+
+
+### Temp Norms
+
+
+```{r}
+temp_norms <- read_xlsx(here::here("maria_data/maria_results_2023", "temp_norm_adam.xlsx"))
+
+color_levels <- str_c(seq(0,28,4), " ˚C")
+
+# Plot the temperature norms
+f1_tnorms <- temp_norms %>% 
+  pivot_longer(
+    cols = -`ambient Temp`, 
+    names_to = "temp_group", 
+    values_to = "temp") %>% 
+  mutate(temp_group = factor(temp_group, levels = color_levels)) %>% 
+  ggplot(aes(`ambient Temp`, temp, group = temp_group)) +
+  geom_line(aes(color = temp_group), linewidth  = 1, alpha = 0.8) +
+  scale_x_continuous(
+    expand = expansion(add = c(0,0)),
+    labels = label_number(suffix = "\u00b0C")) +
+  scale_y_continuous(labels = label_number(suffix = "\u00b0C")) +
+  theme(legend.position = "bottom") +
+  scale_color_brewer() +
+  guides(
+    color = guide_legend(
+      nrow = 1, 
+      label.position = "bottom", 
+      label.hjust = 0.5, 
+      keywidth = unit(1.5, "cm"))) +
+  labs(
+    title = "Temperature Norm",
+    x = "Ambient Temperature", 
+    y = "Temperature Norm",
+    color = "")
+
+f1_tnorms
+```
+
+
 
 
 :::
@@ -792,7 +898,8 @@ fig2_left_a <- ac_daily %>%
     date = as.Date("1999-12-01") + (day-1),
     size_bin = factor(str_remove(size_bin, "sizebin"))) %>% 
   ggplot() +
-  geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25) +
+  geom_area(aes(date, daily_bio, fill = size_bin)) +
+  #geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25) +
   geom_vline(xintercept = as.Date("2000-02-29"), linetype = 2, color = "gray30", linewidth = 0.75) + 
   geom_vline(xintercept = as.Date("2000-05-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
   geom_vline(xintercept = as.Date("2000-08-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
@@ -812,13 +919,15 @@ fig2_left_a <- ac_daily %>%
     breaks = "1 month",  labels = date_format("%b"),
     expand = expansion(add = c(0.5,0.5))) +
   theme(plot.margin = unit(c(1,1,2,1), "lines")) +
-  geom_text(data = season_position_df, aes(x = dates, y = bot_pos, label = label), vjust = 3, size = 5) +
+  geom_text(
+    data = season_position_df, 
+    aes(x = dates, y = bot_pos, label = label), vjust = 3, size = 5) +
   coord_cartesian(
     clip = "off", 
     expand = FALSE, 
     ylim = c(0, 62), 
     xlim = as.Date(c("1999-11-30", "2000-11-30"))) +
-  labs(x = NULL, y = NULL, title = "Daily biomass")
+  labs(x = NULL, y = NULL, title = "(a.) Daily Biomass")
 
 
 
@@ -831,7 +940,8 @@ fig2_left_b <- pc_daily %>%
     date = as.Date("1999-12-01") + (day-1),
     size_bin = factor(str_remove(size_bin, "sizebin"))) %>% 
   ggplot() +
-  geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25, show.legend = F) +
+  geom_area(aes(date, daily_bio, fill = size_bin)) +
+  #geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25) +
   geom_vline(xintercept = as.Date("2000-02-28"), linetype = 2, color = "gray30", linewidth = 0.75) + 
   geom_vline(xintercept = as.Date("2000-05-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
   geom_vline(xintercept = as.Date("2000-08-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
@@ -862,7 +972,8 @@ fig2_left_c <- pr_daily %>%
     date = as.Date("1999-12-01") + (day-1),
     size_bin = factor(str_remove(size_bin, "sizebin"))) %>% 
   ggplot() +
-  geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25) +
+  geom_area(aes(date, daily_bio, fill = size_bin)) +
+  #geom_stream(aes(date, daily_bio, fill = size_bin), type = "ridge", bw = 0.25) +
   geom_vline(xintercept = as.Date("2000-02-28"), linetype = 2, color = "gray30", linewidth = 0.75) + 
   geom_vline(xintercept = as.Date("2000-05-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
   geom_vline(xintercept = as.Date("2000-08-31"), linetype = 2, color = "gray30", linewidth = 0.75) + 
@@ -922,7 +1033,7 @@ pc_season <-  pc_season %>%
   mutate(sizebin5 = 0.00001, sizebin6 = 0.00001) %>% 
   mutate(total = rowSums(across(2:ncol(pc_season)))) %>% 
   pivot_longer(cols = -season, names_to = "size_bin", values_to = "season_bio")  %>% 
-  mutate(functional_group = "Active Copepod",
+  mutate(functional_group = "Passive Copepod",
          size_bin = factor(str_remove(size_bin, "sizebin")),
          season = str_to_title(season),
          season = factor(season, levels = season_lvls)) 
@@ -935,7 +1046,7 @@ pr_season <- read_csv(file = str_c(dat_path, "control_values/P_control_size_bins
 pr_season <- pr_season %>% 
   mutate(total = rowSums(across(2:ncol(pr_season)))) %>% 
   pivot_longer(cols = -season, names_to = "size_bin", values_to = "season_bio")  %>% 
-  mutate(functional_group = "Active Copepod",
+  mutate(functional_group = "Protist",
          size_bin = factor(str_remove(size_bin, "sizebin")),
          season = str_to_title(season),
          season = factor(season, levels = season_lvls))
@@ -972,7 +1083,7 @@ f2_mid_a <- ac_season  %>%
   facet_wrap(~functional_group) +
   scale_y_continuous(limits = c(0,50), expand = expansion(add = c(0,0))) +
   scale_x_discrete(labels = c("Winter\n(Dec-Feb)", "Spring\n(Mar-May)", "Summer\n(June-Aug)", "Autumn\n(Sept-Nov)")) +
-  labs(x = NULL, y = NULL, title = "Seasonal mean biomass")
+  labs(x = NULL, y = NULL, title = "(b.) Seasonal Mean Biomass")
 
 
 # Passive Copepods
@@ -1036,102 +1147,10 @@ f2_mid_c <- pr_season  %>%
 
 # Assemble
 fig2_mid_all <- (f2_mid_a / f2_mid_b + plot_layout(guides = "collect")) /f2_mid_c & theme(legend.position = "left")
-#fig2_mid_all <- f2_mid_a / f2_mid_b /f2_mid_c & theme(legend.position = "none")
 fig2_mid_all 
 
 ```
 
-
-### Dominant Species Biomass
-
-
-
-
-```{r}
-#| label: temp-optima-dominance
-
-
-####_____________________####
-####  Column 3: Temperature Optima
-
-# Changing the plot
-dom_temps <-  dom_spec_ctrl %>% 
-  filter(absolute_bio > 0.1) %>% # Drop very rare species that are invisible
-  mutate(
-    temp_opt = factor(temp_opt),
-    temp_opt = fct_drop(temp_opt),
-    temp_opt = fct_rev(temp_opt),
-    seasons = factor(seasons, levels = season_lvls)) 
-
-# fill label
-temp_fill_lab <- "Temperature Optima \u00B0C"
-# Consistent color
-
-# rev(c(carto_pal(4, "Geyser")))
-#"#CA562C" "#EDBB8A" "#B4C8A8" "#008080"
-temp_val_labels <- c(
-  "28" = "#CA562C",
-  "24" = "#E6A272", 
-  "20" = "#92B69E", 
-  "16" = "#008080"
-)
-
-
-# Active Copepod Plot
-f2_right_ac <- dom_temps %>% 
-  filter(functional_group == "Active Copepod") %>% #distinct(temp_opt)
-  ggplot(aes(max_size, y = absolute_bio)) +
-  geom_col(aes(fill = temp_opt), color = "white", linewidth = 0.25, show.legend = F) +
-  scale_fill_manual(values = temp_val_labels) +
-  scale_y_continuous(expand = expansion(add = c(0,1))) +
-  scale_x_continuous(
-    trans = "log10", labels = label_log(base = 10), limits = 10^c(-6,3)) +
-  facet_wrap(~seasons, nrow = 1, scales = "free_x") +
-  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5, keyheight = unit(1, "cm"))) +
-  theme(legend.title = element_text(angle = 90)) +
-  labs(y = NULL, x = NULL, title = "Dominant groups biomass", fill = temp_fill_lab)
-
-
-
-
-
-# Passive Copepods
-f2_right_pc <- dom_temps %>% 
-  filter(functional_group %in% c("Passive Copepod")) %>% 
-    ggplot(aes(max_size, y = absolute_bio)) +
-  geom_col(aes(fill = temp_opt), color = "white", linewidth = 0.25, show.legend = F) +
-  scale_fill_manual(values = temp_val_labels) +
-  scale_y_continuous(expand = expansion(add = c(0,1))) +
-  scale_x_continuous(
-    trans = "log10", labels = label_log(base = 10), limits = 10^c(-6,3)) +
-  facet_wrap(~seasons, nrow = 1, scales = "free_x") +
-  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5)) +
-  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5, keyheight = unit(1, "cm"))) +
-  theme(legend.title = element_text(angle = 90)) +
-  labs(y = abs_bio_ylab, x = NULL, fill = temp_fill_lab)
-
-
-# Protist Plots
-f2_right_prots <- dom_temps %>% 
-  filter(functional_group %in% c("Protist")) %>% 
-    ggplot(aes(max_size, y = absolute_bio)) +
-  geom_col(aes(fill = temp_opt), color = "white", linewidth = 0.25, show.legend = T) +
-  scale_fill_manual(values = temp_val_labels) +
-  scale_y_continuous(expand = expansion(add = c(0,3))) +
-  scale_x_continuous(
-    trans = "log10", labels = label_log(base = 10), limits = 10^c(-6,2)) +
-  facet_wrap(~seasons, nrow = 1, scales = "free_x") +
-  guides(fill = guide_legend(title.position = "left", title.hjust = 0.5, keyheight = unit(1, "cm"))) +
-  theme(legend.title = element_text(angle = 90)) +
-  labs(y = NULL, x = "Cell/body mass size (μg C)", fill = temp_fill_lab)
-  
-
-# Assemble
-fig2_right_all <- f2_right_ac / f2_right_pc / f2_right_prots + plot_layout(guides = "collect")
-fig2_right_all
-
-
-```
 
 :::
 
@@ -1144,18 +1163,28 @@ fig2_right_all
 
 
 # # All of them
-fig2_full <- fig2_left_all | fig2_mid_all | fig2_right_all + plot_annotation(title = "Pre-heatwave conditions")
+fig2_full <- fig2_left_all | fig2_mid_all + plot_annotation(title = "Pre-heatwave conditions")
 fig2_full 
 ```
 
 
 
+
+
+
 # Fig 3. Size Bin Response
-Absolute Biomass concentration anomalies (HW/afterHW – preHW) for the biomass size bins of (a) protists, (b) passive and (c) active copepod feeders for the winter, autumn, spring and summer HW scenarios. 
+Absolute Biomass concentration anomalies (HW/afterHW – preHW) for the biomass size bins of (a.) protists, (b.) passive and (c.) active copepod feeders for the winter, autumn, spring and summer HW scenarios. 
 
 
 ```{r}
-#| label: size-bins-data-labelling
+#| label: size-bins-data-prep
+
+# Creates:
+# sbins
+# sbin_means
+# sbin_means_all
+# sbin_means_taxa
+
 
 # 4. Load the Size Bins Data
 sbins <- load_folder("size_bins", col_names = FALSE)   %>% 
@@ -1172,6 +1201,7 @@ sbins <- load_folder("size_bins", col_names = FALSE)   %>%
 
 
 # Mean differences
+# Process the metadata for the size bin mean biomass table
 sbin_mean <- sbins[str_detect(names(sbins), "mean")] %>% 
   map_dfr(function(x){
     ncols <- ncol(x)
@@ -1180,7 +1210,6 @@ sbin_mean <- sbins[str_detect(names(sbins), "mean")] %>%
   })
 
 
-# Process the metadata for the size bin mean biomass table
 
 # Split the size bin data based on the file names, which flag which taxa is exposed to a HW
 sbin_means_all <- sbin_mean %>% 
@@ -1299,9 +1328,8 @@ size_bin_carto <- function(x, y, plims = c(-8, 8), max_years = 9, palette = "Gey
         limits = c(1, (max_years*4)+2),
         breaks = year_breaks, 
         labels = year_labs,
-        expand = expansion(add = c(-0.2,-0.2))) +
-    coord_cartesian(clip = "off") +
-      geom_vline(xintercept = 5.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
+        expand = expansion(add = c(0.5,0.5))) +
+    geom_vline(xintercept = 5.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
       geom_vline(xintercept = 9.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
       geom_vline(xintercept = 13.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
       geom_vline(xintercept = 17.5, linetype = 1, color = "gray30", linewidth = 0.75) + 
@@ -1314,12 +1342,16 @@ size_bin_carto <- function(x, y, plims = c(-8, 8), max_years = 9, palette = "Gey
           ticks.colour = "black")) +
     theme(
       legend.position = "bottom", 
-      strip.text.y = element_blank(),
-      axis.text.x = element_text(vjust = -2, face = "bold", size = 12)) +
-    labs(x = "\nYears", 
-           y = "Body Mass Range",
-           fill = abs_bio_ylab,
-           title = y) 
+      #strip.text.y = element_blank(),
+      strip.text.y = element_text(angle = 0),
+      panel.grid = element_blank(),
+      axis.text.x = element_text(
+        vjust = -2, face = "bold", size = 12)) +
+    labs(
+      x = "\nYears", 
+      y = "Biomass Size Bins",
+      fill = abs_bio_ylab,
+      title = y) 
   }
 ```
 
@@ -1338,11 +1370,11 @@ f3_ac <- sbin_means_taxa$`Active Copepods` %>%
   scale_y_discrete(
     labels = c(
       expression(10^-1~"\u2264 m <"~10^0), #3
-      expression(10^0~"\u2264 m <"~10^1), #4
+      expression(10^0~"\u2264 m <"~10^1),  #4
       expression(10^1~"\u2264 m <"~10^2),  #5
-      expression(10^2~"\u2264 m")          #6
-    )
-  )
+      expression(10^2~"\u2264 m"))) +  #6
+  labs(title = "(a.) Active Copepod")      
+    
 
 #f3_ac
 ```
@@ -1365,7 +1397,8 @@ f3_pc <- sbin_means_taxa$`Passive Copepods` %>%
       expression(10^-1~"\u2264 m <"~10^0),  #3
       expression(10^0~"\u2264 m <"~10^1)   #4
     )
-  )
+  ) +
+  labs(title = "(b.) Passive Copepod")
 
 #f3_pc
 ```
@@ -1389,7 +1422,8 @@ f3_pr <- sbin_means_taxa$Protists %>%
       expression(10^-4~"\u2264 m <"~10^-3), #4
       expression(10^-3~"\u2264 m <"~10^-2), #5
       expression(10^-2~"\u2264 m")# 6
-      ))
+      )) +
+  labs(title = "(c.) Protist")
 
 
 #f3_pr
@@ -1403,81 +1437,94 @@ f3_pr <- sbin_means_taxa$Protists %>%
 top <- f3_ac + theme(legend.position = "none") 
 mid <- f3_pc 
 bot <- f3_pr  
-f3_all <- ((top/mid)|bot) + plot_annotation(tag_levels = list(c("(a)", "(b)", "(c)")))
+f3_all <- ((top/mid)|bot) #+ plot_annotation(tag_levels = list(c("(a.)", "(b.)", "(c.)")))
 f3_all
 
 ```
 
  
  
-# Fig 3 Option 2.
+# Fig 3 Seasonal Heatwaves
 
 These focus in on one specific seasonal heatwave. This makes it easier to see progression within one specific season at the expense of being able to see the annual cycles
 
-
 ```{r}
 
-
-# 1. Plotting Function:
-# Make a function to plot the different functional groups separately with some plot controls:
-plot_abs_diff <- function(x, fgroup, lims, lbase, title = NULL, hw_in){
+# Plotting Function for the size bin data, with a seasonal heatwave and functional group focus
+plot_heatwave_sbin_biomass <-  function(
+    x, fgroup, lims, lbase, hw_in = "Autumn HW", title = NULL,  subtitle = NULL, drop_bins = NULL){
   
-  # Make limit labels
+  
+  # Set the order for the season facets to appear
+  seas_order <- switch(hw_in,
+    "Autumn HW" = c("Autumn", "Winter", "Spring", "Summer"),
+    "Winter HW" = c("Winter", "Spring", "Summer", "Autumn"),
+    "Spring HW" = c("Spring", "Summer",  "Autumn", "Winter"),
+    "Summer HW" = c("Summer", "Autumn", "Winter", "Spring"))
+  
+  
+  
+  # Filter the data
+  x_filtered <- x %>% filter(
+    taxa == fgroup, 
+    hw_season == hw_in,
+    size_bin %not in% drop_bins ) %>% 
+    mutate(seasons_cycle = factor(seasons_cycle, levels = seas_order),
+           size_bin = fct_drop(size_bin),
+           hw_taxa = case_when(
+             hw_taxa == "All Taxa" ~ "HW on all\nplankton groups",
+             hw_taxa == "Copepods Only" ~ "HW only\non copepods",
+             hw_taxa == "Protists Only" ~ "HW only\non protists"
+           ))
+  
+  # Add a "total" size_bin
+  x_total <- x_filtered %>% 
+    group_by(year, hw_taxa, seasons_cycle) %>% 
+    summarise(absolute_biomass = sum(absolute_biomass, na.rm = T), 
+              .groups = "drop")  %>% 
+    mutate(size_bin = "size_bin_7")
+  
+  x_filtered <- full_join(x_filtered, x_total,
+                          by = join_by(seasons_cycle, hw_taxa, year, size_bin, absolute_biomass))
+  
+  
+  
+   # Make limit labels
   lim_labs <- c(lims[1], mean(c(0, lims[1])), 0, mean(c(0, lims[2])),  lims[2])
   lim_labs[1] <- str_c("<",lim_labs[1])
   lim_labs[5] <- str_c(">",lim_labs[5])
   
-  # Set the order for the season facets to appear
-  seas_order <- switch(hw_in,
-    "A" = c("Autumn", "Winter", "Spring", "Summer"),
-    "W" = c("Winter", "Spring", "Summer", "Autumn"),
-    "Sp" = c("Spring", "Summer",  "Autumn", "Winter"),
-    "S" = c("Summer", "Autumn", "Winter", "Spring"))
-  
-  # Prepare the data
-  x_plot <- x %>% 
-    filter(!temp_opt %in% str_c(c(0, 4, 8, 12, 16), "C")) %>% 
-    filter(hw_season != "control") %>% 
-    filter(functional_group %in% fgroup) %>% 
-    mutate(functional_group = str_replace(functional_group, " ", "\n"),
-           seasons = factor(seasons, levels = seas_order)) %>% 
-    drop_na()
-    
-  # Build the plot 
-  out_plot <- x_plot %>% 
-    ggplot(aes(year, max_size)) +
-      geom_tile(aes(fill = abs_bio_diff), color = "black") +
+  # Build the plot
+  ggplot(x_filtered, aes(year, y = size_bin, fill = absolute_biomass)) +
+      geom_tile(linewidth = 0.1, color = "gray") +
+      facet_grid(hw_taxa~seasons_cycle, scales = "free", space = "free") +
       scale_fill_carto_c(
         palette = "Tropic", 
-        direction = -1, 
-        limits = lims, 
-        labels = lim_labs,
-        oob = scales::squish) + 
-      scale_y_log10(
-        labels = scales::label_log(base = lbase), 
-        breaks = breaks_log(base = lbase)) +
-      #theme_dark() +
-      theme(
+        direction = -1,
+        limits = lims,
+        labels = lim_labs, 
+        oob = oob_squish) +
+      scale_x_continuous(
+        breaks = c(1:9), 
+        expand = expansion(add = c(0.5,0.5))) +
+      guides(
+        fill = guide_colourbar(
+          title.position = "top", 
+          title.hjust = 0.5, 
+          barwidth = unit(4, "in"), 
+          frame.colour = "black", 
+          ticks.colour = "black")) +
+    theme(
         plot.title = element_text(face = "bold", size = 14),
-        panel.grid.minor = element_blank(),
-        #strip.background = element_rect(fill = "gray30"),
+        panel.grid = element_blank(),
         strip.text.y = element_text(angle = 0, face = "bold"),
         legend.position = "bottom") +
-      guides(fill = guide_colorbar(
-        title.position = "top", 
-        title.hjust = 0.5, 
-        barwidth = unit(4, "in"), 
-        frame.colour = "black", 
-        ticks.colour = "black")) +
-      scale_x_continuous(breaks = c(1:10), expand = expansion(add = c(0.25, 0.25))) +
-      facet_grid(temp_opt ~ seasons, scales = "free", space = "free") +
-      labs(
-        x = "Years",
-        title = title,
-        y = "Max Size (um)", 
-        fill = expression(paste("Absolute biomass anomaly (mg C ", m^{-3}, ")")))
+    labs(x = "Years", 
+           y = "Biomass Size Bins",
+           fill = abs_bio_ylab,
+           title = title,
+           subtitle = subtitle) 
   
-  out_plot
   
 }
 ```
@@ -1485,331 +1532,277 @@ plot_abs_diff <- function(x, fgroup, lims, lbase, title = NULL, hw_in){
 ::: {.panel-tabset}
 
 
+
 ### Autumn Heatwave
 
 ```{r}
-#| fig-height: 8
-#| fig-width: 10
+# Active Copepods
+sb_ahw_ac <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Active Copepods", 
+  hw_in = "Autumn HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_2"), 
+  title = "(a.) Active Copepod") +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-1~"\u2264 m <"~10^0), #3
+      expression(10^0~"\u2264 m <"~10^1), #4
+      expression(10^1~"\u2264 m <"~10^2),  #5
+      expression(10^2~"\u2264 m"),          #6
+      "Total"
+    )
+  )
 
 
-ahw_ac <- plot_abs_diff(
-  x = seasonal_response$`Autumn HW`,
-  fgroup = c("Active Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "A",
-  title = "Dominant functional groups - Autumn heatwave") +
-  labs(subtitle = "(a) Active Copepods",
-       y = "Max Body Size (μm)")
+# Passive Copepods
+sb_ahw_pc <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Passive Copepods", 
+  hw_in = "Autumn HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_5", "size_bin_6"), 
+  title = "(b.) Passive Copepod")  +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-2~"\u2264 m <"~10^-1), #2
+      expression(10^-1~"\u2264 m <"~10^0),  #3
+      expression(10^0~"\u2264 m <"~10^1),   #4
+      "Total"
+    )
+  )
 
 
-ahw_pc <- plot_abs_diff(
-  x = seasonal_response$`Autumn HW`,
-  fgroup = c("Passive Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "A") +
-  labs(subtitle = "(b) Passive Copepods",
-       y = "Max Body Size (μm)")
+# Protists
+sb_ahw_pr <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Protists", 
+  hw_in = "Autumn HW", 
+  lims = c(-10,10), 
+  title = "(c.) Protist", 
+  drop_bins = c("size_bin_1")) +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-6~"\u2264 m <"~10^-5), #2
+      expression(10^-5~"\u2264 m <"~10^-4), #3
+      expression(10^-4~"\u2264 m <"~10^-3), #4
+      expression(10^-3~"\u2264 m <"~10^-2), #5
+      expression(10^-2~"\u2264 m"),# 6
+      "Total"
+      ))
 
-ahw_pr <- plot_abs_diff(
-  x = seasonal_response$`Autumn HW`,
-  fgroup = c("Protist"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "A") +
-  labs(subtitle = "(c) Protists",
-       y = "Max Cell Size (μm)")
 
 
 
-ahw_all <- ((ahw_ac + theme(legend.position = "none")) / ahw_pc  | ahw_pr ) 
-ahw_all
-
+fig3_ahw <- ((sb_ahw_ac + theme(legend.position = "none")) / sb_ahw_pc) | sb_ahw_pr
+fig3_ahw
 ```
+
 
 
 ### Winter Heatwave
 
 ```{r}
-#| fig-height: 8
-#| fig-width: 10
+# Active Copepods
+sb_whw_ac <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Active Copepods", 
+  hw_in = "Winter HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_2"), 
+  title = "(a.) Active Copepod") +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-1~"\u2264 m <"~10^0), #3
+      expression(10^0~"\u2264 m <"~10^1), #4
+      expression(10^1~"\u2264 m <"~10^2),  #5
+      expression(10^2~"\u2264 m"),# 6
+      "Total"
+    )
+  )
+
+
+# Passive Copepods
+sb_whw_pc <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Passive Copepods", 
+  hw_in = "Winter HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_5", "size_bin_6"), 
+  title = "(b.) Passive Copepod")  +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-2~"\u2264 m <"~10^-1), #2
+      expression(10^-1~"\u2264 m <"~10^0),  #3
+      expression(10^0~"\u2264 m <"~10^1),
+      "Total"
+    )
+  )
+
+
+# Protists
+sb_whw_pr <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Protists", 
+  hw_in = "Winter HW", 
+  lims = c(-10,10), 
+  title = "(c.) Protist", 
+  drop_bins = c("size_bin_1")) +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-6~"\u2264 m <"~10^-5), #2
+      expression(10^-5~"\u2264 m <"~10^-4), #3
+      expression(10^-4~"\u2264 m <"~10^-3), #4
+      expression(10^-3~"\u2264 m <"~10^-2), #5
+      expression(10^-2~"\u2264 m"),
+      "Total"
+      ))
 
 
 
-whw_ac <- plot_abs_diff(
-  x = seasonal_response$`Winter HW`,
-  fgroup = c("Active Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "W",
-  title = "Dominant functional groups - Winter heatwave") +
-  labs(subtitle = "(a) Active Copepods",
-       y = "Max Body Size (μm)")
 
-
-whw_pc <- plot_abs_diff(
-  x = seasonal_response$`Winter HW`,
-  fgroup = c("Passive Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "W") +
-  labs(subtitle = "(b) Passive Copepods",
-       y = "Max Body Size (μm)")
-
-whw_pr <- plot_abs_diff(
-  x = seasonal_response$`Winter HW`,
-  fgroup = c("Protist"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "W") +
-  labs(subtitle = "(c) Protists",
-       y = "Max Cell Size (μm)")
-
-
-
-whw_all <- ((whw_ac + theme(legend.position = "none")) / whw_pc  | whw_pr ) 
-whw_all
-
+fig3_whw <- ((sb_whw_ac + theme(legend.position = "none")) / sb_whw_pc) | sb_whw_pr
+fig3_whw
 ```
 
 
 ### Spring Heatwave
 
 ```{r}
-#| fig-height: 8
-#| fig-width: 10
+# Active Copepods
+sb_sphw_ac <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Active Copepods", 
+  hw_in = "Spring HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_2"), 
+  title = "(a.) Active Copepod") +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-1~"\u2264 m <"~10^0), #3
+      expression(10^0~"\u2264 m <"~10^1), #4
+      expression(10^1~"\u2264 m <"~10^2),  #5
+      expression(10^2~"\u2264 m"),
+      "Total"
+    )
+  )
+
+
+# Passive Copepods
+sb_sphw_pc <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Passive Copepods", 
+  hw_in = "Spring HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_5", "size_bin_6"), 
+  title = "(b.) Passive Copepod")  +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-2~"\u2264 m <"~10^-1), #2
+      expression(10^-1~"\u2264 m <"~10^0),  #3
+      expression(10^0~"\u2264 m <"~10^1),
+      "Total"
+    )
+  )
+
+
+# Protists
+sb_sphw_pr <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Protists", 
+  hw_in = "Spring HW", 
+  lims = c(-10,10), 
+  title = "(c.) Protist", 
+  drop_bins = c("size_bin_1")) +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-6~"\u2264 m <"~10^-5), #2
+      expression(10^-5~"\u2264 m <"~10^-4), #3
+      expression(10^-4~"\u2264 m <"~10^-3), #4
+      expression(10^-3~"\u2264 m <"~10^-2), #5
+      expression(10^-2~"\u2264 m"),
+      "Total"
+      ))
 
 
 
-sphw_ac <- plot_abs_diff(
-  x = seasonal_response$`Spring HW`,
-  fgroup = c("Active Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "Sp",
-  title = "Dominant functional groups - Spring heatwave") +
-  labs(subtitle = "(a) Active Copepods",
-       y = "Max Body Size (μm)")
 
-
-sphw_pc <- plot_abs_diff(
-  x = seasonal_response$`Spring HW`,
-  fgroup = c("Passive Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "Sp") +
-  labs(subtitle = "(b) Passive Copepods",
-       y = "Max Body Size (μm)")
-
-sphw_pr <- plot_abs_diff(
-  x = seasonal_response$`Spring HW`,
-  fgroup = c("Protist"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "Sp") +
-  labs(subtitle = "(c) Protists",
-       y = "Max Cell Size (μm)")
-
-
-
-sphw_all <- ((sphw_ac + theme(legend.position = "none")) / sphw_pc  | sphw_pr ) #+ plot_annotation(tag_levels = list(c("(a)", "(b)", "(c)")))
-sphw_all
+fig3_sphw <- ((sb_sphw_ac + theme(legend.position = "none")) / sb_sphw_pc) | sb_sphw_pr
+fig3_sphw
 ```
+
 
 ### Summer Heatwave
 
-
 ```{r}
-#| fig-height: 8
-#| fig-width: 10
+# Active Copepods
+sb_shw_ac <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Active Copepods", 
+  hw_in = "Summer HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_2"), 
+  title = "(a.) Active Copepod") +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-1~"\u2264 m <"~10^0), #3
+      expression(10^0~"\u2264 m <"~10^1), #4
+      expression(10^1~"\u2264 m <"~10^2),  #5
+      expression(10^2~"\u2264 m"),
+      "Total"
+    )
+  )
 
 
-shw_ac <- plot_abs_diff(
-  x = seasonal_response$`Summer HW`,
-  fgroup = c("Active Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "S",
-  title = "Dominant functional groups - Summer heatwave") +
-  labs(subtitle = "(a) Active Copepods",
-       y = "Max Body Size (μm)")
+# Passive Copepods
+sb_shw_pc <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Passive Copepods", 
+  hw_in = "Summer HW", 
+  lims = c(-4,4), 
+  drop_bins = c("size_bin_1", "size_bin_5", "size_bin_6"), 
+  title = "(b.) Passive Copepod")  +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-2~"\u2264 m <"~10^-1), #2
+      expression(10^-1~"\u2264 m <"~10^0),  #3
+      expression(10^0~"\u2264 m <"~10^1),
+      "Total"
+    )
+  )
 
 
-shw_pc <- plot_abs_diff(
-  x = seasonal_response$`Summer HW`,
-  fgroup = c("Passive Copepod"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "S") +
-  labs(subtitle = "(b) Passive Copepods",
-       y = "Max Body Size (μm)")
+# Protists
+sb_shw_pr <- plot_heatwave_sbin_biomass(
+  x = sbin_means_long, 
+  fgroup = "Protists", 
+  hw_in = "Summer HW", 
+  lims = c(-10,10), 
+  title = "(c.) Protist", 
+  drop_bins = c("size_bin_1")) +
+  scale_y_discrete(
+    labels = c(
+      expression(10^-6~"\u2264 m <"~10^-5), #2
+      expression(10^-5~"\u2264 m <"~10^-4), #3
+      expression(10^-4~"\u2264 m <"~10^-3), #4
+      expression(10^-3~"\u2264 m <"~10^-2), #5
+      expression(10^-2~"\u2264 m"),
+      "Total"
+      ))
 
-shw_pr <- plot_abs_diff(
-  x = seasonal_response$`Summer HW`,
-  fgroup = c("Protist"), 
-  lims = c(-1, 1), 
-  lbase = 10,
-  hw_in = "S") +
-  labs(subtitle = "(c) Protists",
-       y = "Max Cell Size (μm)")
 
 
-
-shw_all <- ((shw_ac + theme(legend.position = "none")) / shw_pc  | shw_pr )# + plot_annotation(tag_levels = list(c("(a)", "(b)", "(c)")))
-shw_all
+fig3_shw <- ((sb_shw_ac + theme(legend.position = "none")) / sb_shw_pc) | sb_shw_pr
+fig3_shw
 
 ```
-
 
 :::
 
-# Fig 4. Dominant Species Biomass
 
- Absolute seasonal biomass concentration anomalies of the dominant groups of (a) protists, (b) passive and (a) active copepod feeders for the autumn HW scenario during the heatwave and 2 years after the heatwave.   
+# Fig 4. Shannon Diversity
 
-
-```{r}
-# Pull the top 5/10 dominant species
-top_species <- bind_rows(seasonal_response) %>% 
-  filter(matrix_col %in% str_c("col_", c(1:5)))
-
-
-# Plot those jabronis
-top_ac <- top_species %>% 
-  filter(functional_group == "Active Copepod",
-         hw_season != "Control",
-         !str_detect(trial, "only")) %>% 
-  ggplot(aes(year, absolute_bio)) +
-  geom_line(aes(group = control, color = max_size), linewidth = 0.8, alpha = 0.8) +
-  geom_point(aes(shape = fct_rev(temp_opt), color = max_size), size = 1.2) +
-  scale_shape_manual(
-    values = c(
-      "16C" = 15,
-      "20C" = 16,
-      "24C" = 17,
-      "28C" = 18)) +
-  scale_color_carto_c(
-    palette = "ag_Sunset", 
-    direction = -1, 
-    trans = "log10", 
-    labels = label_log(base = 10), 
-    breaks = 10^c(-2, -1, 0, 1,2),
-    limits = 10^c(-3, 3),
-    oob = oob_squish) +
-  scale_x_continuous(expand = expansion(add = c(0,0)),breaks = c(1:10)) +
-  facet_grid(seasons~hw_season, scales = "free") +
-  guides(
-    color = guide_colorbar(title.position = "top", title.hjust = 0.5, barwidth = unit(5, "cm"), ticks.colour = "black", frame.colour = "black"),
-    shape = guide_legend(title.position = "top", title.hjust = 0.5, override.aes = list(size = rep(3, 3)))) +
-  theme(legend.position = "bottom",
-        panel.background = element_rect(fill = "gray80"),
-        panel.grid = element_blank()) +
-  labs(
-    subtitle = "(a) Active Copepods",
-    y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
-    x = "Year",
-    color = "Maximum Body Size",
-    shape = "Temperature Optima"
-  )
-```
-
-
-```{r}
-# Plot those passive jabronis
-top_pc <- top_species %>% 
-  filter(functional_group == "Passive Copepod",
-         hw_season != "Control",
-         !str_detect(trial, "only")) %>% 
-  ggplot(aes(year, absolute_bio)) +
- geom_line(aes(group = control, color = max_size), linewidth = 0.8, alpha = 0.8) +
-  geom_point(aes(shape = fct_rev(temp_opt), color = max_size), size = 1.2) +
-  scale_shape_manual(
-    values = c(
-      "16C" = 15,
-      "20C" = 16,
-      "24C" = 17,
-      "28C" = 18)) +
-  scale_color_carto_c(
-    palette = "ag_Sunset", 
-    direction = -1, 
-    trans = "log10", 
-    labels = label_log(base = 10), 
-    breaks = 10^c(-2, -1, 0, 1,2),
-    limits = 10^c(-3, 3),
-    oob = oob_squish) +
-  scale_x_continuous(expand = expansion(add = c(0,0)),breaks = c(1:10)) +
-  facet_grid(seasons~hw_season, scales = "free") +
-  guides(
-    color = guide_colorbar(title.position = "top", title.hjust = 0.5, barwidth = unit(5, "cm"), ticks.colour = "black", frame.colour = "black"),
-    shape = guide_legend(title.position = "top", title.hjust = 0.5, override.aes = list(size = rep(3, 3)))) +
-  theme(legend.position = "bottom",
-        panel.background = element_rect(fill = "gray80"),
-        panel.grid = element_blank()) +
-  labs(
-    subtitle = "(b) Passive Copepods",
-    y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
-    x = "Year",
-    color = "Maximum Body Size",
-    shape = "Temperature Optima"
-  )
-```
-
-
-```{r}
-# Protists
-top_pr <- top_species %>% 
-  filter(functional_group == "Protist",
-         hw_season != "Control",
-         !str_detect(trial, "only")) %>% 
-  ggplot(aes(year, absolute_bio)) +
-  geom_line(aes(group = control, color = max_size), linewidth = 0.8, alpha = 0.8) +
-  geom_point(aes(shape = fct_rev(temp_opt), color = max_size), size = 1.2) +
-  scale_shape_manual(
-    values = c(
-      "16C" = 15,
-      "20C" = 16,
-      "24C" = 17,
-      "28C" = 18)) +
-  scale_color_distiller(
-    palette = "YlGnBu", 
-    direction = -1, 
-    trans = "log10", 
-    labels = label_log(base = 10), 
-    breaks = 10^seq(-6,-2, 1),
-    limits = 10^c(-7, -3),
-    oob = oob_squish) +
-  scale_x_continuous(expand = expansion(add = c(0,0)),breaks = c(1:10)) +
-  facet_grid(seasons~hw_season, scales = "free") +
-  guides(
-    color = guide_colorbar(title.position = "top", title.hjust = 0.5, barwidth = unit(5, "cm"), ticks.colour = "black", frame.colour = "black"),
-    shape = guide_legend(title.position = "top", title.hjust = 0.5, override.aes = list(size = rep(3, 4)))) +
-  theme(legend.position = "bottom",
-        panel.background = element_rect(fill = "gray80"),
-        panel.grid = element_blank()) +
-  labs(
-    subtitle = "(c) Protists",
-    y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
-    x = "Year",
-    color = "Maximum Body Size",
-    shape = "Temperature Optima"
-  )
-  
-
-
-```
-
- 
-```{r}
-fig_4 <- ((top_ac / top_pc) + plot_layout(guides = "collect") & theme(legend.position = "bottom") ) | top_pr
-
-fig_4
-```
-
-
-# Fig 5. Shannon Diversity
-
- Annual Shannon Diversity Index for (a) protists, (b) passive and (c) active copepod feeders for the winter, spring, autumn and winter HW scenarios.  y axis: years. Year 0: pre-heatwave, Year 1: heatwave (in red) Years 2-9: after-heatwave.  
+ Annual Shannon Diversity Index for (a.) protists, (b.) passive and (c.) active copepod feeders for the winter, spring, autumn and winter HW scenarios.  y axis: years. Year 0: pre-heatwave, Year 1: heatwave (in red) Years 2-9: after-heatwave.  
 
 
 ```{r}
@@ -1875,14 +1868,14 @@ shannon_all <- shannon_all %>%
 shannon_plot <- function(fgroup, ptitle){
   
   # table for background colors
-  hw_fill <- c("#C6DBEF", "#FDDBC7")
+  
+  hw_fill <- c("transparent", "#FDDBC770")
   rect_df <- data.frame(
-    hw_status = c("Year 0:\npre-heatwave", "Year 1:\nseasonal heatwave"),
-    xmin = c(0, 0.5),
+    hw_status = c("Year 0:\nPre-heatwave\nEquilibrium", "Year 1:\nSeasonal heatwave"),
+    xmin = c(-0.5, 0.5),
     xmax = c(0.5, 1.5),
     ymin = rep(-Inf, 2),
-    ymax = rep(Inf, 2)
-  )
+    ymax = rep(Inf, 2))
   
   # make the plot
   shannon_all %>% 
@@ -1892,28 +1885,48 @@ shannon_plot <- function(fgroup, ptitle){
       geom_rect(
         data = rect_df, 
         aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = hw_status), 
-        color = "transparent") +
-    # geom_rect(xmin = .5, xmax = 1.5, ymin = -10, ymax = 10, fill = "#FDDBC7", color = "transparent")+
-    # geom_rect(xmin = -.5, xmax = .5, ymin = -10, ymax = 10, fill = "#C7E9C0", color = "transparent")+
-    geom_line(aes(year, shannon_idx,linetype = trial_type), linewidth = 0.8) +
+        color = "transparent",
+        alpha = 0.8) +
+    geom_line(
+      aes(year, shannon_idx,
+          color = trial_type,
+          linetype = trial_type), 
+      linewidth = 1.2, alpha = 0.7) +
+    #scale_color_brewer(palette = "Set1", direction = -1) +
+    scale_color_brewer(palette = "Dark2") +
+    #scale_color_grey() +
     scale_fill_manual(values = hw_fill) +
     facet_grid(hw_season ~ season) +
     scale_x_continuous(
-      breaks = seq(0,6, 1),
+      breaks = seq(0,5, 1),
       limits = c(0,6),
-      labels = 0:6,
+      labels = 0:5,
       expand = expansion(add = c(0,0))) +
     scale_y_continuous(breaks = seq(0,10, 0.5)) +
-    theme(panel.grid.minor = element_blank(),
-          panel.grid.major = element_blank(),
-          panel.background = element_rect(fill = NA),
-          legend.position = "bottom",
-          panel.ontop = TRUE) +
-    guides(fill = guide_legend(title.position = "top", title.hjust = 0.5),
-           linetype = guide_legend(title.position = "top", title.hjust = 0.5)) +
-    labs(subtitle = ptitle,
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.background = element_rect(fill = NA),
+      legend.position = "bottom",
+      panel.ontop = TRUE) +
+    guides(
+      fill = guide_legend(
+        title.position = "top", 
+        title.hjust = 0.5, 
+        override.aes = list(color = "black")),
+      linetype = guide_legend(
+        title.position = "top", 
+        ncol = 3, 
+        title.hjust = 0.5,
+        override.aes = list(linewidth = 0.8)), 
+      color = guide_legend(
+        title.position = "top", 
+        ncol = 3, 
+        title.hjust = 0.5)) +
+    labs(title = ptitle,
          x = "Years",
          y = "Shannon Diversity Index",
+         color = "Functional Groups Exposed to Heatwave Effect:",
          linetype = "Functional Groups Exposed to Heatwave Effect:",
          fill = "Heatwave Timing:")
 }
@@ -1926,16 +1939,455 @@ shannon_plot <- function(fgroup, ptitle){
 
 
 # Build the figures
-shan_ac <- shannon_plot("Active Copepods", "(a) Active Copepods") 
-shan_pc <- shannon_plot("Passive Copepods", "(b) Passive Copepods") 
-shan_pr <- shannon_plot("Protists", "(c) Protists")
+shan_ac <- shannon_plot("Active Copepods", "(a.) Active Copepod") 
+shan_pc <- shannon_plot("Passive Copepods", "(b.) Passive Copepod") 
+shan_pr <- shannon_plot("Protists", "(c.) Protist")
 
 
-shan_all <- (shan_ac/ shan_pc | shan_pr) + plot_layout(guides = "collect") & theme(legend.position = "bottom")  
-shan_all <- shan_all 
+shan_all <- shan_ac + 
+  shan_pr + 
+  shan_pc + 
+  guide_area() + 
+  plot_layout(ncol = 2, 
+              guides = "collect") & 
+  theme(legend.position = "bottom",
+        legend.box = "vertical",
+        legend.title = element_text(face = "bold", size = 14),
+        legend.text = element_text(size = 12))  
 shan_all
 
 ```
+
+
+
+
+
+
+# Fig 5. Dominant Species Biomass
+
+ Absolute seasonal biomass concentration anomalies of the dominant groups of (a.) protists, (b.) passive and (a.) active copepod feeders for the autumn HW scenario during the heatwave and 2 years after the heatwave.   
+
+
+```{r}
+# | label: new-dom-species
+
+# Maria res-supplied these tables for dominant species plots, these should fix
+# the problems we were encountering with the reshaped data previously
+
+dom_new_ac <- read_csv(here("maria_data/maria_results_2023/dom_taxa_reshaped/Active_Copepods_Dominant.csv")) %>% 
+  select(1:9)
+dom_new_pc <- read_csv(here("maria_data/maria_results_2023/dom_taxa_reshaped/Passive_Copepods_Dominant.csv"))
+dom_new_pr <- read_csv(here("maria_data/maria_results_2023/dom_taxa_reshaped/Protists_Dominant.csv"))
+
+
+# Just need to put the control data ahead of the seasons for each to capture starting conditions
+# Might be tricky to make sure the taxa_id's go into the right ones
+
+# So annoying dolyr doesn't want to support this function...
+named_group_split <- function(.tbl, ...) {
+  grouped <- group_by(.tbl, ...)
+  names <- rlang::inject(paste(!!!group_keys(grouped), sep = " / "))
+
+  grouped %>% 
+    group_split() %>% 
+    rlang::set_names(names)
+}
+
+
+
+# -----------------
+
+# Reassemble them with control out front
+dom_new_ac <- dom_new_ac %>% 
+  filter(hw_season != "Control") %>% 
+  named_group_split(hw_season, season) %>% 
+  map_dfr(function(x_grouping){
+    
+    # Get the details of the group we're appending onto:
+    taxa_ids <- unique(x_grouping$taxa_id)
+    hw_season_lab <- unique(x_grouping$hw_season)
+    season_lab <- unique(x_grouping$season)
+    
+    # Pull the appropriate control, 
+    # filter to the taxa in this group
+    # label the hw_season and season so we can facet
+    control_bio <- dom_new_ac %>% 
+      filter(
+        hw_season == "Control",
+        taxa_id %in% taxa_ids) %>% 
+      mutate(
+        #season = season_lab,
+        hw_season = hw_season_lab)
+    
+    # Append it back
+    df_out <- bind_rows(control_bio, x_grouping)
+    return(df_out)})
+
+
+
+
+
+# Reassemble them with control out front
+dom_new_pc <- dom_new_pc %>% 
+  filter(hw_season != "Control") %>% 
+  named_group_split(hw_season, season) %>% 
+  map_dfr(function(x_grouping){
+    
+    # Get the details of the group we're appending onto:
+    taxa_ids <- unique(x_grouping$taxa_id)
+    hw_season_lab <- unique(x_grouping$hw_season)
+    season_lab <- unique(x_grouping$season)
+    
+    # Pull the appropriate control, 
+    # filter to the taxa in this group
+    # label the hw_season and season so we can facet
+    control_bio <- dom_new_pc %>% 
+      filter(
+        hw_season == "Control",
+        taxa_id %in% taxa_ids) %>% 
+      mutate(
+        #season = season_lab,
+        hw_season = hw_season_lab)
+    
+    # Append it back
+    df_out <- bind_rows(control_bio, x_grouping)
+    return(df_out)})
+
+
+
+
+
+# Reassemble them with control out front
+dom_new_pr <- dom_new_pr %>% 
+  filter(hw_season != "Control") %>% 
+  named_group_split(hw_season, season) %>% 
+  map_dfr(function(x_grouping){
+    
+    # Get the details of the group we're appending onto:
+    taxa_ids <- unique(x_grouping$taxa_id)
+    hw_season_lab <- unique(x_grouping$hw_season)
+    season_lab <- unique(x_grouping$season)
+    
+    # Pull the appropriate control, 
+    # filter to the taxa in this group
+    # label the hw_season and season so we can facet
+    control_bio <- dom_new_pr %>% 
+      filter(
+        hw_season == "Control",
+        taxa_id %in% taxa_ids) %>% 
+      mutate(
+        #season = season_lab,
+        hw_season = hw_season_lab)
+    
+    # Append it back
+    df_out <- bind_rows(control_bio, x_grouping)
+    return(df_out)})
+
+
+
+```
+
+
+```{r}
+# Function to plot consistently:
+plot_dom_response_new <- function(top_species){
+
+
+  # Display the heatwave element
+  # table for background colors
+  hw_fill <- c("transparent", "#FDDBC770")
+  rect_df <- data.frame(
+    hw_status = c("Year 0:\nPre-heatwave\nEquilibrium", "Year 1:\nSeasonal heatwave"),
+    xmin = c(-0.5, 0.5),
+    xmax = c(0.5, 1.5),
+    ymin = rep(-Inf, 2),
+    ymax = rep(Inf, 2))
+
+
+  # Build the Figure
+  top_species %>% 
+  # dom_new_ac_test %>% 
+    mutate(temp_opt = str_c(temp_opt, "C")) %>% 
+    ggplot() +
+      geom_rect(
+          data = rect_df,
+          aes(xmin = xmin, xmax = xmax,
+              ymin = ymin, ymax = ymax,
+              fill = hw_status),
+          color = "transparent",
+          alpha = 0.9) +
+    geom_line(
+      aes(year, absolute_bio, group = taxa_id, color = max_size), 
+      show.legend = F, 
+      linewidth = 0.7, 
+      alpha = 0.4) +
+    geom_point(
+    aes(year, absolute_bio, shape = fct_rev(as.character(temp_opt)), color = max_size), 
+    size = 2) +
+    scale_shape_manual(
+      values = c(
+        "16C" = 15,
+        "20C" = 16,
+        "24C" = 17,
+        "28C" = 18)) +
+    scale_color_carto_c(
+      palette = "ag_Sunset", 
+      direction = -1, 
+      trans = "log10", 
+      labels = label_log(base = 10), 
+      breaks = 10^seq(-3, 3, 1),
+      limits = 10^c(-3, 3),
+      oob = oob_squish) +
+    scale_fill_manual(values = hw_fill) +
+    scale_x_continuous(
+      limits = c(0, 7),
+      expand = expansion(add = c(0.5,0.5)),
+      breaks = c(0:9)) +
+    guides(
+      shape = guide_legend(
+        title.position = "top", 
+        title.hjust = 0.5, 
+        override.aes = list(size = 3)),
+      color = guide_colorbar(
+        title.position = "top", 
+        title.hjust = 0.5, 
+        barwidth = unit(7, "cm"), 
+        ticks.colour = "black", 
+        frame.colour = "black"),
+      fill = guide_legend(
+        title.position = "top", 
+        title.hjust = 0.5, 
+        keyheight = unit(1, "cm"),
+        override.aes = list(color = "black"))) +
+    facet_grid(season~hw_season, scales = "free_y") +
+    theme(
+      legend.position = "bottom",
+      panel.grid = element_blank(),
+      panel.background = element_rect(color = "black", fill = "transparent")) +
+    labs(
+      y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
+      x = "Year",
+      color = "Maximum Body Size",
+      shape = "Temperature Optima",
+      fill = "Heatwave Timing:"
+    )
+  
+}
+  
+  
+  
+# Testing
+
+
+# (a.) Active Copepod
+dom_response_ac <- plot_dom_response_new(
+  top_species = dom_new_ac) +
+  labs(title = "(a.) Active Copepod Response") + 
+    guides(shape = "none")
+
+# (b.) Passive Copepod
+dom_response_pc <- plot_dom_response_new(
+  top_species = dom_new_pc) +
+  labs(title = "(b.) Passive Copepod Response") + 
+    guides(shape = "none")
+
+# (c.) Protist
+dom_response_pr <- plot_dom_response_new(
+  top_species = dom_new_pr) +
+  labs(title = "(c.) Protist Response")
+
+
+
+# Assemble something
+fig_5 <- dom_response_ac  +
+  dom_response_pr +
+  dom_response_pc +
+  guide_area() + 
+  plot_layout(
+    ncol =2,
+    guides = "collect")
+
+
+fig_5
+
+
+```
+
+
+
+ADAM: 
+
+“Overall, we see an increase in the relative biomass of warmer species during or after each heatwave.”
+
+“For both protists and copepods, heatwaves lead to changes in the relative biomass and order of the dominant groups during and after the heatwave. 
+
+Still, functional groups with temperature norms of 20 ˚C and 24 ˚C dominate the plankton community before, during, and after the heatwaves and between seasons. The community size structure also reflects periodic variations caused by marine heatwaves. However, no consistent pattern emerges across biomass size bins for all heatwave scenarios, revealing the intricate synergy of direct and indirect temperature effects. For years after the heatwaves, the model shows changes in the order of dominant size groups, highlighting that the effect of a seasonal heatwave on the community properties can persist for a long period. However, the re-position of some dominant size groups does not affect the core community size structure.”  
+
+
+
+
+```{r}
+#| label: fig-5-error
+#| eval: false
+
+# # Pull the top 5/10 dominant species, the first 5 columns
+# top_species <- bind_rows(seasonal_response) %>% 
+#   filter(matrix_col %in% str_c("col_", c(1:5)))
+# 
+# 
+# # Repeat the control for each season so that we can facet correctly
+# top_species <- map_dfr(
+#   .x = setNames(season_lvls, season_lvls), 
+#   .f = function(.x){
+#     top_species %>% 
+#       filter(hw_season == "Control") %>% 
+#       mutate(hw_season = str_c(.x, " HW"))}) %>% 
+#   bind_rows(filter(top_species, hw_season != "Control")) %>% 
+#   mutate(hw_season = factor(hw_season, hw_season_order))  %>% 
+#   # Remove trials
+#   filter(!str_detect(trial, "only"))
+#   
+# 
+# 
+# # Additional step:
+# # Drop any that are only in the dominant species group for >2 years
+# not_dom <- top_species %>% 
+#   group_by(functional_group, control, seasons, hw_season) %>% 
+#   summarise(n = n()) %>% 
+#   arrange(desc(n)) %>% 
+#   filter(n <= 3) %>% 
+#   mutate(dom_flag = str_c(functional_group, control, seasons, hw_season))
+#   
+# 
+# 
+# 
+# # Function to plot consistently:
+# plot_dom_species_response <- function(top_species){
+#   
+# 
+#   # Display the heatwave element
+#   # table for background colors
+#   hw_fill <- c("transparent", "#FDDBC770")
+#   rect_df <- data.frame(
+#     hw_status = c("Year 0:\nPre-heatwave\nEquilibrium", "Year 1:\nSeasonal heatwave"),
+#     xmin = c(-0.5, 0.5),
+#     xmax = c(0.5, 1.5),
+#     ymin = rep(-Inf, 2),
+#     ymax = rep(Inf, 2))
+# 
+# 
+#   # Build the Figure
+#   top_species %>% 
+#     ggplot() +
+#       geom_rect(
+#           data = rect_df, 
+#           aes(xmin = xmin, xmax = xmax, 
+#               ymin = ymin, ymax = ymax, 
+#               fill = hw_status), 
+#           color = "transparent",
+#           alpha = 0.9) +
+#     geom_line(
+#       aes(year, absolute_bio, group = control, color = max_size), 
+#       show.legend = F, 
+#       linewidth = 0.7, 
+#       alpha = 0.4) +
+#     geom_point(
+#     aes(year, absolute_bio, shape = fct_rev(temp_opt), color = max_size), 
+#     size = 2) +
+#     scale_shape_manual(
+#       values = c(
+#         "16C" = 15,
+#         "20C" = 16,
+#         "24C" = 17,
+#         "28C" = 18)) +
+#     scale_color_carto_c(
+#       palette = "ag_Sunset", 
+#       direction = -1, 
+#       trans = "log10", 
+#       labels = label_log(base = 10), 
+#       breaks = 10^seq(-3, 3, 1),
+#       limits = 10^c(-3, 3),
+#       oob = oob_squish) +
+#     scale_fill_manual(values = hw_fill) +
+#     scale_x_continuous(
+#       limits = c(0, 7),
+#       expand = expansion(add = c(0.5,0.5)),
+#       breaks = c(0:9)) +
+#     guides(
+#       shape = guide_legend(
+#         title.position = "top", 
+#         title.hjust = 0.5, 
+#         override.aes = list(size = 3)),
+#       color = guide_colorbar(
+#         title.position = "top", 
+#         title.hjust = 0.5, 
+#         barwidth = unit(7, "cm"), 
+#         ticks.colour = "black", 
+#         frame.colour = "black"),
+#       fill = guide_legend(
+#         title.position = "top", 
+#         title.hjust = 0.5, 
+#         keyheight = unit(1, "cm"),
+#         override.aes = list(color = "black"))) +
+#     facet_grid(seasons~hw_season, scales = "free_y") +
+#     theme(
+#       legend.position = "bottom",
+#       panel.grid = element_blank(),
+#       panel.background = element_rect(color = "black", fill = "transparent")) +
+#     labs(
+#       y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
+#       x = "Year",
+#       color = "Maximum Body Size",
+#       shape = "Temperature Optima",
+#       fill = "Heatwave Timing:"
+#     )
+#   
+# }
+```
+
+
+```{r}
+
+#| eval: false
+
+# # (b.) Active Copepod
+# dom_response_ac <- plot_dom_species_response(
+#   top_species = top_species %>% filter(functional_group == "Active Copepod")) +
+#   labs(title = "(a.) Active Copepod Response") + 
+#     guides(shape = "none")
+# 
+# # (c.) Passive Copepod
+# dom_response_pc <- plot_dom_species_response(
+#   top_species = top_species %>% filter(functional_group == "Passive Copepod")) +
+#   labs(title = "(b.) Passive Copepod Response") + 
+#     guides(shape = "none")
+# 
+# # (d.) Protist
+# dom_response_pr <- plot_dom_species_response(
+#   top_species = top_species %>% filter(functional_group == "Protist")) +
+#   labs(title = "(c.) Protist Response")
+# 
+# 
+# 
+# # Assemble something
+# fig_5 <- dom_response_ac  +
+#   dom_response_pr +
+#   dom_response_pc +
+#   guide_area() + 
+#   plot_layout(
+#     ncol =2,
+#     guides = "collect")
+# 
+# 
+# fig_5
+
+```
+
+
+
+
+
+
 
 
 
@@ -2018,7 +2470,7 @@ ac_6 <- exposure_compare %>%
     x = expression(paste("Absolute biomass anomaly (mg C ", m^{-3}, ")")),
     y = "Body Mass Range",
     fill = "Functional Group Heatwave Exposure",
-    subtitle = "(a) Active Copepods"
+    title = "(a.) Active Copepod"
   )
 
 #ac_6
@@ -2061,7 +2513,7 @@ pc_6 <- exposure_compare %>%
     x = expression(paste("Absolute biomass anomaly (mg C ", m^{-3}, ")")),
     y = "Body Mass Range",
     fill = "Functional Group Heatwave Exposure",
-    subtitle = "(b) Passive Copepods"
+    title = "(b.) Passive Copepod"
   )
 
 
@@ -2098,7 +2550,7 @@ pr_6 <- exposure_compare %>%
     x = expression(paste("Absolute biomass anomaly (mg C ", m^{-3}, ")")),
     y = "Body Mass Range",
     fill = "Functional Group Heatwave Exposure",
-    subtitle = "(c) Protists"
+    title = "(c.) Protist"
   )
 ```
 
@@ -2112,6 +2564,761 @@ f6_all <- f6_all + plot_layout(guides = "collect") & theme(legend.position = "bo
 f6_all
 ```
 
+
+
+---
+
+# Supplemental Figures
+
+
+## Fig SM1 Camila Config
+
+
+### SM1 a.
+
+Absolute biomass size bins concentrations for the pre-heatwave conditions for active and passive copepod feeders and for protists.
+
+```{r}
+
+# Biomass Controls
+ca_daily_setup <- read_csv(here::here("maria_data/maria_results_2023/Cop_Act_control_daily_CamilaSetup.csv"))
+cp_daily_setup <- read_csv(here::here("maria_data/maria_results_2023/Cop_Pass_control_daily_CamilaSetup.csv"))
+p_daily_setup <- read_csv(here::here("maria_data/maria_results_2023/P_control_daily_CamilaSetup.csv"))
+
+
+# Put them together, prepare to do a ton of data wrangling for size bins...
+camila_controls <- bind_rows(
+  bind_rows(
+  mutate(ca_daily_setup, functional_group = "Active Copepods"),
+  mutate(cp_daily_setup, functional_group = "Passive Copepods"),
+  mutate(p_daily_setup, functional_group = "Protists")))  %>% 
+  pivot_longer(
+    cols = starts_with("size"), 
+    names_to = "size_bin", 
+    values_to = "control_bio") %>% 
+  mutate(
+    date = as.Date("2000-01-01") + (day-1),
+    size_bin = factor(str_remove(size_bin, "sizebin")),
+    # Start it in december to match the December cycle above
+    new_date = if_else(
+      date <= as.Date("2000-12-01"), 
+      as.Date(date+lubridate::years(1)), 
+      date),
+    new_date = as.Date(new_date)) 
+
+
+
+# Active Copepods
+sm1_a <- camila_controls %>%
+  dplyr::filter(functional_group == "Active Copepods") %>% 
+  ggplot() +
+  geom_area(aes(new_date, control_bio, fill = size_bin)) +
+  # geom_vline(
+  #   xintercept = as.Date("2001-02-28"), 
+  #   linetype = 2, color = "gray30", linewidth = 0.75) + 
+  # geom_vline(
+  #   xintercept = as.Date("2001-05-31"), 
+  #   linetype = 2, color = "gray30", linewidth = 0.75) + 
+  # geom_vline(
+  #   xintercept = as.Date("2001-08-31"), 
+  #   linetype = 2, color = "gray30", linewidth = 0.75) + 
+  scale_fill_carto_d(
+    palette = "ag_Sunset", direction = -1,
+    labels = c(
+      expression("           m <"~10^-2),
+      expression(10^-2~"\u2264 m <"~10^-1),
+      expression(10^-1~"\u2264 m <"~10^0),
+      expression(10^0~"\u2264 m <"~10^1),
+      expression(10^1~"\u2264 m <"~10^2),
+      expression(10^2~"\u2264 m         "))) +
+  guides(fill = guide_legend(title = "Copepod\nMass Range", label.hjust = 0.5)) +
+  facet_wrap(~functional_group) +
+  scale_y_continuous(expand = expansion(add = c(0,0))) +
+  scale_x_date(
+    breaks = "1 month",  labels = date_format("%b"),
+    expand = expansion(add = c(0.5,0.5))) +
+  theme(plot.margin = unit(c(1,1,2,1), "lines")) +
+  geom_text(
+    data = season_position_df, 
+    aes(x = dates+365, y = bot_pos, label = label), vjust = 3, size = 5) +
+  coord_cartesian(
+    clip = "off", 
+    expand = FALSE, 
+    ylim = c(0, 40), 
+    xlim = as.Date(c("2000-11-30", "2001-11-30"))) +
+  labs(x = NULL, y = NULL, title = "(a.) Daily Biomass")
+
+
+
+
+# Passive Copepods
+sm1_b <- camila_controls %>%
+  dplyr::filter(functional_group == "Passive Copepods") %>% 
+  ggplot() +
+  geom_area(aes(new_date, control_bio, fill = size_bin)) +
+ # geom_vline(
+ #    xintercept = as.Date("2001-02-28"), 
+ #    linetype = 2, color = "gray30", linewidth = 0.75) + 
+ #  geom_vline(
+ #    xintercept = as.Date("2001-05-31"), 
+ #    linetype = 2, color = "gray30", linewidth = 0.75) + 
+ #  geom_vline(
+ #    xintercept = as.Date("2001-08-31"), 
+ #    linetype = 2, color = "gray30", linewidth = 0.75) + 
+  scale_fill_carto_d(
+    palette = "ag_Sunset", direction = -1,
+    labels = c(
+      expression("           m <"~10^-2),
+      expression(10^-2~"\u2264 m <"~10^-1),
+      expression(10^-1~"\u2264 m <"~10^0),
+      expression(10^0~"\u2264 m <"~10^1),
+      expression(10^1~"\u2264 m <"~10^2),
+      expression(10^2~"\u2264 m         "))) +
+  guides(fill = guide_legend(title = "Copepod\nMass Range", label.hjust = 0.5)) +
+  facet_wrap(~functional_group) +
+  scale_y_continuous(expand = expansion(add = c(0,0))) +
+  scale_x_date(
+    breaks = "1 month",  labels = date_format("%b"),
+    expand = expansion(add = c(0.5,0.5))) +
+  theme(plot.margin = unit(c(1,1,2,1), "lines"),
+        legend.position = "none") +
+  geom_text(
+    data = season_position_df, 
+    aes(x = dates+365, y = bot_pos, label = label), vjust = 3, size = 5) +
+  coord_cartesian(
+    clip = "off", 
+    expand = FALSE, 
+    ylim = c(0, 40), 
+    xlim = as.Date(c("2000-11-30", "2001-11-30"))) +
+  labs(x = NULL, y = NULL, NULL)
+
+
+
+# Protists
+sm1_c <- camila_controls %>%
+  dplyr::filter(functional_group == "Protists") %>% 
+  ggplot() +
+  geom_area(aes(new_date, control_bio, fill = size_bin)) +
+  # geom_vline(
+  #   xintercept = as.Date("2001-02-28"), 
+  #   linetype = 2, color = "gray30", linewidth = 0.75) + 
+  # geom_vline(
+  #   xintercept = as.Date("2001-05-31"), 
+  #   linetype = 2, color = "gray30", linewidth = 0.75) + 
+  # geom_vline(
+  #   xintercept = as.Date("2001-08-31"), 
+  #   linetype = 2, color = "gray30", linewidth = 0.75) + 
+  scale_fill_manual(
+    values = c(
+      "#FFFFCC",
+      "#C7E9B4",
+      "#7FCDBB",
+      "#41B6C4",
+      "#2C7FB8",
+      "#253494",
+      "gray60"),
+    labels = c(
+      expression("           m <"~10^-6),
+      expression(10^-6~"\u2264 m <"~10^-5),
+      expression(10^-5~"\u2264 m <"~10^-4),
+      expression(10^-4~"\u2264 m <"~10^-3),
+      expression(10^-3~"\u2264 m <"~10^-2),
+      expression(10^-2~"\u2264 m         "),
+                "Total                   ")) +
+  guides(fill = guide_legend(title = "Protist\nMass Range", label.hjust = 0.5)) +
+  facet_wrap(~functional_group) +
+  scale_x_date(
+    breaks = "1 month",  labels = date_format("%b"),
+    expand = expansion(add = c(0.5,0.5))) +
+  theme(plot.margin = unit(c(1,1,2,1), "lines")) +
+  geom_text(
+    data = season_position_df, 
+    aes(x = dates+365, y = bot_pos, label = label), vjust = 3, size = 5) +
+  coord_cartesian(
+    clip = "off", 
+    expand = FALSE, 
+    ylim = c(0, 135),
+    xlim = as.Date(c("2000-11-30", "2001-11-30"))) +
+  labs(x = "", y = NULL, title = NULL)
+  
+
+# Combine them
+sm1_left <- sm1_a / sm1_b /sm1_c + plot_layout(guides = "collect")
+
+
+
+```
+
+### SM1 b.
+
+
+Sea Surface Temperature and Mix Layer Depth (a) as in the present study and (b) as in Serra-Pompei et al. (2020).  Solid line: Sea Surface Temperature and Mix Layer Depth (a) as in the present study. Dash line: Sea Surface Temperature and Mix Layer Depth (a) as in Serra-Pompei et al. (2020). 
+
+
+```{r}
+ # Camila abiotic conditions:
+camila_env <- read_xlsx(here::here("maria_data/maria_results_2023/SST_MLD_SerraPompei2020.xlsx")) %>% select(c(1:4)) %>% 
+  setNames(c("day", "temp_k", "temp_c", "mld"))
+
+# pivot and add labels
+camila_env_long <- camila_env %>% 
+  pivot_longer(
+    cols = c(temp_k, temp_c, mld), 
+    names_to = "var", 
+    values_to = "vals") %>% 
+  mutate(
+    labels = case_when(
+    var == "temp_k" ~ "Temperature (\u00b0K)",
+    var == "temp_c" ~ "Temperature (\u00b0C)",
+    var == "mld"  ~ "Mixed Layer Depth (m)"),
+    labels = fct_rev(labels),
+    date = as.Date("2000-01-01") + (day-1),
+    # Start it in december to match the December cycle above
+    new_date = if_else(
+      date <= as.Date("2000-12-01"), 
+      as.Date(date+lubridate::years(1)), 
+      date),
+    new_date = as.Date(new_date))
+   
+
+
+# Build the plots
+sm1_sst <- abiot_long %>% 
+  filter(var == "temp") %>% 
+  ggplot(aes(date, vals)) +
+  geom_line(linewidth  = 1, linetype = 1) +
+  geom_line(
+    data = filter(camila_env_long, var == "temp_c"),
+    aes(new_date, vals),
+    linewidth  = 1, linetype = 2) +
+  # geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  # geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  # geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  facet_wrap(~labels, ncol = 1,scales = "free") +
+  scale_x_date(
+    breaks = "1 month",  
+    labels = date_format("%b"),
+    expand = expansion(add = c(0,0))) +
+  labs(
+    title = "(b.) Abiotic Conditions",
+    x = NULL,  
+    y = "Temperature") + 
+  scale_y_continuous(labels = number_format(suffix = "\u00b0C"))
+
+#sm1_sst
+
+
+sm1_mld <- abiot_long %>% 
+  filter(var == "MLD") %>% 
+  ggplot(aes(date, vals)) +
+  geom_line(linewidth  = 1, linetype = 1) +
+  geom_line(
+    data = filter(camila_env_long, var == "mld"),
+    aes(new_date, vals),
+    linewidth  = 1, linetype = 2) +
+  # geom_vline(xintercept = as.Date("2001-02-28"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  # geom_vline(xintercept = as.Date("2001-05-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  # geom_vline(xintercept = as.Date("2001-08-31"), linetype = 2, color = "gray40", linewidth = 0.5) + 
+  facet_wrap(~labels, ncol = 1,scales = "free") +
+  scale_x_date(
+    breaks = "1 month",  
+    labels = date_format("%b"),
+    expand = expansion(add = c(0,0))) +
+  labs(
+    title = NULL,
+    x = NULL,  
+    y = "Temperature") + 
+  scale_y_continuous(labels = number_format(suffix = "m"))
+
+#sm1_mld
+
+
+# Put them together
+sm1_right <- sm1_sst/sm1_mld
+
+
+```
+
+
+### SM1 All
+
+```{r}
+sm1_full <- sm1_left | sm1_right
+sm1_full
+
+```
+
+
+## Fig SM2 Shannon diveristy
+
+Seasonal Shannon Diversity Index for (a) active and (b) passive copepod feeders and (c) protists for the summer (June- August) heatwave scenarios under the environmental forcing (Sea Surface Temperature and Mix Layer Depth) as in Serra-Pompei et al. (202).  
+
+Seasonal Shannon Diversity Index for: 
+ (a) active
+ (b) passive copepod feeders and 
+ (c) protists for the summer (June- August) heatwave scenarios.  
+ 
+X-axis: years. Year 0: pre-heatwave, Year 1: heatwave (in red) Years 2-9: after-heatwave. 
+
+```{r}
+
+# Read the diversity data
+summer_ca <- read_csv(
+  here::here("maria_data/maria_results_2023/summer_Ca_all_seasons_CAMILA_envSETUP.csv"))
+summer_cp <- read_csv(
+  here::here("maria_data/maria_results_2023/summer_Cp_all_seasons_CAMILA_envSETUP.csv"))
+summer_p <- read_csv(
+  here::here("maria_data/maria_results_2023/summer_P_all_seasons_CAMILA_envSETUP.csv"))
+
+# Load Camilas Diversity data
+camila_diversity <- left_join(summer_ca, summer_cp) %>% 
+  left_join(summer_p) %>% 
+  rename_all(~str_remove(.x, "summer_")) %>% 
+  pivot_longer(
+    cols = !year,
+    names_to = "group",
+    values_to = "shannon_index") %>% 
+  separate(group, sep = "_", into = c("functional_group", "season")) %>% 
+  mutate(
+    functional_group = case_when(
+      functional_group == "Ca" ~ "Active Copepods",
+      functional_group == "Cp" ~ "Passive Copepods",
+      functional_group == "P" ~ "Protists"),
+    season = str_to_title(season),
+    season = factor(season, levels = season_lvls)
+  )
+  
+
+# heatwave coverage
+rect_df <- data.frame(
+    hw_status = c("Year 0:\nPre-heatwave\nEquilibrium", "Year 1:\nSeasonal heatwave"),
+    xmin = c(-0.5, 0.5),
+    xmax = c(0.5, 1.5),
+    ymin = rep(-Inf, 2),
+    ymax = rep(Inf, 2))
+hw_fill <- c("transparent", "#FDDBC770")
+
+# # Make the plot
+# sm2 <- camila_diversity %>% 
+#   ggplot() +
+#   geom_rect(
+#       data = rect_df, 
+#       aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = hw_status), 
+#       color = "transparent",
+#       alpha = 0.8) +
+#   geom_line(aes(year, shannon_index, linetype = season),
+#             linewidth = 1.2, alpha = 0.7) +
+#   facet_grid(functional_group ~ ., scales = "free") +
+#   scale_x_continuous(
+#       breaks = seq(0,5, 1),
+#       limits = c(0,6),
+#       labels = 0:5,
+#       expand = expansion(add = c(0,0))) +
+#   scale_fill_manual(values = hw_fill) +
+#   guides(
+#       fill = guide_legend(
+#         title.position = "top", 
+#         title.hjust = 0.5, 
+#         keyheight = unit(1, "cm"),
+#         override.aes = list(color = "black")),
+#       linetype = guide_legend(
+#         title.position = "top", 
+#         title.hjust = 0.5)) +
+#   facet_grid() +
+#   theme(
+#     legend.position = "bottom",
+#     panel.grid = element_blank(),
+#     panel.background = element_rect(color = "black", fill = "transparent")) +
+#   labs(
+#       y = "Shannon Index",
+#       x = "Year",
+#       linetype = "Season:",
+#       fill = "Heatwave Timing:"
+#     )
+# 
+# 
+# sm2
+
+
+# Jk make it look like this
+
+sm2 <- ggplot() +
+      geom_rect(
+        data = rect_df, 
+        aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = hw_status), 
+        color = "transparent",
+        alpha = 0.8) +
+    geom_line(
+      data = camila_diversity,
+      aes(year, shannon_index,
+          color = functional_group,
+          linetype = functional_group), 
+      linewidth = 1.2, alpha = 0.7) +
+    scale_color_brewer(palette = "Dark2") +
+    scale_fill_manual(values = hw_fill) +
+    facet_grid(. ~ season) +
+    scale_x_continuous(
+      breaks = seq(0,5, 1),
+      limits = c(0,6),
+      labels = 0:5,
+      expand = expansion(add = c(0,0))) +
+    scale_y_continuous(breaks = seq(0,10, 0.5)) +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.background = element_rect(fill = NA),
+      legend.position = "bottom",
+      panel.ontop = TRUE) +
+    guides(
+      fill = guide_legend(
+        title.position = "top", 
+        title.hjust = 0.5, 
+        override.aes = list(color = "black")),
+      linetype = guide_legend(
+        title.position = "top", 
+        ncol = 3, 
+        title.hjust = 0.5,
+        override.aes = list(linewidth = 0.8)), 
+      color = guide_legend(
+        title.position = "top", 
+        ncol = 3, 
+        title.hjust = 0.5)) +
+    labs(#title = ptitle,
+         x = "Years",
+         y = "Shannon Diversity Index",
+         color = "Functional Groups:",
+         linetype = "Functional Groups:",
+         fill = "Heatwave Timing:")
+
+sm2
+```
+
+
+
+
+## Fig SM3 Study Area SST
+
+Figure SM3: Latitudinal and longitudinal coverage of the Mix Layer Depth and Sea Surface Temperature used as environmental forcing in the model. 
+
+
+```{r}
+library(sf)
+
+# Polygons for mapping
+new_england <- rnaturalearth::ne_states("united states of america") %>% st_as_sf(crs = 4326)
+
+# Bathymetric Contour Data
+bathy <- raster::raster(str_c(cs_path("res","Bathy/"), "ETOPO1/NEShelf_Etopo1_bathy.tiff")) 
+
+# Make a terra copyfor ggplot using tidyterra
+elev_terra <- terra::rast(bathy)
+
+# Region Assignment
+# Source Andy Pershing: Reference Pershing et al. 2010
+mab_slope <- tribble(
+    ~"longitude",       ~"latitude",
+    -71.07764473940071, 36.98990872585177,
+    -70.37294964932077, 37.52560031966651,
+    -69.45253157248167, 38.43942715617401,
+    -71.437183050666,   39.4320321682425,
+    -71.68166910232638, 39.17994200644733,
+    -72.19940427054837, 38.89634057442776,
+    -72.5014164520112,  38.75453985841798) %>% 
+  mutate(area = "MAB Slope") %>% 
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>% 
+  group_by(area) %>% 
+  summarise() %>% 
+  st_cast("POLYGON") %>% 
+  st_convex_hull()
+
+
+# Map of MAB Slope region
+sm3 <- ggplot() +
+  tidyterra::geom_spatraster_contour(
+    data = elev_terra,
+    breaks = seq(0,-15000,-100),
+    alpha = 0.4) +
+  geom_sf(
+    data = mab_slope, 
+    color = "orange", 
+    fill = "orange", 
+    alpha = 0.3,
+    linewidth = 1,
+    linetype = 1) + 
+  geom_sf(data = new_england) +
+  map_theme() +
+  coord_sf(xlim = c(-76.2,-69),
+           ylim = c(36, 42.1), 
+           expand = T)
+
+
+sm3
+
+```
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+# Dominant Species Seasonal Responses
+
+```{r}
+#| label: figure-3-seasonal-function
+
+
+# 1. Plotting Function:
+# Make a function to plot the different functional groups separately with some plot controls:
+plot_abs_diff <- function(x, fgroup, lims, lbase, title = NULL, hw_in){
+  
+  # Make limit labels
+  lim_labs <- c(lims[1], mean(c(0, lims[1])), 0, mean(c(0, lims[2])),  lims[2])
+  lim_labs[1] <- str_c("<",lim_labs[1])
+  lim_labs[5] <- str_c(">",lim_labs[5])
+  
+  # Set the order for the season facets to appear
+  seas_order <- switch(hw_in,
+    "A" = c("Autumn", "Winter", "Spring", "Summer"),
+    "W" = c("Winter", "Spring", "Summer", "Autumn"),
+    "Sp" = c("Spring", "Summer",  "Autumn", "Winter"),
+    "S" = c("Summer", "Autumn", "Winter", "Spring"))
+  
+  # Prepare the data
+  x_plot <- x %>% 
+    filter(!temp_opt %in% str_c(c(0, 4, 8, 12, 16), "C")) %>% 
+    filter(hw_season != "control") %>% 
+    filter(functional_group %in% fgroup) %>% 
+    mutate(functional_group = str_replace(functional_group, " ", "\n"),
+           seasons = factor(seasons, levels = seas_order)) %>% 
+    drop_na()
+    
+  # Build the plot 
+  out_plot <- x_plot %>% 
+    ggplot(aes(year, max_size)) +
+      geom_tile(aes(fill = abs_bio_diff), color = "black") +
+      scale_fill_carto_c(
+        palette = "Tropic", 
+        direction = -1, 
+        limits = lims, 
+        labels = lim_labs,
+        oob = scales::squish) + 
+      scale_y_log10(
+        labels = scales::label_log(base = lbase), 
+        breaks = breaks_log(base = lbase)) +
+      #theme_dark() +
+      theme(
+        plot.title = element_text(face = "bold", size = 14),
+        panel.grid = element_blank(),
+        #strip.background = element_rect(fill = "gray30"),
+        strip.text.y = element_text(angle = 0, face = "bold"),
+        legend.position = "bottom") +
+      guides(fill = guide_colorbar(
+        title.position = "top", 
+        title.hjust = 0.5, 
+        barwidth = unit(4, "in"), 
+        frame.colour = "black", 
+        ticks.colour = "black")) +
+      scale_x_continuous(breaks = c(1:10), expand = expansion(add = c(0.5, 0.5))) +
+      facet_grid(temp_opt ~ seasons, scales = "free", space = "free") +
+      labs(
+        x = "Years",
+        title = title,
+        y = "Max Size (um)", 
+        fill = expression(paste("Absolute biomass anomaly (mg C ", m^{-3}, ")")))
+  
+  out_plot
+  
+}
+```
+
+::: {.panel-tabset}
+
+
+### Autumn Heatwave
+
+```{r}
+#| fig-height: 8
+#| fig-width: 10
+
+
+ahw_ac <- plot_abs_diff(
+  x = seasonal_response$`Autumn HW`,
+  fgroup = c("Active Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "A",
+  title = "Dominant functional groups - Autumn heatwave") +
+  labs(title = "(a.) Active Copepod",
+       y = "Max Body Size (μm)")
+
+
+ahw_pc <- plot_abs_diff(
+  x = seasonal_response$`Autumn HW`,
+  fgroup = c("Passive Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "A") +
+  labs(title = "(b.) Passive Copepod",
+       y = "Max Body Size (μm)")
+
+ahw_pr <- plot_abs_diff(
+  x = seasonal_response$`Autumn HW`,
+  fgroup = c("Protist"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "A") +
+  labs(title = "(c.) Protist",
+       y = "Max Cell Size (μm)")
+
+
+
+ahw_all <- ((ahw_ac + theme(legend.position = "none")) / ahw_pc  | ahw_pr ) 
+ahw_all
+
+```
+
+
+### Winter Heatwave
+
+```{r}
+#| fig-height: 8
+#| fig-width: 10
+
+
+
+whw_ac <- plot_abs_diff(
+  x = seasonal_response$`Winter HW`,
+  fgroup = c("Active Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "W",
+  title = "Dominant functional groups - Winter heatwave") +
+  labs(title = "(a.) Active Copepod",
+       y = "Max Body Size (μm)")
+
+
+whw_pc <- plot_abs_diff(
+  x = seasonal_response$`Winter HW`,
+  fgroup = c("Passive Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "W") +
+  labs(title = "(b.) Passive Copepod",
+       y = "Max Body Size (μm)")
+
+whw_pr <- plot_abs_diff(
+  x = seasonal_response$`Winter HW`,
+  fgroup = c("Protist"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "W") +
+  labs(title = "(c.) Protist",
+       y = "Max Cell Size (μm)")
+
+
+
+whw_all <- ((whw_ac + theme(legend.position = "none")) / whw_pc  | whw_pr ) 
+whw_all
+
+```
+
+
+### Spring Heatwave
+
+```{r}
+#| fig-height: 8
+#| fig-width: 10
+
+
+
+sphw_ac <- plot_abs_diff(
+  x = seasonal_response$`Spring HW`,
+  fgroup = c("Active Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "Sp",
+  title = "Dominant functional groups - Spring heatwave") +
+  labs(title = "(a.) Active Copepod",
+       y = "Max Body Size (μm)")
+
+
+sphw_pc <- plot_abs_diff(
+  x = seasonal_response$`Spring HW`,
+  fgroup = c("Passive Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "Sp") +
+  labs(title = "(b.) Passive Copepod",
+       y = "Max Body Size (μm)")
+
+sphw_pr <- plot_abs_diff(
+  x = seasonal_response$`Spring HW`,
+  fgroup = c("Protist"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "Sp") +
+  labs(title = "(c.) Protist",
+       y = "Max Cell Size (μm)")
+
+
+
+sphw_all <- ((sphw_ac + theme(legend.position = "none")) / sphw_pc  | sphw_pr ) #+ plot_annotation(tag_levels = list(c("(a.)", "(b.)", "(c.)")))
+sphw_all
+```
+
+### Summer Heatwave
+
+
+```{r}
+#| fig-height: 8
+#| fig-width: 10
+
+
+shw_ac <- plot_abs_diff(
+  x = seasonal_response$`Summer HW`,
+  fgroup = c("Active Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "S",
+  title = "Dominant functional groups - Summer heatwave") +
+  labs(title = "(a.) Active Copepod",
+       y = "Max Body Size (μm)")
+
+
+shw_pc <- plot_abs_diff(
+  x = seasonal_response$`Summer HW`,
+  fgroup = c("Passive Copepod"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "S") +
+  labs(title = "(b.) Passive Copepod",
+       y = "Max Body Size (μm)")
+
+shw_pr <- plot_abs_diff(
+  x = seasonal_response$`Summer HW`,
+  fgroup = c("Protist"), 
+  lims = c(-1, 1), 
+  lbase = 10,
+  hw_in = "S") +
+  labs(title = "(c.) Protist",
+       y = "Max Cell Size (μm)")
+
+
+
+shw_all <- ((shw_ac + theme(legend.position = "none")) / shw_pc  | shw_pr )# + plot_annotation(tag_levels = list(c("(a.)", "(b.)", "(c.)")))
+shw_all
+
+```
+
+
+:::
 
 
 # High-Res Exports
@@ -2129,36 +3336,51 @@ Over-sized figures will be reduced by the Production Editor. If figures are draw
 
 
 ```{r}
-#| label: saving-figures
+#| label: saving-figures-pdf
+#| eval: false
+
+
 
 # Local destination
-local_save <- here::here("maria_data/maria_results_2023/hi_res_figures/")
+local_save <- here::here("maria_data/maria_results_2023/hi_res_figures/new/")
 
 # Figure 1: Abiotic Conditions
 # These can be single column figures
 
 
-
-
 # Save them
-ggsave(filename = str_c(local_save, "sst_daily.pdf"), 
+
+# SST
+ggsave(filename = str_c(local_save, "fig1_sst_daily.pdf"), 
        plot = f1_sst, 
        width = 82, 
        height = 62, scale = 2,
        units = "mm",
        dpi = 300)
-ggsave(filename = str_c(local_save, "mld_daily.pdf"), 
+
+# MLD
+ggsave(filename = str_c(local_save, "fig1_mld_daily.pdf"), 
        plot = f1_mld, 
        width = 82, 
        height = 62, scale = 2,
        units = "mm",
        dpi = 300)
-ggsave(filename = str_c(local_save, "nitrogen_daily.pdf"), 
-       plot = f1_n, 
+
+ggsave(filename = str_c(local_save, "fig1_tnorms.pdf"), 
+       plot = f1_tnorms, 
        width = 82, 
        height = 62, scale = 2,
        units = "mm",
        dpi = 300)
+
+
+# Nitrogen
+# ggsave(filename = str_c(local_save, "nitrogen_daily.pdf"), 
+#        plot = f1_n, 
+#        width = 82, 
+#        height = 62, scale = 2,
+#        units = "mm",
+#        dpi = 300)
 
 
 
@@ -2177,9 +3399,11 @@ ggsave(filename = str_c(local_save, "figure_2.pdf"),
 
 
 
+
+
 # Figure 3: Size-bin responses
 
-
+# The one that cycles through seasons within the year
 ggsave(filename = str_c(local_save, "figure_3.pdf"), 
        plot = f3_all, 
        scale = 2,
@@ -2188,30 +3412,90 @@ ggsave(filename = str_c(local_save, "figure_3.pdf"),
        units = "mm",
        dpi = 300)
 
-# Then the seassonal responses
 
+# Then the seasonal responses as heatmaps
 ggsave(filename = str_c(local_save, "figure_3_augusthw.pdf"), 
-       plot = ahw_all, 
+       plot = fig3_ahw, 
        scale = 2,
        width = 173, 
        height = 130, 
        units = "mm",
        dpi = 300)
 ggsave(filename = str_c(local_save, "figure_3_winterhw.pdf"), 
-       plot = whw_all, 
+       plot = fig3_whw, 
        scale = 2,
        width = 173, 
        height = 130, 
        units = "mm",
        dpi = 300)
 ggsave(filename = str_c(local_save, "figure_3_springhw.pdf"), 
-       plot = sphw_all, 
+       plot = fig3_sphw, 
        scale = 2,
        width = 173, 
        height = 130, 
        units = "mm",
        dpi = 300)
 ggsave(filename = str_c(local_save, "figure_3_summerhw.pdf"), 
+       plot = fig3_shw, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+# Figure 4: Shannon Diversity Index
+
+
+ggsave(filename = str_c(local_save, "figure_4_shannon_index.pdf"), 
+       plot = shan_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+
+
+# Figure 4: Dominant Species responses
+
+# The all season line plot
+ggsave(filename = str_c(local_save, "figure_5_dom_taxa.pdf"), 
+       plot = fig_5, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+# Then the seasonal versions as heatmaps
+ggsave(filename = str_c(local_save, "domspecies_augusthw.pdf"), 
+       plot = ahw_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "domspecies_winterhw.pdf"), 
+       plot = whw_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "domspecies_springhw.pdf"), 
+       plot = sphw_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "domspecies_summerhw.pdf"), 
        plot = shw_all, 
        scale = 2,
        width = 173, 
@@ -2222,31 +3506,12 @@ ggsave(filename = str_c(local_save, "figure_3_summerhw.pdf"),
 
 
 
-# Figure 4: Dominant Species responses
-
-ggsave(filename = str_c(local_save, "figure_4.pdf"), 
-       plot = fig_4, 
-       scale = 2,
-       width = 173, 
-       height = 130, 
-       units = "mm",
-       dpi = 300)
-
-# Figure 5: Shannon Diversity
 
 
-ggsave(filename = str_c(local_save, "figure_5_shannon_index.pdf"), 
-       plot = shan_all, 
-       scale = 2,
-       width = 173, 
-       height = 130, 
-       units = "mm",
-       dpi = 300)
+
 
 # Figure 6: Biomass Anomalies
-
-
-ggsave(filename = str_c(local_save, "figure_6.pdf"), 
+ggsave(filename = str_c(local_save, "figure_6_biomass.pdf"), 
        plot = f6_all, 
        scale = 2,
        width = 173, 
@@ -2254,5 +3519,474 @@ ggsave(filename = str_c(local_save, "figure_6.pdf"),
        units = "mm",
        dpi = 300)
 
+
+
+# Figure SM1 - Conditions in Camila's model
+ggsave(filename = str_c(local_save, "figure_sm1_camilla_setup.pdf"), 
+       plot = sm1_full, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+# Figure SM2
+ggsave(filename = str_c(local_save, "figure_sm2_summer_diversity.pdf"), 
+       plot = sm2, 
+       scale = 2,
+       width = 82, 
+       height = 62, 
+       units = "mm",
+       dpi = 300)
+
+
+
+# Figure SM3
+ggsave(filename = str_c(local_save, "figure_sm3_midatlantic_area_map.pdf"), 
+       plot = sm3 , 
+       scale = 2,
+       width = 82, 
+       height = 62, 
+       units = "mm",
+       dpi = 300)
+
+
+
+
+
 ```
+
+
+
+```{r}
+#| label: saving-figures-jpg
+#| eval: false
+
+# Local destination
+local_save <- here::here("maria_data/maria_results_2023/hi_res_figures/new/")
+
+# Figure 1: Abiotic Conditions
+# These can be single column figures
+
+
+# Save them
+
+# SST
+ggsave(filename = str_c(local_save, "fig1_sst_daily.jpg"), 
+       plot = f1_sst, 
+       width = 82, 
+       height = 62, scale = 2,
+       units = "mm",
+       dpi = 300)
+
+# MLD
+ggsave(filename = str_c(local_save, "fig1_mld_daily.jpg"), 
+       plot = f1_mld, 
+       width = 82, 
+       height = 62, scale = 2,
+       units = "mm",
+       dpi = 300)
+
+ggsave(filename = str_c(local_save, "fig1_tnorms.jpg"), 
+       plot = f1_tnorms, 
+       width = 82, 
+       height = 62, scale = 2,
+       units = "mm",
+       dpi = 300)
+
+
+# Nitrogen
+# ggsave(filename = str_c(local_save, "nitrogen_daily.jpg"), 
+#        plot = f1_n, 
+#        width = 82, 
+#        height = 62, scale = 2,
+#        units = "mm",
+#        dpi = 300)
+
+
+
+
+
+# Figure 2: Control Conditions
+# This is a 2/3  or full page figure
+
+ggsave(filename = str_c(local_save, "figure_2.jpg"), 
+       plot = fig2_full, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+
+
+# Figure 3: Size-bin responses
+
+# The one that cycles through seasons within the year
+ggsave(filename = str_c(local_save, "figure_3.jpg"), 
+       plot = f3_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+# Then the seasonal responses as heatmaps
+ggsave(filename = str_c(local_save, "figure_3_augusthw.jpg"), 
+       plot = fig3_ahw, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "figure_3_winterhw.jpg"), 
+       plot = fig3_whw, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "figure_3_springhw.jpg"), 
+       plot = fig3_sphw, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "figure_3_summerhw.jpg"), 
+       plot = fig3_shw, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+# Figure 4: Shannon Diversity Index
+
+
+ggsave(filename = str_c(local_save, "figure_4_shannon_index.jpg"), 
+       plot = shan_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+
+
+# Figure 4: Dominant Species responses
+
+# The all season line plot
+ggsave(filename = str_c(local_save, "figure_5_dom_taxa.jpg"), 
+       plot = fig_5, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+# Then the seasonal versions as heatmaps
+ggsave(filename = str_c(local_save, "domspecies_augusthw.jpg"), 
+       plot = ahw_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "domspecies_winterhw.jpg"), 
+       plot = whw_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "domspecies_springhw.jpg"), 
+       plot = sphw_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+ggsave(filename = str_c(local_save, "domspecies_summerhw.jpg"), 
+       plot = shw_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+
+
+
+
+
+# Figure 6: Biomass Anomalies
+
+
+ggsave(filename = str_c(local_save, "figure_6_biomass.jpg"), 
+       plot = f6_all, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+
+# Figure SM1 - Conditions in Camila's model
+ggsave(filename = str_c(local_save, "figure_sm1_camilla_setup.jpg"), 
+       plot = sm1_full, 
+       scale = 2,
+       width = 173, 
+       height = 130, 
+       units = "mm",
+       dpi = 300)
+
+
+# Figure SM2
+ggsave(filename = str_c(local_save, "figure_sm2_summer_diversity.jpg"), 
+       plot = sm2, 
+       scale = 2,
+       width = 82, 
+       height = 62, 
+       units = "mm",
+       dpi = 300)
+
+
+
+# Figure SM3
+ggsave(filename = str_c(local_save, "figure_sm3_midatlantic_area_map.jpg"), 
+       plot = sm3 , 
+       scale = 2,
+       width = 82, 
+       height = 62, 
+       units = "mm",
+       dpi = 300)
+
+```
+
+
+
+
+
+
+
+```{r}
+#| label: fig-5-original
+#| eval: false
+
+# Pull the top 5/10 dominant species, the first 5 columns
+top_species <- bind_rows(seasonal_response) %>% 
+  filter(matrix_col %in% str_c("col_", c(1:5)))
+
+
+# b. Plot the Active Copepods
+top_ac <- top_species %>% 
+  filter(
+    functional_group == "Active Copepod",
+    hw_season != "Control",
+    !str_detect(trial, "only")) %>% 
+  ggplot(aes(year, absolute_bio)) +
+  geom_line(
+    aes(group = control, color = max_size), 
+    linewidth = 0.6, alpha = 0.8) +
+  geom_point(
+    aes(shape = fct_rev(temp_opt), color = max_size), 
+    size = 2) +
+  facet_grid(seasons~hw_season, scales = "free_y") +
+  scale_shape_manual(
+    values = c(
+      "16C" = 15,
+      "20C" = 16,
+      "24C" = 17,
+      "28C" = 18)) +
+  scale_color_carto_c(
+    palette = "ag_Sunset", 
+    direction = -1, 
+    trans = "log10", 
+    labels = label_log(base = 10), 
+    breaks = 10^c(-2, -1, 0, 1,2),
+    limits = 10^c(-3, 3),
+    oob = oob_squish) +
+  scale_x_continuous(expand = expansion(add = c(0,0)),breaks = c(1:9)) +
+  guides(
+    color = guide_colorbar(
+      title.position = "top", 
+      title.hjust = 0.5, 
+      barwidth = unit(5, "cm"), 
+      ticks.colour = "black", 
+      frame.colour = "black"),
+    shape = guide_legend(
+      title.position = "top", 
+      title.hjust = 0.5, 
+      override.aes = list(size = rep(3, 3)))) +
+  theme(legend.position = "bottom",
+        panel.background = element_rect(fill = "gray80"),
+        panel.grid = element_blank()) +
+  labs(
+    title = "(a.) Active Copepod",
+    y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
+    x = "Year",
+    color = "Maximum Body Size",
+    shape = "Temperature Optima"
+  )
+
+
+
+
+# c. Plot those passive jabronis
+top_pc <- top_species %>% 
+  filter(functional_group == "Passive Copepod",
+         hw_season != "Control",
+         !str_detect(trial, "only")) %>% 
+  ggplot(aes(year, absolute_bio)) +
+ geom_line(aes(group = control, color = max_size), 
+           linewidth = 0.6, alpha = 0.8) +
+  geom_point(aes(shape = fct_rev(temp_opt), color = max_size), size = 2) +
+  scale_shape_manual(
+    values = c(
+      "16C" = 15,
+      "20C" = 16,
+      "24C" = 17,
+      "28C" = 18)) +
+  scale_color_carto_c(
+    palette = "ag_Sunset", 
+    direction = -1, 
+    trans = "log10", 
+    labels = label_log(base = 10), 
+    breaks = 10^c(-2, -1, 0, 1,2),
+    limits = 10^c(-3, 3),
+    oob = oob_squish) +
+  scale_x_continuous(expand = expansion(add = c(0,0)),breaks = c(1:9)) +
+  facet_grid(seasons~hw_season, scales = "free_y") +
+  guides(
+    color = guide_colorbar(title.position = "top", title.hjust = 0.5, barwidth = unit(5, "cm"), ticks.colour = "black", frame.colour = "black"),
+    shape = guide_legend(title.position = "top", title.hjust = 0.5, override.aes = list(size = rep(3, 3)))) +
+  theme(legend.position = "bottom",
+        panel.background = element_rect(fill = "gray80"),
+        panel.grid = element_blank()) +
+  labs(
+    title = "(b.) Passive Copepod",
+    y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
+    x = "Year",
+    color = "Maximum Body Size",
+    shape = "Temperature Optima"
+  )
+
+
+
+# d. Protists
+top_pr <- top_species %>% 
+  filter(functional_group == "Protist",
+         hw_season != "Control",
+         !str_detect(trial, "only")) %>% 
+  ggplot(aes(year, absolute_bio)) +
+  geom_line(aes(group = control, color = max_size), linewidth = 0.6, alpha = 0.6) +
+  geom_point(aes(shape = fct_rev(temp_opt), color = max_size), size = 2) +
+  scale_shape_manual(
+    values = c(
+      "16C" = 15,
+      "20C" = 16,
+      "24C" = 17,
+      "28C" = 18)) +
+  scale_color_distiller(
+    palette = "YlGnBu", 
+    direction = -1, 
+    trans = "log10", 
+    labels = label_log(base = 10), 
+    breaks = 10^seq(-6,-2, 1),
+    limits = 10^c(-7, -3),
+    oob = oob_squish) +
+  scale_x_continuous(expand = expansion(add = c(0,0)),breaks = c(1:9)) +
+  facet_grid(seasons~hw_season, scales = "free_y") +
+  guides(
+    color = guide_colorbar(
+      title.position = "top", 
+      title.hjust = 0.5, 
+      barwidth = unit(6, "cm"), 
+      ticks.colour = "black", 
+      frame.colour = "black"),
+    shape = guide_legend(title.position = "top", title.hjust = 0.5, override.aes = list(size = rep(3, 4)))) +
+  theme(legend.position = "bottom",
+        panel.background = element_rect(fill = "gray80"),
+        panel.grid = element_blank()) +
+  labs(
+    title = "(c.) Protist",
+    y = expression(paste("Absolute biomass (mg C ", m^{-3}, ")")),
+    x = "Year",
+    color = "Maximum Body Size",
+    shape = "Temperature Optima"
+  )
+  
+
+
+```
+
+
+
+```{r}
+#| label: fig-5-differences
+#| eval: false
+
+# What About differencing:
+# Take the biomass in the year before, and see how that changes in time
+# Should be close to zero as it nears equilibrium
+
+# What About differencing
+top_species %>% 
+  mutate(dom_flag = str_c(functional_group, control, seasons, hw_season)) %>% 
+  filter(
+    dom_flag %in% not_dom$dom_flag == FALSE,
+    hw_season == "Summer HW") %>% 
+  group_by(dom_flag) %>% 
+  arrange(year) %>% 
+  mutate(
+    bio_diff = absolute_bio - lag(absolute_bio, n = 1),
+    bio_diff = ifelse(year == 0, NA, bio_diff),
+    .groups = "drop") %>% 
+  mutate(hw_action = ifelse(year < 2, "Heatwave Exposure", "Post-Heatwave")) %>% 
+  filter(year > 0) %>% 
+  ggplot() +
+  geom_col(aes(year, bio_diff, group = dom_flag, fill = temp_opt),
+    show.legend = T,
+    #position = "dodge",
+    linewidth = 0.1, alpha = 0.5, color = "white") +
+  geom_hline(yintercept = 0, linetype = 1, linewidth = 0.8) +
+  facet_grid(
+    functional_group~hw_action,
+    scales = "free",
+    space = "free",
+    labeller = labeller(
+      hw_action = label_wrap_gen(10),
+      functional_group = label_wrap_gen(10))) +
+  scale_x_continuous(
+    expand = expansion(add = c(0.5,0.5)),
+    breaks = c(1:9)) +
+  theme(
+    legend.position = "bottom",
+    panel.grid = element_blank()) +
+  labs(
+    y = expression(paste("Biomass Change from Year-1 (mg C ", m^{-3}, ")")),
+    x = "Year",
+    color = "Temperature Optima",
+    shape = "Temperature Optima",
+    fill = "Temperature Optima:",
+    title = "Summer Heatwave Seasonal Biomass Change\nDominant Taxa")
+
+```
+
+
+
 
