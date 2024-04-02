@@ -5,19 +5,22 @@ This is a landing pad for the Rmarkdown presentation and the cluster analysis rm
 This index.md file is used as a shortcut to the following html presentations and pages.
 
 
-The following links direct you to the xaringan slideshow:
+For details on the data provenance of the CPR data analyses use this link:
+[CPR Data Provenance](https://adamkemberling.github.io/continuous_plankton_recorder/docs/)
+
+
+
+The following links direct you to the xaringan slideshow walking through patterns in correlations:
 
 [Presentation Code link](/R/presentations/cpr_paper_story.html)
 
-[Presentation Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/presentations/cpr_paper_story.html#1)
+[Presentation Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/presentations/cpr_paper_story.html#1)
 
 
 
 The next links direct you to the clustering analysis markdown document and its code:
 
-[Rmarkdown Code Link](/R/05_cpr_clustering.Rmd)
-
-[HTML Page Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/05_cpr_clustering.html)
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/05_cpr_clustering.html)
 
 
 This link directs you to the shiny web app for comparing species abundance relationships to the buoy measurements.
@@ -27,7 +30,13 @@ This link directs you to the shiny web app for comparing species abundance relat
 
 This link is for the report consolidating results from the various analyses.
 
-[Rmarkdown Code Link](/R/12_paper_layout.Rmd)
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/new_anom_analyses/12_paper_layout.html)
 
-[HTML Page Link](https://gulfofmaine.github.io/continuous_plankton_recorder/R/12_paper_layout.html)
+
+Link to the Rodionov Regime Shift Testing Results
+[https://adamkemberling.github.io/continuous_plankton_recorder/R/new_anom_analyses/13_rodionov_testing.html](https://adamkemberling.github.io/continuous_plankton_recorder/R/new_anom_analyses/13_rodionov_testing.html)
+
+
+This link is to the figure testing link for Maria's paper:
+[HTML Page Link](https://adamkemberling.github.io/continuous_plankton_recorder/R/mgrigoratou_collaboration/figure_edits_2023.html)
 

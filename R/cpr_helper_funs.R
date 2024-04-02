@@ -3,6 +3,8 @@
 #Set ggplot theme
 ggplot2::theme_set(ggplot2::theme_classic())
 
+
+
 #' @title Locate Data Path on Box
 #' @description Safely navigate to box path within GMRI in lieu of here function
 #'
@@ -18,9 +20,13 @@ find_box_data <- function(box_project_name) {
   return(box_path)
 }
 
-cpr_boxpath <- find_box_data("continuous_plankton_recorder")
-ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
+# # Set the main paths - originals
+# cpr_boxpath <- find_box_data("continuous_plankton_recorder")
+# ccel_boxpath <- "/Users/akemberling/Box/Climate Change Ecology Lab"
 
+# Change to use gmRi::cs_path()
+cpr_boxpath <- gmRi::cs_path("root", "Adam Kemberling/Box_Projects/continuous_plankton_recorder")
+ccel_boxpath <- gmRi::cs_path("ccel")
 
 
 
@@ -233,14 +239,16 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall", ta
   if(is.null(taxa)) {
     my_taxa <- c("calanus", "calanus1to4", "centropages", "chaetognatha",
                  "euphausiacea", "metridia", "oithona", "para_pseudocalanus",
-                 "paraeucheata", "temora")
-  } else{my_taxa = taxa}
+                 "paraeucheata", "temora")} 
+  else{my_taxa = taxa}
   
+  # Plot the long corrplot
   long_plot <- corr_dataframe %>% 
     filter(Var1 %notin% my_taxa,
            Var2 %in% my_taxa) %>% 
     mutate(Var2 = factor(Var2, levels = my_taxa))
   
+  # plot the tall version
   tall_plot <- corr_dataframe %>% 
     filter(Var1 %in% my_taxa,
            Var2 %notin% my_taxa) %>% 
@@ -254,7 +262,7 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall", ta
     leg_position <- "bottom"
   }
   
-  
+  # Clean it up
   ggplot(plot_option, aes(x = Var1, y = fct_rev(Var2), fill = value)) +
     geom_tile(color = "white") +
     geom_text(aes(label = sig_symbol), 
@@ -280,200 +288,3 @@ cpr_corr_plot <- function(corr_dataframe, period = "Q1", plot_style = "tall", ta
 }
 
 
-#### Trim Data to Study Area BBox  ####
-
-
-#' @title CPR Area Filter
-#' 
-#' @description Subset the Gulf of Maine CPR survey data using a specific survey area, specified by name. 
-#' Extents for the following areas are available: 
-#'
-#' @param study_area Indication of what area to subset with. Includes GOM, GOM_new, CCB, WGOM, EGOM, SS.
-#'
-#' @return 
-#' @export
-#'
-#' @examples
-cpr_area_crop <- function(cpr_dat, study_area = "GOM_new"){
-  
-  area_bboxes <- tribble( ##### Area BBbox Open  ####
-    ~"area",  ~"lon",  ~"lat",
-    #Gulf of Maine - Historic
-    "gom",   -70.000000,	42.200000,
-    "gom",   -68.600000,	42.200000,
-    "gom",   -68.600000,	42.400000,
-    "gom",   -66.600000,	42.400000,
-    "gom",   -66.600000,	43.400000,
-    "gom",   -68.600000,	43.400000,
-    "gom",   -68.600000,	43.200000,
-    "gom",   -70.000000,	43.200000,
-    "gom",   -70.000000,	42.200000,
-    
-    #Gulf of Maine - Extended North to capture cpr route change
-    "gom_new",   -70.000000,	42.200000, 
-    "gom_new",   -66.600000,	42.200000, 
-    "gom_new",   -66.600000,	43.800000, 
-    "gom_new",   -70.000000,	43.800000, 
-    "gom_new",   -70.000000,	42.200000,
-    
-    "ccb",   -70.800000,	42.200000,
-    "ccb",   -70.000000,	42.200000,
-    "ccb",   -70.000000,	42.800000,
-    "ccb",   -70.800000,	42.800000,
-    "ccb",   -70.800000,	42.200000,
-    
-    #Western Gulf of Maine
-    "wgom",  -70.000000, 	42.200000,
-    "wgom",  -68.600000, 	42.200000,
-    "wgom",  -68.600000, 	43.200000,
-    "wgom",  -70.000000, 	43.200000,
-    "wgom",  -70.000000, 	42.200000,
-    
-    #Eastern Gulf of Maine
-    "egom",  -68.600000,	42.400000,
-    "egom",  -66.600000,	42.400000,
-    "egom",  -66.600000,	43.400000,
-    "egom",  -68.600000,	43.400000,
-    "egom",  -68.600000,	42.400000,
-    
-    "ss",    -66.600000,	42.600000,
-    "ss",    -65.400000,	42.600000,
-    "ss",    -65.400000,	43.400000,
-    "ss",    -66.600000,	43.400000,
-    "ss",    -66.600000,	42.600000,
-  ) %>% arrange(area) ##### Area BBbox Close  ####
-  
-  
-
-  #Filter to the correct area
-  study_area_bbox <- filter(area_bboxes, area == tolower(study_area))
-  
-  
-  #subset data that fits
-  cpr_dat <- cpr_dat %>% mutate(lon = ifelse(lon > 0, lon * -1, lon))
-  
-  cpr_dat <- cpr_dat %>% 
-    filter(
-      between(lon, min(study_area_bbox$lon), max(study_area_bbox$lon)),
-      between(lat, min(study_area_bbox$lat), max(study_area_bbox$lat)))
-  
-  # Return the cpr data
-  return(cpr_dat)
-}
-  
-
-####  Spline Tools  ####
-  
-  
-  
-#' Continuous Plankton Recorder Seasonal Spline Tool
-#'
-#' @param cpr_dat Takes output of cpr_area_crop. A data.frame containing atleast the following columns: year, julian day, lat, lon, and abundance.
-#' @param spline_bins Integer value indicating the desired number of basis functions for the seasonal spline fit, default = 10
-#' @param season_bins Integer value indicating the number of periods you wish there to be in a recurring 365 day cycle. 
-#' These are used as labels, not in GAM fitting.
-#'
-#' @return  List containing 1. the original dataframe with log transformed abundances, labeled periods, and log transformed anomalies
-#' and 2. the mean, standard deviation, and sample size for each period for each year.
-#' @export
-#'
-#' @examples
-cpr_spline_fun <- function(cpr_dat = cpr_data, spline_bins = 10, season_bins = 4) {
-  ####  Fit Seasonal Trend using all data  ####
-  
-    
-  #Check Input dimensions are correct
-  if(ncol(cpr_dat) != 5) {return(print('dat format requires 5 columns: [year, jday, lat, lon, #]'))}
-    
-  #Transform abundance to log abundance
-  cpr_dat <- cpr_dat %>% 
-    mutate(
-      abundance = as.numeric(abundance),
-      log_abund = log(abundance),
-      log_abund = ifelse(is.infinite(log_abund), 0, log_abund)
-    )
-  
-  
-  #Build spline model using mgsv::gam using cyclic penalized cubic regression spline smooth
-  cc_spline_mod <- gam(log_abund ~  s(jday, bs = "cc", k = spline_bins),
-                       data = cpr_dat)
-  
-  
-  #Add Predictions back to the data
-  cpr_dat$spline_pred <- predict(cc_spline_mod, cpr_dat, type = "response")
-  
-  
-  #Calculate anomalies
-  cpr_dat$anomaly <- cpr_dat$log_abund - cpr_dat$spline_pred
-  
-  #Calculate Anomalies relative to standard deviation measure of:
-  #overall_sd <- sd(cpr_dat$spline_pred, na.rm = T)
-  overall_sd <- sd(cpr_dat$log_abund, na.rm = T)
-  cpr_dat$rel_anomaly <- cpr_dat$anomaly / overall_sd
-  
-  
-  ####  Calculate Seasonal Averages  ####
-  #Get Period Split Points from number of season_bins
-  bin_splits <- c(seq(0, 365, by = ceiling(365 / (season_bins))), 365)
-  
-  #Set period number in data based on desired number of splits
-  period <- data.frame(
-    period = rep(0, nrow(cpr_dat)),
-    min_date = rep(NA, nrow(cpr_dat)),
-    max_date = rep(NA, nrow(cpr_dat)))
-  
-  #Add period label and datebound
-  for (n in 1:nrow(cpr_dat)) {
-    for (i in 1:season_bins) {
-      if( cpr_dat$jday[n] > bin_splits[i] & cpr_dat$jday[n] <=  bin_splits[i+1]) {
-        period[n,"period"]   <- i
-        period[n,"min_date"] <- bin_splits[i]
-        period[n,"max_date"] <- bin_splits[i+1]
-      }
-    }
-  }
-  
-  #Bind period column
-  period <- period %>% 
-    mutate(datebounds = str_c(min_date, "-", max_date)) %>% 
-    select(-c(min_date, max_date))
-  
-  cpr_dat <- bind_cols(cpr_dat, period)
-  
-  #Get Period Means
-  seasonal_summary <- cpr_dat %>% 
-    group_by(year, period, datebounds) %>% 
-    summarise(
-      period_anom_mu = mean(anomaly, na.rm = T),
-      period_anom_sd = mean(anomaly, na.rm = T),
-      period_anom_std = mean(rel_anomaly, na.rm = T),
-      period_anom_n = n(),
-      .groups = "keep") %>% 
-    ungroup() %>% 
-    mutate(period = as.character(period))
-  
-  #Get Annual Means
-  annual_summary <- cpr_dat %>% 
-    group_by(year) %>% 
-    summarise(
-      period_anom_mu = mean(anomaly, na.rm = T),
-      period_anom_sd = mean(anomaly, na.rm = T),
-      period_anom_std = mean(rel_anomaly, na.rm = T),
-      period_anom_n = n(),
-      .groups = "keep") %>% 
-    mutate(period = "annual",
-           datebounds = "1-365")
-  
-  #Put the annual and period means together
-  period_summaries <- bind_rows(seasonal_summary, annual_summary) %>% arrange(year, period)
-  
-  #Predictions out
-  ts_out <- list(
-    "cprdat_predicted" = cpr_dat,
-    "period_summs" = period_summaries,
-    "spline_model" = cc_spline_mod
-  )
-  return(ts_out)
-  
-  
-} 

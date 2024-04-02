@@ -11,15 +11,19 @@ library(patchwork)
 library(sf)
 library(here)
 library(tidyverse)
+library(gganimate)
+
 
 #CCEL Boxpath
-ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
-
-#### Spline function  ####
-source(here("R", "cpr_helper_funs.R"))
+# ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
+ccel_boxpath <-cs_path(box_group = "ccel", subfolder = NULL)
 
 
-####  Data  ####
+# #### Spline function  ####
+# source(here("R", "cpr_helper_funs.R"))
+
+
+####  1. Data  ####
 cpr <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
                 guess_max = 1e6, col_types = cols()) %>% 
   rename(lon = `longitude (degrees)`, lat = `latitude (degrees)`) %>% 
@@ -30,10 +34,16 @@ cpr <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_
 northeast <- rnaturalearth::ne_states(country = "united states of america") %>% st_as_sfc(crs = 4326)
 canada <- rnaturalearth::ne_states(country = "canada") %>% st_as_sfc(crs = 4326)
 
-####  Model Transects  ####
+####  2. Different Transects  ####
 
-# Portland Transect
-pmod <- cpr %>% filter(year == "2017", cruise == "477MC") 
+# what years went to portland - in 2013 they switched, but super awkwardly
+cpr %>% 
+  filter(year == 2013) %>% 
+  ggplot(aes(lon, lat, color = factor(month))) +
+  geom_point()
+
+# Portland Transect - begins 2013
+pmod <- cpr %>% filter(year == "2013")#, cruise == "477MC") 
 pmod_sf <- pmod %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
 
 # Boston Transect
@@ -41,54 +51,43 @@ bmod <- cpr %>% filter(year == "1990", cruise == "YC9001")
 bmod_sf <- bmod %>% st_as_sf(coords = c("lon", "lat"), crs = 4326)
 
 
+
+####  3. Map the Port Transition  ####
 ggplot() +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
-  geom_sf(data = pmod_sf, aes(color = "Portland Transect - 2017")) +
-  geom_sf(data = bmod_sf, aes(color = "Boston Transect - 1990")) +
+  geom_sf(data = pmod_sf, aes(color = "Portland Transect - Mid-2013 Switch")) +
+  geom_sf(data = bmod_sf, aes(color = "Boston Transect - 1960")) +
   coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
-  theme_bw() 
+  theme_bw() + 
+  labs(color = "Transect Routes", 
+       subtitle = "CPR Survey's Relocation to Portland")
 
 
-####  Generating transects from scratch
 
-# what years went to portland - in 2013 they switched, but super awkwardly
-cpr %>% 
-  filter(year == 2013) %>% 
-  ggplot(aes(lon, lat, color = factor(month))) +
-    geom_point()
 
+
+
+####  4. Transect Endpoints  ####
+
+# Process:
 # take all portland transects and get a mean/var for the start/end coordinates to set up the end points
+# Do the same for boston transect
 
 # West End
 west <- cpr %>%
   filter(year >= 2014) %>% 
   split(.$cruise) %>% 
-  map(function(x) {first_station <- x %>% arrange(desc(lon)) %>% slice(1) }) %>% 
+  map(function(x) {first_station <- x %>% arrange(lon) %>% slice(1) }) %>% 
   bind_rows() %>% 
   filter(lon < -65) 
-
-west %>% 
-  ggplot(aes(lon, lat, color = factor(cruise))) +
-  geom_point()
 
 # East End
 east <- cpr %>%
   filter(year >= 2014) %>% 
   split(.$cruise) %>% 
-  map(function(x) {first_station <- x %>% arrange(lon) %>% slice(1) }) %>% 
+  map(function(x) {first_station <- x %>% arrange(desc(lon)) %>% slice(1) }) %>% 
   bind_rows()
-
-east %>% 
-  ggplot(aes(lon, lat, color = factor(cruise))) +
-  geom_point()
-
-
-# Together
-ggplot() +
-  geom_point(data = west, aes(lon, lat)) +
-  geom_point(data = east, aes(lon, lat))
-
 
 # Save their summary stats
 west_summ <- west %>% summarise(
@@ -104,9 +103,76 @@ east_summ <- east %>% summarise(
   lat_sd = sd(lat))
 
 
+# Together
+ggplot() +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_point(data = west, aes(lon, lat)) +
+  geom_point(data = east, aes(lon, lat)) +
+  geom_point(data = west_summ, aes(lon_mu, lat_mu, color = "Western Endpoint Avg."), size = 3) +
+  geom_point(data = east_summ, aes(lon_mu, lat_mu, color = "Eastern Endpoint Avg."), size = 3) +
+  coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
+  labs(subtitle = "Portland Transect Endpoint Centroids")
+
+
+
+
+
+
+####______________________####
+
+
+####  Simulation Functions  ####
+
+####  Generate Endpoint Function  ####
+endpoint_means <- function(cpr_data){
+  
+  # West End
+  west <- cpr_data %>%
+    split(.$cruise) %>% 
+    map(function(x) {first_station <- x %>% arrange(lon) %>% slice(1) }) %>% 
+    bind_rows() %>% 
+    filter(lon < -65) 
+  
+  # East End
+  east <- cpr_data %>%
+    split(.$cruise) %>% 
+    map(function(x) {first_station <- x %>% arrange(desc(lon)) %>% slice(1) }) %>% 
+    bind_rows()  %>% 
+    filter(lon < -65) 
+ 
+  # Save their summary stats
+  west_summ <- west %>% summarise(
+    lon_mu = mean(lon),
+    lon_sd = sd(lon),
+    lat_mu = mean(lat),
+    lat_sd = sd(lat))
+  
+  east_summ <- east %>% summarise(
+    lon_mu = mean(lon),
+    lon_sd = sd(lon),
+    lat_mu = mean(lat),
+    lat_sd = sd(lat))
+  
+  return(list(
+    "west_end" = west_summ,
+    "east_end" = east_summ
+  ))
+   
+}
+
+
+####  Generate Portland/Boston Endpoints
+port_endpoints <- endpoint_means(cpr_data = filter(cpr, year >= 2014))
+bost_endpoints <- endpoint_means(cpr_data = filter(cpr, year <= 2012))
+
+
+
+
+
 ####  Generate Transect Function  ####
-generate_transect <- function(west_center = west_summ, 
-                              east_center = east_summ, 
+generate_transect <- function(west_center = port_endpoints$west_end, 
+                              east_center = port_endpoints$east_end, 
                               n_stations = 10, 
                               n_transects = 1){
   
@@ -136,22 +202,44 @@ generate_transect <- function(west_center = west_summ,
 }
 
 
-# And Voila
-tester <- generate_transect(n_transects = 3)
+# And Voila!
 
-tester %>% 
-  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>% 
-  ggplot() +
-    geom_sf(aes(color = transect_id)) +
+# Simulate Portland Transects
+portland_tester <- generate_transect(west_center = port_endpoints$west_end, 
+                                     east_center = port_endpoints$east_end, 
+                                     n_stations = 10,
+                                     n_transects = 4) %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) 
+
+
+# Simulate some Boston Transects
+boston_tester <- generate_transect(west_center = bost_endpoints$west_end, 
+                                   east_center = bost_endpoints$east_end, 
+                                   n_stations = 10,
+                                   n_transects = 4) %>% 
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) 
+
+
+
+# Map simulations
+ggplot() +
+    geom_sf(data = portland_tester, aes(shape = transect_id, color = "Simulated Portland Transects")) +
+    geom_sf(data = boston_tester, aes(shape = transect_id, color = "Simulated Boston Transects")) +
     geom_sf(data = northeast) +
     geom_sf(data = canada) +
     coord_sf(xlim = c(-71,-64.8), ylim = c(41, 44.3)) +
     theme_bw()+
-    labs(subtitle = "Simulated Portland Transects")
+    labs(subtitle = "Transect Simulation", color = "Transect Origins", shape = "Transect ID#'s")
 
 
 
-####  Next Steps  ####
+
+
+
+
+#####__________________####
+
+####  Simating Data  ####
 ####__1. Simulate Transects  ####
 
 # Add sample_date column
@@ -209,16 +297,38 @@ portland_sims <- map(bost_counts$n_cruises, function(x){transects <- generate_tr
 
 
 
-####__2. Get SST / depth of all those points  ####
+#### Get Oceanographic DataSST / depth of all those points  ####
+
+# Chlorophyll-a
+# https://coastwatch.noaa.gov/cw/satellite-data-products/ocean-color/science-quality/viirs-3-sensor-gap-filled-chlorophyll-dineof.html
+
+# Depth
+
+# SST
+
+# Ocean Color
 
 ####____a. Depth  ####
 
 # Load etopo depth raster
-etopo <- raster("~/Box/RES Data/Shapefiles/NEShelf_Etopo1_bathy.tiff")
+res_path <- cs_path(box_group = "res")
+etopo <- raster(str_c(res_path, "Shapefiles/NEShelf_Etopo1_bathy.tiff"))
 
 # Extract depths
 bost_locations$depth <- raster::extract(etopo, bost_locations[, c("lon", "lat")])
 portland_sims$depth <- raster::extract(etopo, portland_sims[, c("lon", "lat")])
+
+
+
+
+
+
+# Map the depths at each point?
+
+
+
+
+
 
 
 ####____b. SST  ####
@@ -234,6 +344,7 @@ target_dates <- str_split(portland_sims$sample_date, "-") %>%
   rownames_to_column(var = "sample_date") %>% 
   setNames(c("sample_date", "year", "month", "day"))
 
+# Make them valid raster dates
 target_dates <- gmRi::make_stack_dates(target_dates, year, month, day)
 
 
@@ -241,116 +352,33 @@ target_dates <- gmRi::make_stack_dates(target_dates, year, month, day)
 
 
 
-
-# Load OISST Data - Set Raster naming
-ncpath <- "~/Box/NSF OKN Demo Data/oisst/annual_observations/"
-nc_files <- list.files(ncpath)
-nc_files_full <- str_c(ncpath, "/", nc_files)
-
-#pull what the years are to name layers and for 1981 behavior
-nc_years <- str_sub(nc_files, -10, -7)
-
-# Single year behavior
-year_x <- stack(nc_files_full[1])
-names(year_x) %>% str_replace("X", "") %>% str_replace_all(".", "_")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-####  ncdf4 Approach  ####
-
-library(stars)
-library(ncdf4)
-#library(tidync)
-
 # Load OISST Data
-ncpath <- "~/Box/NSF OKN Demo Data/oisst/annual_observations/"
-nc_files <- list.files(ncpath)
-
-# Trying different netcdf access methods to work with tidync for subsetting and indexing
-# These are all slightly problematic
-
-#oisst <- raster::stack(str_c(ncpath, "/", nc_files))
-#oisst <- read_stars(str_c(ncpath, "/", nc_files), var = "sst") # Exhausts memory
-#oisst <- RNetCDF::open.nc(str_c(ncpath, "/", nc_files)) # Workflow undefined
-# tidync(oisst) # Does not integrate with multiple file netcdf connections
 
 
+# Area to load sst for
+sst_window <- data.frame(
+  lon = c(-72, -65),
+  lat = c(41.75,44),
+  time = as.Date(c("2016-08-01", "2020-12-31")))
 
-####______1. Slicing by lat/lon
 
-# # Load netcdfs with netcdf4
-# oisst <- ncdf4::nc_open(str_c(ncpath, "/", nc_files)) # Workflow undefined
-# 
-# # Access the lat/lon values behind the indexing
-# nc_lon <- ncvar_get(oisst, "lon")
-# nc_lat <- ncvar_get(oisst, "lat")
-# nc_time <- ncvar_get(oisst, "time")
-# 
-# # Build the indexing you want to 
-# lon_index <- range(bost_locations$lon) + c(-1, 1)  + rep(180, 2) # add 1 degree buffer and convert 0-360
-# lat_index <- range(bost_locations$lat) + c(-1, 1) 
-# 
-# # Get the netcdf indices that match
-# lon_key <- which(between(oisst_lon, left = lon_index[1], right = lon_index[2]))
-# lat_key <- which(between(nc_lat, left = lat_index[1], right = lat_index[2]))
-# 
-# # And Subset
-# oisst_sst <- ncvar_get(oisst, "sst")
-# oisst_sst[lon_key, lat_key, 1]
+# load sst from GMRI cloudstorage
+oisst_window_load(
+  data_window = sst_window, 
+  anomalies = FALSE, 
+  box_location = "cloudstorage")
 
 
 
-####  Stars workflow  ####
-# doesn't accept multiple layers
-# nc_files_full <- str_c(ncpath, "/", nc_files)
-# oisst <- stars::read_ncdf(nc_files_full[2]) #Workflow undefined
-# oisst_lon <- st_get_dimension_values(oisst, "lon")
-# oisst_lat <- st_get_dimension_values(oisst, "lat")
-# oisst_time <- st_get_dimension_values(oisst, "time")
-# 
-# # Build the indexing from value range you want
-# lon_index <- range(bost_locations$lon) + c(-1, 1)  + rep(180, 2) # add 1 degree buffer and convert 0-360
-# lat_index <- range(bost_locations$lat) + c(-1, 1) 
-# 
-# # Get the netcdf indices that match
-# lon_key <- which(between(oisst_lon, left = lon_index[1], right = lon_index[2]))
-# lat_key <- which(between(oisst_lat, left = lat_index[1], right = lat_index[2]))
-# 
-# #Slicing and stacking
-# oisst[[1]]
-# oisst_slice <- oisst %>% 
-#   slice("lon", lon_key) %>% 
-#   slice("lat", lat_key) %>% 
-#   slice("time", 1) 
-# 
-# ##plot(oisst_) ## gives error about unique breaks
-# ## remove NAs, zeros, and give a large number
-# ## of breaks (used for validating in detail)
-# qu_0_omit = function(x, ..., n = 5) {
-#   x = units::drop_units(na.omit(x))
-#   c(0, quantile(x[x > 0], seq(0, 1, length.out = n)))
-# }
-# 
-# plot(oisst_slice, 
-#      border = NA, 
-#      breaks = qu_0_omit(oisst_slice[[1]]), 
-#      reset = FALSE)
+
+
+
+####  Bottom Temperature & Salinity
+
+# SODA Reanalysis Data
+
+
+
 
 
 

@@ -77,7 +77,7 @@ sahfos_abundances <- list("traverse" = sahfos_trav   %>% select(11:ncol(sahfos_t
                           "phyto"    = sahfos_phyto  %>% select(11:ncol(sahfos_phyto)))
 
 
-# Function to convert 
+# Function to convert units
 sahfos_100m3 <-  map(sahfos_abundances, function(x){
   x_meters_cubed <- x * conversion_rate
   return(x_meters_cubed)

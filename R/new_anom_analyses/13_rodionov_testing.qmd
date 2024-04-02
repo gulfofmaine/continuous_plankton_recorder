@@ -1,0 +1,399 @@
+---
+title: "Gulf of Maine CPR Survey Community Regime Shifts"
+author: "Adam Kemberling"
+url: "https://github.com/adamkemberling"
+affiliation: "Gulf of Maine Research Institute"
+affiliation_url: "https://www.gmri.org"
+description: | 
+  Does the Zooplankton Community in the Gulf of Maine Show Regime Shift Dynamics
+date: "Updated on: `r Sys.Date()`"
+format: 
+  html:
+    toc: true
+    self-contained: true
+execute: 
+  echo: false
+  warning: false
+  message: false
+  comment: ""
+  fig-align: center
+---
+
+# About:
+
+The goal of this markdown is to investigate whether the zooplankton communities identified by our principal component analysis showcase temporal trends that are consistent with regime shift dynamics.
+
+Regime shifts have been tested for using the methods of Rodionov et al. 2004
+
+The p-value threshold for all tests have been set to p = 0.05
+The minimum length (years) for a regime was set to 5 years
+
+
+In the following figures with a second lower panel, a value of 0 for RSI is indicative that the regime shift test for that year did not pass. Years with RSI values have met the significance threshold given the above parameters.
+
+```{r}
+# Load packages
+library(rshift)
+library(tidyverse)
+library(here)
+library(gmRi)
+library(patchwork)
+
+
+# Path to resources on box
+ccel_boxpath <- gmRi::cs_path("ccel")
+
+# Plot theme
+theme_set(theme_minimal())
+
+
+# Taxa levels for taxa plots, ordered by size with calanus together
+species_05 <- c("Calanus I-IV", 
+                "Calanus finmarchicus V-VI", 
+                "Centropages typicus",
+                "Oithona spp.",
+                "Para-Pseudocalanus spp.",
+                "Metridia lucens",  
+                "Euphausiacea spp.",
+                "Chaetognatha eyecount")
+species_05 <- factor(species_05, levels = species_05)
+  
+
+
+
+####  Quarterly CPR Data with SST  ####
+
+# Load the pca data and the abundance anomalies:
+
+# source: 03_new_anoms_quarterly_sst.R
+cpr_sst <- read_csv(
+  str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "anomalies_w_quarterlysst.csv", sep = "/"),
+  col_types = cols(),
+  guess_max = 1e5) %>% 
+  mutate(period = ifelse(period == "annual", "Annual", period))
+
+
+
+# Add some label formatting using taxa from 2005 paper
+cpr_sst <- cpr_sst %>% 
+  mutate(taxa = stringr::str_to_sentence(taxa),
+         taxa = str_replace_all(taxa, "Para_pseu", "Para-Pseu"),
+         taxa = str_replace_all(taxa, "i_iv", "I-IV"),
+         taxa = str_replace_all(taxa, "v_vi", "V-VI"),
+         taxa = str_replace_all(taxa, "_", " "),
+         taxa = str_replace_all(taxa, "spp", "spp."),
+         taxa = factor(taxa, levels = species_05)) %>% 
+  filter(taxa %in% species_05)
+```
+
+
+
+
+### Individual Taxa Regime Shifts
+
+```{r}
+# take only annual values
+taxa_anoms <- cpr_sst %>% 
+  filter(period == "Annual")
+
+
+# Plot the timeseries
+taxa_anoms %>% 
+  ggplot(aes(year, anomaly)) +
+  geom_line(linewidth = 1) +
+  geom_hline(yintercept = 0, linetype = 2, linewidth = 0.8, alpha = 0.5) +
+  facet_wrap(~taxa, ncol = 2) +
+  labs(y = "Abundance Anomaly")
+
+
+# Make a wide one to grab specific taxa easier
+taxa_wide <- taxa_anoms %>% 
+  #filter(!str_detect(taxa, "Chae")) %>% 
+  pivot_wider(
+    names_from = "taxa", 
+    values_from = "anomaly") %>% 
+  select(-c(temp_anomaly, lag_ref, year_ref, lag_temp, period_anom_n))
+
+
+
+# Save csv for Andy
+write_csv(taxa_wide, here::here("R/new_anom_analyses/derived_data/focal_taxa_annual_anomalies.csv"))
+
+
+```
+
+
+```{r}
+
+
+# # Weird that it keeps the other columns and their values
+# rshift::Rodionov(data = taxa_anoms, col = "anomaly", time = "year", l = 5, prob = 0.95)
+# 
+# # Do it on one taxa at a time
+# rshift::Rodionov(data = taxa_wide, col = "Calanus I-IV", time = "year", l = 5, prob = 0.95, merge = F)
+```
+
+
+::: {.panel-tabset}
+
+
+```{r}
+taxa_col <- as.character(species_05[[1]])
+
+```
+
+### `r taxa_col`
+
+```{r}
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = taxa_wide, 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+
+```{r}
+taxa_col <- as.character(species_05[[2]])
+
+```
+
+### `r taxa_col`
+
+```{r}
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = taxa_wide, 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+
+```{r}
+taxa_col <- as.character(species_05[[3]])
+
+```
+
+### `r taxa_col`
+
+```{r}
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = taxa_wide, 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+
+```{r}
+taxa_col <- as.character(species_05[[4]])
+
+```
+
+### `r taxa_col`
+
+```{r}
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = taxa_wide, 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+
+```{r}
+taxa_col <- as.character(species_05[[5]])
+
+```
+
+### `r taxa_col`
+
+```{r}
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = taxa_wide, 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+
+```{r}
+taxa_col <- as.character(species_05[[6]])
+
+```
+
+### `r taxa_col`
+
+```{r}
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = taxa_wide, 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+
+```{r}
+taxa_col <- as.character(species_05[[7]])
+
+```
+
+### `r taxa_col`
+
+```{r}
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = taxa_wide, 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+
+:::
+
+
+## Zooplankton PC Regime Shifts
+
+
+```{r}
+
+
+# Load the Principal Component timeseries
+# Source: R/new_anom_analyses/02_new_anoms_pca.R
+focal_taxa_pc <- read_csv(here("results_data/cpr_focal_pca_timeseries_period_1961-2017.csv"))
+
+# The paper has pc1 flipped to be consistent in direction with the 2005 paper
+focal_taxa_pc$`First Mode` <- focal_taxa_pc$`First Mode` * -1
+
+# Plot the timeseries
+focal_taxa_pc %>% 
+  pivot_longer(values_to = "pc", names_to = "component_num", cols = contains("Mode")) %>% 
+  ggplot(aes(year, pc)) +
+  geom_line(aes(color = component_num), linewidth = 1) +
+  geom_hline(yintercept = 0, linetype = 2, linewidth = 0.8, alpha = 0.5) +
+  scale_color_gmri(reverse = T) +
+  theme(legend.position = "bottom") +
+  labs(y = "PC Loading", x = "Year")
+```
+
+
+
+::: {.panel-tabset}
+
+
+### Principal Component 1 (small zooplankton)
+
+```{r}
+# # Is the column name's space causing problems
+# focal_taxa_pc$mode1 <- focal_taxa_pc$`First Mode`
+# taxa_col <- "mode1"
+
+# Doesn't seem like it
+taxa_col <- "First Mode"
+
+RSI_graph(
+  data = rshift::Rodionov(
+    data = drop_na(focal_taxa_pc), 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")  
+```
+
+### Principal Component 2 (large zooplankton)
+
+```{r}
+taxa_col <- "Second Mode"
+RSI_graph(
+  data = rshift::Rodionov(
+    data = drop_na(focal_taxa_pc), 
+    col = taxa_col, 
+    time = "year", 
+    l = 5, 
+    prob = 0.95, 
+    merge = T),
+  col = taxa_col, 
+  time = "year",
+  rsi = "RSI")
+```
+
+:::
+
+
+#### Don't need the buoy data
+
+```{r}
+
+# Load the buoy PCA data that uses the buoy sensor data
+
+
+# Gappy Buoy data - source: 10_buoy_daily_interpolations
+buoy_raw <- read_csv(here("R/new_anom_analyses/derived_data/buoy_pca_raw.csv"),
+                     col_types = cols(),
+                     guess_max = 1e5)
+
+# Interpolated NA Buoy data - source: 10_buoy_daily_interpolations.R
+buoy_i <- read_csv(here("R/new_anom_analyses/derived_data/buoy_pca_interp.csv"),
+                   col_types = cols())
+
+
+```
+
+
+```{r, results='asis'}
+# Use gmri css
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+```

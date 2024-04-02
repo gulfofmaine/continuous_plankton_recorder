@@ -8,15 +8,18 @@ library(here)
 library(gmRi)
 library(patchwork)
 library(ggpmisc)
+library(targets)
+
 
 ####  Functions  ####
 source(here::here("R", "cpr_helper_funs.R"))
 
 
 ####  Load Data  ####
+
 # CPR Dataset with quarterly anomalies and SST with a one-period lag
 # souce: 03_new_anoms_quarterly_sst.R
-cpr_sst <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "anomalies_w_quarterlysst.csv", sep = "/"),
+cpr_sst <- read_csv(str_c(ccel_boxpath, "Data/Gulf of Maine CPR/2020_combined_data/anomalies_w_quarterlysst.csv"),
                     col_types = cols(),
                     guess_max = 1e5)
 

@@ -1,0 +1,41 @@
+---
+title: "Continuous Plankton Recorder Data Provenance"
+author: "Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+biblio-style: apalike
+link-citations: yes
+github-repo: adamkemberling/continuous_plankton_recorder
+description: "This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, comment = "", warning = FALSE)
+library(tidyverse)
+library(gt)
+library(gmRi)
+library(targets)
+library(patchwork)
+library(tidyverse)
+library(sf)
+
+# Polygons for mapping
+new_england <- rnaturalearth::ne_states("united states of america") %>% st_as_sf(crs = 4326)
+canada <- rnaturalearth::ne_states("canada") %>% st_as_sf(crs = 4326)
+
+# ggplot theme
+theme_set(theme_bw())
+```
+
+```{r}
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+```
+
+# Preface{-}
+
+The Continuous Plankton Recorder Survey is a long-running survey program that collects abundance information for zooplankton populations in the surface ocean around the world. This resource is used when looking at the intra-annual variation in zooplankton populations like those here in the Gulf of Maine.
+
+For more information about the continuous plankton recorder program, its history, and the status of other transects please visit www.cprsurvey.org.

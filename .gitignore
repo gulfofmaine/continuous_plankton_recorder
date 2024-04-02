@@ -8,3 +8,6 @@ R/buoy_data/
 R/new_anom_analyses/derived_data/
 _targets/
 maria_data/
+andy_osm_data/
+results_data/
+erddap_data/

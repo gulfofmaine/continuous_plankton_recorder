@@ -10,6 +10,7 @@ library(tidyverse)
 library(patchwork)
 library(sf)
 library(here)
+library(targets)
 
 #CCEL Boxpath
 ccel_boxpath <- shared.path(os.use = "unix", group = "Climate Change Ecology Lab", folder = NULL)
@@ -20,10 +21,15 @@ source(here("R", "cpr_helper_funs.R"))
 
 ####  Data  ####
 
-# Combined dataset from NOAA/SAHFOS, 
-# concentrations in common units: # / meters cubed
-cpr <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
-                guess_max = 1e6, col_types = cols())
+# # Combined dataset from NOAA/SAHFOS, 
+# # concentrations in common units: # / 100 meters cubed: 
+# # Checked in 17_noaa_sahfos_eda.R
+# cpr <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combined_data", "zooplankton_combined.csv", sep = "/"), 
+#                 guess_max = 1e6, col_types = cols())
+
+# Load targets data
+tar_load(gom_combined_zooplankton)
+cpr <- gom_combined_zooplankton
 
 #eliminate sample_id column that is mixed in
 cpr <- cpr %>% mutate(sample_id = NULL)
@@ -62,7 +68,7 @@ ggplot(cal_test, aes(jday,abundance)) +
 
 #Set seasonal bin number
 season_bins <- 4
-bin_splits <- c(seq(0,365, by = ceiling(365 / (season_bins))), 365)
+bin_splits <- c(seq(0, 365, by = ceiling(365 / (season_bins))), 365)
 #names(bin_splits) <- c(1:length(bin_splits))
 
 #Set period number in data based on desired number of splits
@@ -196,7 +202,7 @@ sfdf <- st_sf(area = unique(area_bboxes$area), st_sfc(area_polygons), crs = 4326
 ####__####
 #### Seasonal Anomaly Calculations  ####
 
-# CPRdat should be an m-by-5 matrix of CPR observations: [year, jday, lat, lon, #]
+# CPR dat should be an m-by-5 matrix of CPR observations: [year, jday, lat, lon, #]
 cpr_dat <- cpr %>%
   mutate(cal_date = as.POSIXct(str_c(year, month, day, sep = "/"), format = "%Y/%m/%d"),
          jday = lubridate::yday(cal_date),
@@ -241,8 +247,7 @@ taxa_list <- map(taxa_cols, function(x){
   taxa_subset <- cpr %>% 
     mutate(
       cal_date = as.POSIXct(str_c(year, month, day, sep = "/"), format = "%Y/%m/%d"),
-      jday = lubridate::yday(cal_date)
-      ) %>% 
+      jday = lubridate::yday(cal_date)) %>% 
     select(year, jday, lat =`latitude (degrees)`, lon = `longitude (degrees)`, abundance = !!taxa_name) %>% 
     cpr_area_crop(., study_area = "gom_new")
     
@@ -318,10 +323,15 @@ anomaly_list$`calanus i-iv` #two objects, point observations and period summarie
 period_summs <- imap(anomaly_list, function(x,y){x$period_summs <- mutate(x$period_summs, taxa = y)})
 period_summs <- bind_rows(period_summs)
 
+# Pivot wider using standardized anomalies to fill matrix
+# the names were changed in function, hence comment out
 periodic_anoms <- period_summs %>% 
-  select(-period_anom_mu, -period_anom_sd) %>% 
-  pivot_wider(names_from = taxa, values_from = period_anom_std) %>% 
+  select(taxa, year, period, datebounds, anom_z) %>% 
+  pivot_wider(names_from = taxa, values_from = anom_z) %>% 
   janitor::clean_names()
+  # select(-period_anom_mu, -period_anom_sd) %>% 
+  # pivot_wider(names_from = taxa, values_from = period_anom_std) %>% 
+  # janitor::clean_names()
 
 
 ####__####

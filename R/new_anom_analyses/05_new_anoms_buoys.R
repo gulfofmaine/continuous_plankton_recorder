@@ -1,4 +1,5 @@
-#### Investigating NERACOOS Buoy Data Relationships with NOAA/SAHFOS CPR Data  ####
+#### Investigating NERACOOS Buoy Data Relationships 
+# with NOAA/SAHFOS CPR Data  ####
 #### Adam A. Kemberling
 #### 3/11/2020
 ####  NOTE: Buoy daily measurements and the buoy daily PCA are unaffected by CPR data and are still valid as is
@@ -29,13 +30,20 @@ cpr_sst <- read_csv(str_c(ccel_boxpath, "Data", "Gulf of Maine CPR", "2020_combi
 
 
 #Reference Taxa
-species_05 <- c("calanus_finmarchicus_v_vi", "centropages_typicus", "oithona_spp","para_pseudocalanus_spp", 
-                "metridia_lucens", "calanus_i_iv", "euphausiacea_spp")
+species_05 <- c(
+  "calanus_finmarchicus_v_vi", 
+  "centropages_typicus", 
+  "oithona_spp",
+  "para_pseudocalanus_spp", 
+  "metridia_lucens", 
+  "calanus_i_iv", 
+  "euphausiacea_spp")
 
+# Subset to the main species
 cpr_sst <- cpr_sst %>% filter(taxa %in% species_05)
 
 
-# Buoy Data
+# Load Buoy Data
 buoy <- read.csv(str_c(cpr_boxpath, "data/processed_data/buoy_anomalies.csv", sep = "/")) %>% 
   mutate(reading_depth = factor(
     reading_depth, levels = c("1 meter", "20 meters", "50 meters", "100 meters", "150 meters", "180 meters")

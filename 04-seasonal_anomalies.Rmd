@@ -1,0 +1,55 @@
+# Seasonal Anomaly Modeling
+
+Seasonal zooplankton anomalies are estimated for each taxa and life-stage group independently based on their intra-annual patterns in abundance. For this estimation, a generalized additive model (GAM) is used to model log(abundance) throughout the year using the Julian day (day of year, 1-365) as the independent variable or predictor of the log(abundance). The model we  fit uses a cubic cyclic spline smoother: `bs = "cc"` which specifies a cyclic cubic regression spline (see cyclic.cubic.spline). i.e. a penalized cubic regression splines whose ends match, up to second derivative.
+
+If we take the observed abundances and subtract out the predicted seasonal abundance we are left with seasonal anomalies. These can then be standardized by the standard deviation, which leaves a standardized index of abundance which keeps the anomalies on the same scale across different taxa.
+
+```{r}
+# Using targets
+tar_load(gom_seasonal_avgs)
+
+# reshape to wide format using standardized anomalies
+cpr_wide <- gom_seasonal_avgs %>% 
+  select(taxa, year, period, datebounds, anom_z) %>% 
+  pivot_wider(names_from = taxa, values_from = anom_z) %>% 
+  janitor::clean_names()
+
+#New levels for taxa plots, ordered by size with calanus together
+species_05 <- c("Calanus I-IV", "Calanus finmarchicus V-VI", "Centropages typicus",
+                "Oithona spp.","Para-Pseudocalanus spp.",
+                "Metridia lucens",  "Euphausiacea spp.")
+species_05 <- factor(species_05, levels = species_05)
+  
+
+# Add some label formatting
+cpr_long <- cpr_wide %>% 
+  pivot_longer(names_to = "taxa", values_to = "anomaly", cols = 5:ncol(.)) %>% 
+  mutate(taxa = stringr::str_to_sentence(taxa),
+         taxa = str_replace_all(taxa, "Para_pseu", "Para-Pseu"),
+         taxa = str_replace_all(taxa, "i_iv", "I-IV"),
+         taxa = str_replace_all(taxa, "v_vi", "V-VI"),
+         taxa = str_replace_all(taxa, "[_]", " "),
+         taxa = str_replace_all(taxa, "spp", "spp.")) %>% 
+  filter(taxa %in% species_05) %>% 
+  mutate(taxa = factor(taxa, levels = species_05))
+
+
+
+#### Figure 1 from Pershing et al. 2005
+# add gap years for plot of annual anomalies
+gap_years <- data.frame(year = c(1975, 1976),
+                        anomaly = c(NA, NA))
+gap_anoms <- map_dfr(species_05, function(x){
+  df_out <- mutate(gap_years, taxa = x)})
+
+# Plot Anomalies for annual deviation in standard deviations
+cpr_long %>% 
+    filter(period == "annual") %>% 
+    full_join(gap_anoms) %>% 
+    ggplot(aes(year, anomaly)) +
+    geom_hline(yintercept = 0, color = "royalblue", linetype = 2, alpha = 0.4) +
+    geom_line(aes(group = taxa), color = gmri_cols("gmri blue")) + 
+    facet_wrap(~taxa, ncol = 2) + 
+    labs(x = NULL, y = "Annual Abundance Index")
+```
+

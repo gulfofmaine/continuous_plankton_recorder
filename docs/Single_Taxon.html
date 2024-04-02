@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Single Taxon Starting Points | Continuous Plankton Recorder Data Provenance</title>
+  <meta name="description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 2 Single Taxon Starting Points | Continuous Plankton Recorder Data Provenance" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  <meta name="github-repo" content="adamkemberling/continuous_plankton_recorder" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 2 Single Taxon Starting Points | Continuous Plankton Recorder Data Provenance" />
+  
+  <meta name="twitter:description" content="This is a minimal example of using the bookdown package to write documentation for a repository using Rmarkdown and bookdown. The output format for this example is bookdown::gitbook. Chapters are written individually using Rmarkdown" />
+  
+
+<meta name="author" content="Gulf of Maine Research Institute: Integrated Systems Ecology Laboratory" />
+
+
+<meta name="date" content="2021-10-19" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="intro.html"/>
+<link rel="next" href="All_Taxa.html"/>
+<script src="libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/vis-4.20.1/vis.css" rel="stylesheet" />
+<script src="libs/vis-4.20.1/vis.min.js"></script>
+<script src="libs/visNetwork-binding-2.0.9/visNetwork.js"></script>
+
+
+
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> About the Project</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#cpr-data-provenance"><i class="fa fa-check"></i><b>1.1</b> CPR Data Provenance</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#cpr-data-starting-points"><i class="fa fa-check"></i><b>1.2</b> CPR Data: Starting Points</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#cpr-survey-transects"><i class="fa fa-check"></i><b>1.3</b> CPR Survey Transects</a>
+<ul>
+<li class="chapter" data-level="1.3.1" data-path="intro.html"><a href="intro.html#gulf-of-maine-transect"><i class="fa fa-check"></i><b>1.3.1</b> Gulf of Maine Transect</a></li>
+<li class="chapter" data-level="1.3.2" data-path="intro.html"><a href="intro.html#mid-atlantic-transect"><i class="fa fa-check"></i><b>1.3.2</b> Mid-Atlantic Transect</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="Single_Taxon.html"><a href="Single_Taxon.html"><i class="fa fa-check"></i><b>2</b> Single Taxon Starting Points</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="Single_Taxon.html"><a href="Single_Taxon.html#box-file-locations"><i class="fa fa-check"></i><b>2.1</b> Box File Locations</a></li>
+<li class="chapter" data-level="2.2" data-path="Single_Taxon.html"><a href="Single_Taxon.html#original-file-structure"><i class="fa fa-check"></i><b>2.2</b> Original File Structure</a></li>
+<li class="chapter" data-level="2.3" data-path="Single_Taxon.html"><a href="Single_Taxon.html#consolidated-taxa-files"><i class="fa fa-check"></i><b>2.3</b> Consolidated Taxa Files</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="All_Taxa.html"><a href="All_Taxa.html"><i class="fa fa-check"></i><b>3</b> All Taxa Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#box-file-locations-1"><i class="fa fa-check"></i><b>3.1</b> Box File Locations</a></li>
+<li class="chapter" data-level="3.2" data-path="All_Taxa.html"><a href="All_Taxa.html#data-processing-pipeline"><i class="fa fa-check"></i><b>3.2</b> Data Processing Pipeline</a></li>
+<li class="chapter" data-level="3.3" data-path="All_Taxa.html"><a href="All_Taxa.html#noaanefsc-starting-points"><i class="fa fa-check"></i><b>3.3</b> NOAA/NEFSC Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.3.1" data-path="All_Taxa.html"><a href="All_Taxa.html#noaa-abundances-and-taxa-keys"><i class="fa fa-check"></i><b>3.3.1</b> NOAA Abundances and Taxa Keys</a></li>
+</ul></li>
+<li class="chapter" data-level="3.4" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-starting-points"><i class="fa fa-check"></i><b>3.4</b> SAHFOS Starting Points</a>
+<ul>
+<li class="chapter" data-level="3.4.1" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-taxa-keys"><i class="fa fa-check"></i><b>3.4.1</b> SAHFOS Taxa Keys</a></li>
+<li class="chapter" data-level="3.4.2" data-path="All_Taxa.html"><a href="All_Taxa.html#sahfos-abundances"><i class="fa fa-check"></i><b>3.4.2</b> SAHFOS Abundances</a></li>
+<li class="chapter" data-level="3.4.3" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-unit-differences"><i class="fa fa-check"></i><b>3.4.3</b> Resolving Unit Differences</a></li>
+<li class="chapter" data-level="3.4.4" data-path="All_Taxa.html"><a href="All_Taxa.html#resolving-differences-in-development-stage-groups"><i class="fa fa-check"></i><b>3.4.4</b> Resolving Differences in Development Stage Groups</a></li>
+</ul></li>
+<li class="chapter" data-level="3.5" data-path="All_Taxa.html"><a href="All_Taxa.html#appending-noaa-sahfos-data-sources"><i class="fa fa-check"></i><b>3.5</b> Appending NOAA &amp; SAHFOS Data Sources</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="seasonal-anomaly-modeling.html"><a href="seasonal-anomaly-modeling.html"><i class="fa fa-check"></i><b>4</b> Seasonal Anomaly Modeling</a></li>
+<li class="chapter" data-level="5" data-path="mid-atlantic-transect-data-prep.html"><a href="mid-atlantic-transect-data-prep.html"><i class="fa fa-check"></i><b>5</b> Mid-Atlantic Transect Data Prep</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Continuous Plankton Recorder Data Provenance</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="Single_Taxon" class="section level1" number="2">
+<h1><span class="header-section-number">Chapter 2</span> Single Taxon Starting Points</h1>
+<div id="box-file-locations" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Box File Locations</h2>
+<p>CPR data on individual taxon were delivered through email and stored in the following directory on box.</p>
+<blockquote>
+<p><strong>Box/Adam Kemberling/Box_Projects/continuous_plankton_recorder/</strong></p>
+</blockquote>
+<p>All derived data from these starting files are under this directory. This is not a permanent home, but is the location the <code>cpr_boxpath()</code> refers to in the code:</p>
+</div>
+<div id="original-file-structure" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Original File Structure</h2>
+<p>When initially engaging with the CPR data, requests for CPR data on specific taxa were requested and received as individual files. These came in two groups that contain both annual averages and some within-year averages (bi-monthly or quarterly).</p>
+<div id="jrqapfblsp" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#jrqapfblsp .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#jrqapfblsp .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#jrqapfblsp .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#jrqapfblsp .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#jrqapfblsp .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#jrqapfblsp .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#jrqapfblsp .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#jrqapfblsp .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#jrqapfblsp .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#jrqapfblsp .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#jrqapfblsp .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#jrqapfblsp .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#jrqapfblsp .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#jrqapfblsp .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jrqapfblsp .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jrqapfblsp .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#jrqapfblsp .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#jrqapfblsp .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jrqapfblsp .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#jrqapfblsp .gt_left {
+  text-align: left;
+}
+
+#jrqapfblsp .gt_center {
+  text-align: center;
+}
+
+#jrqapfblsp .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#jrqapfblsp .gt_font_normal {
+  font-weight: normal;
+}
+
+#jrqapfblsp .gt_font_bold {
+  font-weight: bold;
+}
+
+#jrqapfblsp .gt_font_italic {
+  font-style: italic;
+}
+
+#jrqapfblsp .gt_super {
+  font-size: 65%;
+}
+
+#jrqapfblsp .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 65%;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Folder</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">File Name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Description</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Temporal Frequency</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Calanus_finmarchicus.txt</td>
+<td class="gt_row gt_left">Late stage C. Finmarchicus densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Calanus_I-IV.txt</td>
+<td class="gt_row gt_left">Early-stage C. finmarchicus densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Centropages_typicus.txt</td>
+<td class="gt_row gt_left">Centropages typicus densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Chaetognatha_eyecount.txt</td>
+<td class="gt_row gt_left">Chaetognatha spp. densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Euphausiacea_Total.txt</td>
+<td class="gt_row gt_left">Euphausiacea densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Metridia_lucens.txt</td>
+<td class="gt_row gt_left">Metridia lucens densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Oithona_spp..txt</td>
+<td class="gt_row gt_left">Oithona spp. densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Para-Pseudocalanus_spp..txt</td>
+<td class="gt_row gt_left">Paracalanus &amp; Pseudocalanus densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Paraeuchaeta_norvegica.txt</td>
+<td class="gt_row gt_left">Paraeuchaeta norvegica densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX</td>
+<td class="gt_row gt_left">GOMx.Temora_longicornis.txt</td>
+<td class="gt_row gt_left">Temora longicornis densities</td>
+<td class="gt_row gt_left">Quarterly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Calanus_finmarchicus.txt</td>
+<td class="gt_row gt_left">Late stage C. Finmarchicus densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Calanus_I-IV.txt</td>
+<td class="gt_row gt_left">Early-stage C. finmarchicus densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Centropages_typicus.txt</td>
+<td class="gt_row gt_left">Centropages typicus densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Chaetognatha_eyecount.txt</td>
+<td class="gt_row gt_left">Chaetognatha spp. densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Euphausiacea_Total.txt</td>
+<td class="gt_row gt_left">Euphausiacea densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Metridia_lucens.txt</td>
+<td class="gt_row gt_left">Metridia lucens densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Oithona_spp..txt</td>
+<td class="gt_row gt_left">Oithona spp. densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Para-Pseudocalanus_spp..txt</td>
+<td class="gt_row gt_left">Paracalanus &amp; Pseudocalanus densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Paraeuchaeta_norvegica.txt</td>
+<td class="gt_row gt_left">Paraeuchaeta norvegica densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+    <tr><td class="gt_row gt_left">CPRtimeseries_textX6</td>
+<td class="gt_row gt_left">Temora_longicornis.txt</td>
+<td class="gt_row gt_left">Temora longicornis densities</td>
+<td class="gt_row gt_left">Bi-monthly periods</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+</div>
+<div id="consolidated-taxa-files" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Consolidated Taxa Files</h2>
+<p>These collections of individual taxon abundances are each processed into two additional processed files. One for the yearly densities and the second for quarterly densities. These two intermediate/processed files are:</p>
+<div id="fvjsxvqzrr" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#fvjsxvqzrr .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#fvjsxvqzrr .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#fvjsxvqzrr .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#fvjsxvqzrr .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#fvjsxvqzrr .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#fvjsxvqzrr .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#fvjsxvqzrr .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#fvjsxvqzrr .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#fvjsxvqzrr .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#fvjsxvqzrr .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#fvjsxvqzrr .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#fvjsxvqzrr .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#fvjsxvqzrr .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#fvjsxvqzrr .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fvjsxvqzrr .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#fvjsxvqzrr .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#fvjsxvqzrr .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#fvjsxvqzrr .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#fvjsxvqzrr .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#fvjsxvqzrr .gt_left {
+  text-align: left;
+}
+
+#fvjsxvqzrr .gt_center {
+  text-align: center;
+}
+
+#fvjsxvqzrr .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#fvjsxvqzrr .gt_font_normal {
+  font-weight: normal;
+}
+
+#fvjsxvqzrr .gt_font_bold {
+  font-weight: bold;
+}
+
+#fvjsxvqzrr .gt_font_italic {
+  font-style: italic;
+}
+
+#fvjsxvqzrr .gt_super {
+  font-size: 65%;
+}
+
+#fvjsxvqzrr .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 65%;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Folder</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">File Name</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Description</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">processed_data</td>
+<td class="gt_row gt_left">cpr_allspecies_long.csv</td>
+<td class="gt_row gt_left">reshaping of bi-monthly single species taxa</td></tr>
+    <tr><td class="gt_row gt_left">processed_data</td>
+<td class="gt_row gt_left">cpr_allspecies_long_quarters.csv</td>
+<td class="gt_row gt_left">reshaping of quarterly single species taxa</td></tr>
+  </tbody>
+  
+  
+</table>
+</div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="intro.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="All_Taxa.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"search": {
+"engine": "fuse",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

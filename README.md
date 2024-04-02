@@ -1,8 +1,28 @@
 # Gulf of Maine Continuous Plankton Recorder Analysis
 
-Analysis of zooplankton trends in the gulf of maine region. Identifying changes in plankton abundance over time, and their relationship with physical properties of the environment as well as regional climate cycles.
+This repository is home to the data reconciliation of the Gulf of Maine CPR obtained from NOAA Fisheries (NEFSC) and the Sir Alister Hardy Foundation (SAHFOS), as well as analyses looking at patterns in abundance anomalies.
 
-## Repository Contents
+## Analysis Pipeline Documentation
+
+Zooplankton analyses contained here focus on identifying changes in plankton abundance over time, and their relationship with physical properties of the environment.
+
+The analysis pipeline has been documented using the {targets} package and can be seen in the `_targets.R` file.
+
+
+## Project Data Provenance Documentation
+
+Full documentation of the data provenance for this project have been made available on [github using bookdown and github pages here:](https://adamkemberling.github.io/continuous_plankton_recorder/docs/)
+
+
+## Rmd Reports
+
+Various rendered reports have been made available using github pages. Links to the various reports can be found at the [index page](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/index.md)
+
+
+
+---
+
+## Repo Contents & File Descriptions
 
 [README.md](https://github.com/adamkemberling/continuous_plankton_recorder/blob/master/README.md) - Introduction to the project and project navigation   
  

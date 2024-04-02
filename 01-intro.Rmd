@@ -1,0 +1,139 @@
+# About the Project {#intro}
+
+This report documents the data used for our studies using the Continuous Plankton Recorder Survey (CPR) data, and all data wrangling performed for the analyses.
+
+
+## CPR Data Provenance
+
+The data for the [continuous plankton recorder survey (CPR)](<https://www.cprsurvey.org/services/the-continuous-plankton-recorder/>) has been collected and maintained by multiple government and non-government organizations.
+
+The operation of the Gulf of  Maine CPR transect has been conducted since 1961 through joint collaboration between the Sir Alister Hardy Foundation (now Marine Biological Association) and the Northeast Fisheries Science Center under NOAA. While the core sampling methodology and sample processing has remained consistent, there are some noteworthy changes-of-hand and differences in data storage formatting between research entities.
+
+This documentation seeks to document the different data available to us here, and the data contained within each when working from each starting point. Once the starting points are clear, the data processing steps will be detailed to provide clarity on how these different resources can be used together.
+
+All final processing code has been moved to the {targets} pipeline, with all processing steps written as functions in:\
+> **R/support/gom_cpr_pipeline_support.R**
+
+
+## CPR Data: Starting Points
+
+Tracking the data provenance will be documented here for three distinct "starting points". These starting points are how the data was delivered to us from various institutions, and each starting point has specific data wrangling steps performed in preparation for any analyses.
+
+**The three starting points are:**   
+ 1. Individual files for single taxon, for the Gulf of Maine Transect   
+ 2. Files containing data for all taxa, for the Gulf of Maine Transect   
+ 3. Files containing data for all taxa, for the Mid-Atlantic Bight Transect   
+
+
+## CPR Survey Transects
+
+### Gulf of Maine Transect
+
+Data for the Gulf of Maine transect was transferred to us from two sources. [The Sir Alister Hardy Foundation](<https://www.cprsurvey.org/about-us/sir-alister-hardy-and-the-continuous-plankton-recorder-cpr-survey/>), and the Northeast Fisheries Science Center. 
+
+This transect crosses the Gulf of Maine from off the Southern tip of Nova Scotia and to port in the US. The ship of opportunity that the CPR sampler is towed originally traveled to Boston, but transitioned to Portland more recently.
+
+```{r, fig.height = 3}
+
+withr::with_dir(rprojroot::find_root('_targets.R'), 
+                tar_load(gom_combined_zooplankton))   
+
+# clean up data
+gom_abund <- gom_combined_zooplankton %>% 
+  mutate(
+    month = str_pad(month, width = 2, side = "left", pad = "0"),
+    day = str_pad(day, width = 2, side = "left", pad = "0"),
+    date = as.Date(str_c(year, month, day, sep = "-")),
+    .after = station,
+    `longitude (degrees)` = ifelse(
+    `longitude (degrees)` > 0,
+    `longitude (degrees)` * -1,
+    `longitude (degrees)`))
+
+
+##### Map GOM  ####
+
+# Make a box around points
+gom_extent <- structure(
+  c(
+    xmin = min(gom_abund$`longitude (degrees)`),
+    ymin = min(gom_abund$`latitude (degrees)`),
+    xmax = max(gom_abund$`longitude (degrees)`),
+    ymax = max(gom_abund$`latitude (degrees)`)),
+  class = "bbox",
+  crs = 4326
+) %>% st_as_sfc()
+
+
+# sf for GOM points
+gom_sf <- gom_abund %>% 
+  distinct(date, station, `longitude (degrees)`, `latitude (degrees)`) %>% 
+  st_as_sf(coords = c("longitude (degrees)", "latitude (degrees)"), 
+           crs = 4326, remove = FALSE)
+
+
+# Map for GOM region
+gom_map <- ggplot() +
+  geom_sf(data = new_england, size = 0.3) +
+  geom_sf(data = canada, size = 0.3) +
+  geom_sf(data = gom_sf, shape = 3, alpha = 0.2) +
+  coord_sf(xlim = c(-73, -63),
+           ylim = c(41.75, 45),
+           expand = T) +
+  theme_bw() +
+  labs(subtitle = "CPR Survey: Gulf of Maine Transect")
+gom_map
+```
+
+
+### Mid-Atlantic Transect
+
+Data for the Mid-Atlantic transect was transferred to us from the Northeast Fisheries Science Center. This transect crosses the Mid-Atlantic Bight, extending seaward from the New Jersey, New York Bight.
+
+```{r, fig.height = 4}
+ # Source: 01_mab_firstlook.R
+ccel_boxpath <- box_path("Climate Change Ecology Lab")
+mab_abund <- read_csv(str_c(ccel_boxpath, "Data/Mid Atlantic CPR/noaa_mab_cpr_long.csv"), 
+                      guess_max = 1e6, 
+                      col_types = cols())
+
+
+
+# clean up dates
+mab_abund <- mab_abund %>% 
+  mutate(
+    month = str_pad(month, width = 2, side = "left", pad = "0"),
+    day = str_pad(day, width = 2, side = "left", pad = "0"),
+    date = as.Date(str_c(year, month, day, sep = "-")),
+    .after = sample,
+    day = NULL,
+    month = NULL,
+    year = NULL)
+
+
+
+
+
+#####  Map Mid-Atlantic  ####
+
+# map mab transect
+mab_sf <- mab_abund %>% 
+  distinct(date, sample, longitude, latitude) %>% 
+  st_as_sf(coords = c("longitude", "latitude"), 
+           crs = 4326, remove = FALSE)
+
+
+
+# Plot MAB
+mab_plot <- ggplot() +
+  geom_sf(data = mab_sf, shape = 3, alpha = 0.2) +
+  geom_sf(data = new_england, size = 0.3) +
+  coord_sf(xlim = c(-76,-69.5),
+           ylim = c(36.8, 41.5), 
+           expand = F) +
+  theme_bw() +
+  labs(subtitle = "CPR Survey: Mid-Atlantic Transect")
+
+mab_plot
+```
+

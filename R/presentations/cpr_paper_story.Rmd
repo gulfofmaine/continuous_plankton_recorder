@@ -42,6 +42,7 @@ library(ggbiplot)
 library(ggpmisc)
 library(tidyverse)
 library(here)
+library(DT)
 #devtools::install_github("vqv/ggbiplot")
 
 
